@@ -1,0 +1,14 @@
+html,
+body,
+#root {
+  @apply h-fit min-h-dvh;
+}
+
+#root {
+  @apply flex flex-grow flex-col text-gray-800;
+  background: linear-gradient(
+    135deg,
+    theme('colors.sky.50') 0%,
+    theme('colors.green.50') 100%
+  );
+}

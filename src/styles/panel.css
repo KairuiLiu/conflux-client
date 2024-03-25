@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .panel-classic {
+    @apply bg-panel-white shadow-panel rounded-lg;
+  }
+}
