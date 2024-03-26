@@ -1,5 +1,5 @@
 const Avatar: React.FC<{
-  user: Omit<UserInfoExchange, 'roll'>;
+  user: Pick<UserInfoExchange, 'avatar' | 'name'>;
   size?: number;
 }> = ({ user, size = 32 }) => {
   const username = user.name.replace(/^User_([a-zA-Z0-9]{8})$/, '$1');
@@ -9,7 +9,7 @@ const Avatar: React.FC<{
 
   return (
     <div
-      className="flex items-center justify-center overflow-hidden rounded-full select-none"
+      className="flex select-none items-center justify-center overflow-hidden rounded-full"
       style={{ width: size, height: size }}
     >
       {user.avatar ? (

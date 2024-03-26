@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .input {
+    @apply rounded-md border-2 border-gray-300 p-1 placeholder-gray-300 outline-none transition-all focus:border-sky-600;
+  }
+
+  .input-check {
+    @apply invalid:border-red-500;
+  }
+
+  .input-danger {
+    @apply border-red-600 focus:border-red-600;
+  }
+
+  .input-underline {
+    @apply rounded-none border-l-0 border-r-0 border-t-0;
+  }
+}

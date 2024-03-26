@@ -10,14 +10,17 @@ interface UserInfoExchange {
   roll: UserRole;
 }
 
-interface UserInfo {
-  uuid: string;
-  avatar: string?;
-  name: string;
+interface MeetingConfig {
   autoEnableCamera: boolean;
   defaultCamera: string?;
   autoEnableMic: boolean;
   defaultMic: string?;
   autoEnableSpeaker: boolean;
   defaultSpeaker: string?;
+}
+
+interface UserInfo extends MeetingConfig {
+  uuid: string;
+  avatar: string?;
+  name: string;
 }
