@@ -3,7 +3,8 @@ function requestPermission(name: 'audio' | 'video') {
     .getUserMedia({ video: name === 'video', audio: name === 'audio' })
     .then((stream) => {
       stream.getTracks().forEach((track) => track.stop());
-    });
+    })
+    .catch(() => {});
 }
 
 function checkPermission(name: 'audio' | 'video') {
@@ -38,8 +39,8 @@ function isDeviceChanged(
   newDevices: MediaDeviceInfo[]
 ) {
   if (oldDevices.length !== newDevices.length) return true;
-  return oldDevices.some(({ deviceId }) =>
-    newDevices.find((device) => device.deviceId === deviceId)
+  return oldDevices.some(
+    ({ deviceId }) => !newDevices.find((device) => device.deviceId === deviceId)
   );
 }
 

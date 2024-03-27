@@ -1,6 +1,9 @@
 import { refreshMediaDevice } from '@/utils/media-devices';
 import { Dispatch, SetStateAction } from 'react';
 
+let registeredMeidaChange = false;
+let registeredPermissionChange = false;
+
 export function initListener(
   setState: React.Dispatch<React.SetStateAction<StateType>>
 ) {
@@ -11,6 +14,8 @@ export function initListener(
 function addMediaPermissionListener(
   setState: Dispatch<SetStateAction<StateType>>
 ) {
+  if (!navigator.mediaDevices || registeredPermissionChange) return;
+  registeredPermissionChange = true;
   try {
     navigator.permissions
       .query({ name: 'camera' as unknown as PermissionName })
@@ -34,8 +39,9 @@ function addMediaPermissionListener(
 }
 
 function addMediaStateListener(setState: Dispatch<SetStateAction<StateType>>) {
-  addEventListener('devicechange', () => {
-    console.log('device change');
+  if (!navigator.mediaDevices || registeredMeidaChange) return;
+  registeredMeidaChange = true;
+  navigator.mediaDevices.addEventListener('devicechange', () => {
     refreshMediaDevice('audio', setState);
     refreshMediaDevice('video', setState);
   });

@@ -1,6 +1,6 @@
 import { Context } from '@/context';
 import { Listbox, Switch, Transition } from '@headlessui/react';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { pick } from 'lodash-es';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/solid';
 import ProgressBar from '@/components/progress';
@@ -8,18 +8,16 @@ import MicrophoneVolume from '@/components/microphone-volume';
 import { refreshMediaDevice } from '@/utils/media-devices';
 import { setStreamWithId } from '@/utils/media-stream';
 import { stopStream } from '@/utils/media-stream';
+import VideoPanel from '@/components/video-panel';
 
 // todo auto set speaker
-// todo device change
-// todo sound level
-// todo mobile
+// todo video panel
 
 export default function MeetSetting() {
   const { state, setState } = useContext(Context);
 
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const [meetingConfig, setMeetingConfig] = useState<MeetingConfig>(
     pick(state.user, [
@@ -41,20 +39,25 @@ export default function MeetSetting() {
 
   // [INIT & UPDATE] rebind stream when meeting config camera | device list changed => rebind stream
   useEffect(() => {
-    if (state.mediaDiveces.camera.length === 0) return;
-
-    let camera = state.mediaDiveces.camera.find(
+    // try to find the default camera
+    const camera = state.mediaDiveces.camera.find(
       (d) => d.label === meetingConfig.defaultCamera
     );
 
-    if (!camera) {
-      camera = state.mediaDiveces.camera[0];
+    if (camera) {
+      setStreamWithId(videoStream, setVideoStream, camera.deviceId, 'video');
+    } else if (state.mediaDiveces.camera[0]) {
       setMeetingConfig((prev) => ({
         ...prev,
-        defaultCamera: camera?.label || '',
+        defaultCamera: state.mediaDiveces.camera[0].label,
       }));
     } else {
-      setStreamWithId(videoStream, setVideoStream, camera.deviceId, 'video');
+      setMeetingConfig((prev) => ({
+        ...prev,
+        defaultCamera: '',
+      }));
+      stopStream(videoStream);
+      setVideoStream(null);
     }
 
     return () => {
@@ -64,40 +67,40 @@ export default function MeetSetting() {
 
   // [INIT & UPDATE] rebind stream when meeting config mic | device list changed => rebind stream
   useEffect(() => {
-    if (state.mediaDiveces.microphone.length === 0) return;
-
-    let miceophone = state.mediaDiveces.microphone.find(
+    // try to find the default microphone
+    const microphone = state.mediaDiveces.microphone.find(
       (d) => d.label === meetingConfig.defaultMic
     );
-    if (!miceophone) {
-      miceophone = state.mediaDiveces.microphone[0];
-      setMeetingConfig((prev) => ({
-        ...prev,
-        defaultMic: miceophone?.label || '',
-      }));
-    } else
+
+    if (microphone) {
       setStreamWithId(
         audioStream,
         setAudioStream,
-        miceophone.deviceId,
+        microphone.deviceId,
         'audio'
       );
+    } else if (state.mediaDiveces.microphone[0]) {
+      setMeetingConfig((prev) => ({
+        ...prev,
+        defaultMic: state.mediaDiveces.microphone[0].label,
+      }));
+    } else {
+      setMeetingConfig((prev) => ({
+        ...prev,
+        defaultMic: '',
+      }));
+      stopStream(audioStream);
+      setAudioStream(null);
+    }
 
     return () => {
       stopStream(audioStream);
     };
   }, [state.mediaDiveces.microphone, meetingConfig.defaultMic]);
 
-  // [INIT & UPDATE] inject stream to video element
-  useEffect(() => {
-    if (videoRef.current && videoStream) {
-      videoRef.current.srcObject = videoStream;
-    }
-  }, [videoRef, videoStream]);
-
   return (
     <>
-      <section className="flex flex-col">
+      <section className="flex flex-shrink flex-col overflow-y-auto">
         <div className="grid flex-grow grid-cols-[min-content_1fr] gap-3 p-5">
           <Switch
             checked={meetingConfig.autoEnableCamera}
@@ -175,7 +178,7 @@ export default function MeetSetting() {
                 });
               }}
             >
-              <div className="relative w-full flex-shrink flex-grow">
+              <div className="w-full flex-shrink flex-grow">
                 <Listbox.Button className="list-button">
                   <span className="block truncate">
                     {state.mediaDiveces.speaker.find(
@@ -251,7 +254,7 @@ export default function MeetSetting() {
                 });
               }}
             >
-              <div className="relative w-full flex-shrink flex-grow">
+              <div className="w-full flex-shrink flex-grow">
                 <Listbox.Button className="list-button">
                   <span className="block truncate">
                     {state.mediaDiveces.microphone.find(
@@ -323,7 +326,7 @@ export default function MeetSetting() {
                 });
               }}
             >
-              <div className="relative w-full flex-shrink flex-grow">
+              <div className="w-full flex-shrink flex-grow">
                 <Listbox.Button className="list-button">
                   <span className="block truncate">
                     {state.mediaDiveces.camera.find(
@@ -381,11 +384,10 @@ export default function MeetSetting() {
           </div>
           <div />
         </div>
-        <div></div>
+        <VideoPanel stream={videoStream} user={state.user} />
       </section>
-      <video ref={videoRef} autoPlay playsInline></video>
 
-      <div className="flex justify-end p-5">
+      <div className="flex flex-shrink-0 flex-grow-0 justify-end gap-3 p-5">
         <button
           className="btn btn-remove-focus btn-primary-outline"
           onClick={() => {

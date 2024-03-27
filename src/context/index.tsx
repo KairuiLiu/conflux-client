@@ -20,7 +20,9 @@ export const ContextProvider: React.FC<ContextProviderProps> = ({
   children,
 }) => {
   const [state, setState] = useState(globalState);
-  initListener(setState);
+  useEffect(() => {
+    initListener(setState);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('state', JSON.stringify(state));
