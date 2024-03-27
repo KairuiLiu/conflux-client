@@ -30,6 +30,9 @@ const VideoPanel: React.FC<{
   // limit both, or none => fill panel
   const expandPanel = limitWidth === limitHeight;
   const asp = fixAsp || (limitWidth ? aspRange[0] : aspRange[1]);
+  const avatarSize = expandPanel
+    ? Math.max(panelSize.height, panelSize.width) / asp
+    : Math.min(panelSize.height, panelSize.width);
 
   useEffect(() => {
     const stream = screenStream || camStream;
@@ -60,14 +63,11 @@ const VideoPanel: React.FC<{
         <div
           className="flex h-full w-full items-center justify-center p-2"
           style={{
-            minHeight: Math.max(panelSize.height, panelSize.width) / asp,
-            minWidth: Math.max(panelSize.height, panelSize.width) / asp,
+            minHeight: avatarSize,
+            minWidth: avatarSize,
           }}
         >
-          <Avatar
-            user={user}
-            size={(Math.max(panelSize.height, panelSize.width) / asp) * 0.5}
-          />
+          <Avatar user={user} size={avatarSize * 0.5} />
         </div>
       )}
     </div>

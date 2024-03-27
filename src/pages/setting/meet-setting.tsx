@@ -73,6 +73,12 @@ export default function MeetSetting() {
     }
   }
 
+  // 6 useEffects:
+  // [INIT * 1] init => refresh media devices to set default device
+  // [UPDATE * 3] device / default device changed => rebind stream
+  // [CLEANUP * 2] stream changed => cleanup old stream
+  // component unmount => cleanup stream
+
   // [INIT] refresh media devices
   useEffect(() => {
     refreshMediaDevice('audio', setState);
@@ -157,6 +163,20 @@ export default function MeetSetting() {
       pauseAllAudioContext();
     };
   }, [state.mediaDiveces.speaker, meetingConfig.defaultSpeaker]);
+
+  // [CLEANUP] stop stream when component unmount
+  useEffect(() => {
+    return () => {
+      stopStream(videoStream);
+    };
+  }, [videoStream]);
+
+  // [CLEANUP] stop stream when component unmount
+  useEffect(() => {
+    return () => {
+      stopStream(audioStream);
+    };
+  }, [audioStream]);
 
   return (
     <>
