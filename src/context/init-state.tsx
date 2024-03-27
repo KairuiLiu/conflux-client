@@ -17,11 +17,71 @@ export function initState(): StateType {
       defaultMic: null,
       autoEnableSpeaker: true,
       defaultSpeaker: null,
+      mirrorCamera: true,
     },
     mediaDiveces: {
       camera: [],
       microphone: [],
       speaker: [],
     },
+    rtcStatus: [
+      {
+        title: 'Network',
+        Bandwidth: {
+          upload: '0 kbps',
+          download: '0 kbps',
+        },
+        PackageLost: {
+          upload: '0 %',
+          download: '0 %',
+        },
+        Delay: {
+          value: '0 ms',
+        },
+      },
+      {
+        title: 'Audio',
+        Bitrate: {
+          upload: '0 kbps',
+          download: '0 kbps',
+        },
+        Microphone: {
+          value: '0 dB',
+        },
+        Speaker: {
+          value: '0 dB',
+        },
+      },
+      {
+        title: 'Video',
+        Resolution: {
+          upload: '0 x 0',
+          download: '0 x 0',
+        },
+        Framerate: {
+          upload: '0 fps',
+          download: '0 fps',
+        },
+        Bitrate: {
+          upload: '0 kbps',
+          download: '0 kbps',
+        },
+      },
+      {
+        title: 'Screen Sharing',
+        Resolution: {
+          upload: '0 x 0',
+          download: '0 x 0',
+        },
+        Framerate: {
+          upload: '0 fps',
+          download: '0 fps',
+        },
+        Bitrate: {
+          upload: '0 kbps',
+          download: '0 kbps',
+        },
+      },
+    ],
   };
 }

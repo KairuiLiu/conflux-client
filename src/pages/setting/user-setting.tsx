@@ -51,7 +51,7 @@ export default function UserSetting() {
           </div>
         </div>
       </section>
-      <div className="flex justify-end gap-3 p-5">
+      <div className="flex justify-end gap-3 p-5 pb-0">
         <button
           className="btn btn-remove-focus btn-primary-outline"
           onClick={() => {

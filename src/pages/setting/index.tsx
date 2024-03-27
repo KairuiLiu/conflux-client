@@ -6,6 +6,7 @@ import {
 } from '@heroicons/react/24/solid';
 import UserSetting from './user-setting';
 import MeetSetting from './meet-setting';
+import MeetSystemInfo from './meet-system-info';
 
 const settingCategories = [
   {
@@ -21,10 +22,11 @@ const settingCategories = [
   {
     icon: <GlobeAsiaAustraliaIcon className="h-5 w-5" />,
     name: 'System Info',
-    page: () => <div>ok system</div>,
+    page: () => <MeetSystemInfo />,
   },
 ];
 
+// TODO migrate to component
 export default function Setting() {
   return (
     <main className="flex flex-grow items-center justify-center px-2">

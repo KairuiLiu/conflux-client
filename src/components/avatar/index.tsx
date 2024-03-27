@@ -8,26 +8,31 @@ const Avatar: React.FC<{
     avatarColors.length;
 
   return (
-    <div
-      className="flex select-none items-center justify-center overflow-hidden rounded-full"
-      style={{ width: size, height: size }}
-    >
-      {user.avatar ? (
-        <img
-          src={user.avatar}
-          alt={user.name}
-          className="h-full w-full rounded-full object-cover"
-        />
-      ) : (
-        <div
-          className={`${avatarColors[avatarColorIndex]} text-center, flex h-full w-full items-center justify-center`}
-        >
-          <span className="font-bold text-white" style={{ fontSize: size / 2 }}>
-            {username.slice(0, 2).toUpperCase()}
-          </span>
-        </div>
-      )}
-    </div>
+    size > 0 && (
+      <div
+        className="flex select-none items-center justify-center overflow-hidden rounded-full"
+        style={{ width: size, height: size }}
+      >
+        {user.avatar ? (
+          <img
+            src={user.avatar}
+            alt={user.name}
+            className="h-full w-full rounded-full object-cover"
+          />
+        ) : (
+          <div
+            className={`${avatarColors[avatarColorIndex]} text-center, flex h-full w-full items-center justify-center`}
+          >
+            <span
+              className="font-bold text-white"
+              style={{ fontSize: size / 2 }}
+            >
+              {username.slice(0, 2).toUpperCase()}
+            </span>
+          </div>
+        )}
+      </div>
+    )
   );
 };
 

@@ -3,7 +3,8 @@ import ProgressBar from '../progress';
 
 const MicrophoneVolume: React.FC<{
   stream: MediaStream | null;
-}> = ({ stream }) => {
+  relativeVolume?: boolean;
+}> = ({ stream, relativeVolume }) => {
   const [volume, setVolume] = useState(0);
   const maxVolume = useRef(1e-6);
   const animationFrameRef = useRef<number>();
@@ -11,6 +12,7 @@ const MicrophoneVolume: React.FC<{
   useEffect(() => {
     if (!stream) return;
     maxVolume.current = 1e-6;
+
     const audioContext = new AudioContext();
     const mediaStreamAudioSourceNode = audioContext.createMediaStreamSource(
       stream!
@@ -21,21 +23,25 @@ const MicrophoneVolume: React.FC<{
     const pcmData = new Float32Array(analyserNode.fftSize);
     const onFrame = () => {
       analyserNode.getFloatTimeDomainData(pcmData);
-      let sumSquares = 0.0;
-      for (const amplitude of pcmData) {
-        sumSquares += amplitude * amplitude;
-      }
-      const realVoume = Math.sqrt(sumSquares / pcmData.length);
-      if (realVoume > maxVolume.current) {
-        maxVolume.current = realVoume;
-        setVolume(1);
-      } else {
-        const preVolume = realVoume / maxVolume.current;
-        setVolume(
-          preVolume < 0.001 || maxVolume.current < 0.001 ? 0 : preVolume
-        );
-      }
 
+      if (relativeVolume) {
+        let sumAbs = 0.0;
+        for (const amplitude of pcmData) sumAbs += Math.abs(amplitude);
+        if (sumAbs > maxVolume.current) {
+          maxVolume.current = sumAbs;
+          setVolume(1);
+        } else {
+          const relativeVolume = sumAbs / maxVolume.current;
+          setVolume(maxVolume.current < 1 ? 0 : relativeVolume);
+        }
+      } else {
+        let sumSquares = 0.0;
+        for (const amplitude of pcmData) {
+          sumSquares += amplitude * amplitude;
+        }
+        const realVoume = Math.sqrt(sumSquares / pcmData.length);
+        setVolume(realVoume);
+      }
       animationFrameRef.current = window.requestAnimationFrame(onFrame);
     };
     window.requestAnimationFrame(onFrame);
@@ -45,7 +51,7 @@ const MicrophoneVolume: React.FC<{
       analyserNode.disconnect();
       cancelAnimationFrame(animationFrameRef.current!);
     };
-  }, [stream]);
+  }, [stream, relativeVolume]);
 
   return <ProgressBar progress={volume} />;
 };
