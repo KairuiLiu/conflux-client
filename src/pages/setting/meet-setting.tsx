@@ -1,25 +1,29 @@
 import { Context } from '@/context';
 import { Listbox, Switch, Transition } from '@headlessui/react';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { pick } from 'lodash-es';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/solid';
 import MicrophoneVolume from '@/components/microphone-volume';
-import { refreshMediaDevice } from '@/utils/media-devices';
-import { setStreamWithId } from '@/utils/media-stream';
-import { stopStream } from '@/utils/media-stream';
 import { VideoPanel } from '@/components/video-panel';
-import testSound from '@/assets/test-sound.mp3';
 import SpeakerVolume from '@/components/speaker-volume';
+import useMediaStream from '@/utils/use-media-stream';
+import useSpeakerStream from '@/utils/use-speaker-stream';
 
 export default function MeetSetting() {
   const { state, setState } = useContext(Context);
+  const [musicLover, setMusicLover] = useState(false);
+  const [selectedCameraLabel, setSelectedCameraLabel, videoStream] =
+    useMediaStream(state.user.defaultCamera || '', 'video', 'camera');
 
-  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
-  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const [selectedMicrophoneLabel, setSelectedMicrophoneLabel, audioStream] =
+    useMediaStream(state.user.defaultMic || '', 'audio', 'microphone');
 
-  const [audioElementAnylist, setAudioElementAnylist] =
-    useState<HTMLAudioElement>();
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement>();
+  const [
+    selectedSpeakerLabel,
+    setSelectedSpeakerLabel,
+    audioElementAnylist,
+    handleSpeakerTest,
+  ] = useSpeakerStream(state.user.defaultSpeaker || '');
 
   const [meetingConfig, setMeetingConfig] = useState<MeetingConfig>(
     pick(state.user, [
@@ -32,151 +36,6 @@ export default function MeetSetting() {
       'mirrorCamera',
     ])
   );
-
-  // Shit design: JS audio context API
-  const speakerTestCallback = async (
-    oldElem: HTMLAudioElement | undefined,
-    setElem: React.Dispatch<React.SetStateAction<HTMLAudioElement | undefined>>
-  ) => {
-    if (oldElem !== undefined) {
-      oldElem.pause();
-      oldElem.src = '';
-      setElem(undefined);
-    } else {
-      const speaker = state.mediaDiveces.speaker.find(
-        (d) => d.label === meetingConfig.defaultSpeaker
-      );
-      if (speaker) {
-        const element = document.createElement('audio');
-        element.src = testSound;
-        try {
-          await element.setSinkId(speaker.deviceId);
-          element.play();
-          setElem(element);
-        } catch (error) {
-          console.error('Audio playback error:', error);
-        }
-      }
-    }
-  };
-
-  function pauseAllAudioContext() {
-    if (audioElementAnylist) {
-      audioElementAnylist.pause();
-      audioElementAnylist.src = '';
-      setAudioElementAnylist(undefined);
-    }
-    if (audioElement) {
-      audioElement.pause();
-      audioElement.src = '';
-      setAudioElement(undefined);
-    }
-  }
-
-  // 6 useEffects:
-  // [INIT * 1] init => refresh media devices to set default device
-  // [UPDATE * 3] device / default device changed => rebind stream
-  // [CLEANUP * 2] stream changed => cleanup old stream
-  // component unmount => cleanup stream
-
-  // [INIT] refresh media devices
-  useEffect(() => {
-    refreshMediaDevice('audio', setState);
-    refreshMediaDevice('video', setState);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // [INIT & UPDATE] rebind stream when meeting config camera | device list changed => rebind stream
-  useEffect(() => {
-    // try to find the default camera
-    const camera = state.mediaDiveces.camera.find(
-      (d) => d.label === meetingConfig.defaultCamera
-    );
-
-    if (camera) {
-      setStreamWithId(videoStream, setVideoStream, camera.deviceId, 'video');
-    } else if (state.mediaDiveces.camera[0]) {
-      setMeetingConfig((prev) => ({
-        ...prev,
-        defaultCamera: state.mediaDiveces.camera[0].label,
-      }));
-    } else {
-      stopStream(videoStream);
-      setVideoStream(null);
-    }
-
-    return () => {
-      stopStream(videoStream);
-    };
-  }, [state.mediaDiveces.camera, meetingConfig.defaultCamera]);
-
-  // [INIT & UPDATE] rebind stream when meeting config mic | device list changed => rebind stream
-  useEffect(() => {
-    // try to find the default microphone
-    const microphone = state.mediaDiveces.microphone.find(
-      (d) => d.label === meetingConfig.defaultMic
-    );
-
-    if (microphone) {
-      setStreamWithId(
-        audioStream,
-        setAudioStream,
-        microphone.deviceId,
-        'audio'
-      );
-    } else if (state.mediaDiveces.microphone[0]) {
-      setMeetingConfig((prev) => ({
-        ...prev,
-        defaultMic: state.mediaDiveces.microphone[0].label,
-      }));
-    } else {
-      stopStream(audioStream);
-      setAudioStream(null);
-    }
-
-    return () => {
-      stopStream(audioStream);
-    };
-  }, [state.mediaDiveces.microphone, meetingConfig.defaultMic]);
-
-  // [INIT & UPDATE] rebind stream when meeting config speaker | device list changed => rebind stream
-  useEffect(() => {
-    pauseAllAudioContext();
-
-    // try to find the default speaker
-    const speaker = state.mediaDiveces.speaker.find(
-      (d) => d.label === meetingConfig.defaultSpeaker
-    );
-
-    if (speaker) {
-      return;
-    } else if (state.mediaDiveces.speaker[0]) {
-      setMeetingConfig((prev) => ({
-        ...prev,
-        defaultSpeaker: state.mediaDiveces.speaker[0].label,
-      }));
-    } else {
-      pauseAllAudioContext();
-    }
-
-    return () => {
-      pauseAllAudioContext();
-    };
-  }, [state.mediaDiveces.speaker, meetingConfig.defaultSpeaker]);
-
-  // [CLEANUP] stop stream when component unmount
-  useEffect(() => {
-    return () => {
-      stopStream(videoStream);
-    };
-  }, [videoStream]);
-
-  // [CLEANUP] stop stream when component unmount
-  useEffect(() => {
-    return () => {
-      stopStream(audioStream);
-    };
-  }, [audioStream]);
 
   return (
     <>
@@ -273,20 +132,16 @@ export default function MeetSetting() {
           <p className="flex items-center">Speaker</p>
           <div className="flex">
             <Listbox
-              value={meetingConfig.defaultSpeaker}
+              value={selectedSpeakerLabel}
               onChange={(d) => {
-                setMeetingConfig({
-                  ...meetingConfig,
-                  defaultSpeaker: d,
-                });
+                setSelectedSpeakerLabel(d);
               }}
             >
               <div className="w-full flex-shrink flex-grow">
                 <Listbox.Button className="list-button">
                   <span className="block truncate">
                     {state.mediaDiveces.speaker.find(
-                      (speaker) =>
-                        speaker.label === meetingConfig.defaultSpeaker
+                      (speaker) => speaker.label === selectedSpeakerLabel
                     )?.label ||
                       (state.mediaDiveces.speaker.length
                         ? 'Select a speaker'
@@ -344,13 +199,15 @@ export default function MeetSetting() {
           <button
             className="btn btn-primary-outline flex-shrink-0 flex-grow-0 px-4 py-1"
             onClick={() => {
-              speakerTestCallback(audioElement, setAudioElement);
-              speakerTestCallback(audioElementAnylist, setAudioElementAnylist);
+              handleSpeakerTest();
+            }}
+            onDoubleClick={() => {
+              setMusicLover(true);
+              handleSpeakerTest(true);
             }}
           >
-            Test
+            {musicLover ? 'Enjoy!' : 'Test'}
           </button>
-
           <div />
           <SpeakerVolume element={audioElementAnylist} relitive />
           <div />
@@ -358,12 +215,9 @@ export default function MeetSetting() {
           <p className="flex items-center">Microphone</p>
           <div className="flex">
             <Listbox
-              value={meetingConfig.defaultMic}
+              value={selectedMicrophoneLabel}
               onChange={(d) => {
-                setMeetingConfig({
-                  ...meetingConfig,
-                  defaultMic: d,
-                });
+                setSelectedMicrophoneLabel(d);
               }}
             >
               <div className="w-full flex-shrink flex-grow">
@@ -371,7 +225,7 @@ export default function MeetSetting() {
                   <span className="block truncate">
                     {state.mediaDiveces.microphone.find(
                       (microphone) =>
-                        microphone.label === meetingConfig.defaultMic
+                        microphone.label === selectedMicrophoneLabel
                     )?.label ||
                       (state.mediaDiveces.microphone.length
                         ? 'Select a microphone'
@@ -433,19 +287,16 @@ export default function MeetSetting() {
           <p className="flex items-center">Camera</p>
           <div className="flex">
             <Listbox
-              value={meetingConfig.defaultCamera}
+              value={selectedCameraLabel}
               onChange={(d) => {
-                setMeetingConfig({
-                  ...meetingConfig,
-                  defaultCamera: d,
-                });
+                setSelectedCameraLabel(d);
               }}
             >
               <div className="w-full flex-shrink flex-grow">
                 <Listbox.Button className="list-button">
                   <span className="block truncate">
                     {state.mediaDiveces.camera.find(
-                      (camera) => camera.label === meetingConfig.defaultCamera
+                      (camera) => camera.label === selectedCameraLabel
                     )?.label ||
                       (state.mediaDiveces.camera.length
                         ? 'Select a camera'
@@ -540,6 +391,8 @@ export default function MeetSetting() {
               user: {
                 ...state.user,
                 ...meetingConfig,
+                defaultCamera: selectedCameraLabel,
+                defaultMic: selectedMicrophoneLabel,
               },
             }))
           }

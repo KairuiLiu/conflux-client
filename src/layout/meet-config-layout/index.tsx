@@ -1,4 +1,4 @@
-import { aspRange, VideoPanel } from '@/components/video-panel';
+import { VideoPanel } from '@/components/video-panel';
 import { Context } from '@/context';
 import { ReactNode, useContext, useState } from 'react';
 
@@ -13,7 +13,7 @@ const MeetConfigLayout = ({
   configForm: ReactNode;
 }) => {
   const { state } = useContext(Context);
-  const [cameraStream, setCameraStream] = useState(null);
+  const [cameraStream] = useState(null);
 
   return (
     <main className="flex flex-grow -translate-y-8 flex-col items-center justify-center gap-6 px-4">

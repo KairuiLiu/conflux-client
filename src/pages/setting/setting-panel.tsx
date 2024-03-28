@@ -3,6 +3,7 @@ import {
   UserIcon,
   UserGroupIcon,
   GlobeAsiaAustraliaIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/solid';
 import UserSetting from './user-setting';
 import MeetSetting from './meet-setting';
@@ -26,11 +27,16 @@ const settingCategories = [
   },
 ];
 
-export default function SettingPanel() {
+const SettingPanel: React.FC<{
+  handleClose: () => void;
+}> = ({ handleClose }) => {
   return (
     <section className="panel-classic flex flex-col">
-      <div className="border-b-2 border-gray-300 p-4 text-2xl font-semibold">
+      <div className="flex items-center justify-between border-b-2 border-gray-300 p-4 text-2xl font-semibold">
         <h3>Setting</h3>
+        <button className="btn btn-remove-focus btn-text" onClick={handleClose}>
+          <XMarkIcon className="h-5 w-5" />
+        </button>
       </div>
       <div className="flex h-[calc(100dvh-200px)] max-h-[700px] min-h-80 w-dvw min-w-80 max-w-3xl flex-col sm:flex-row">
         <Tab.Group>
@@ -61,4 +67,6 @@ export default function SettingPanel() {
       </div>
     </section>
   );
-}
+};
+
+export default SettingPanel;

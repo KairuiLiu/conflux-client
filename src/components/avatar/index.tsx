@@ -19,7 +19,7 @@ const Avatar: React.FC<{
   return (
     size > 0 && (
       <div
-        className="flex select-none items-center justify-center overflow-hidden rounded-full"
+        className="flex select-none items-center justify-center overflow-hidden rounded-full transition-all"
         style={{ width: size, height: size }}
       >
         {user.avatar ? (
@@ -30,10 +30,10 @@ const Avatar: React.FC<{
           />
         ) : (
           <div
-            className={`${avatarColors[avatarColorIndex]} text-center, flex h-full w-full items-center justify-center`}
+            className={`${avatarColors[avatarColorIndex]} text-center, flex h-full w-full items-center justify-center transition-all`}
           >
             <span
-              className="font-bold text-white"
+              className="font-bold text-white transition-all"
               style={{ fontSize: size / 2.3 }}
             >
               {getUserShortName(username)}

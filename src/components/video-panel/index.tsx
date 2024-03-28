@@ -45,7 +45,7 @@ export const VideoPanel: React.FC<{
 
   return (
     <div
-      className={'relative overflow-hidden bg-gray-100 ' + className}
+      className={'relative overflow-hidden bg-gray-100 flex items-center ' + className}
       style={{
         aspectRatio: expandPanel ? 'auto' : asp,
         width: expandPanel ? '100%' : 'auto',
