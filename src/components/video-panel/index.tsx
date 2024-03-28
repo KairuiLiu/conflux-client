@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import Avatar from '../avatar';
 import { useElementSize } from '@/utils/use-element-size';
 
-const aspRange = [1.25, 1.8];
+export const aspRange = [1.25, 1.8];
 
-const VideoPanel: React.FC<{
+export const VideoPanel: React.FC<{
   limitWidth?: boolean;
   limitHeight?: boolean;
   expendVideo?: boolean;
@@ -13,6 +13,7 @@ const VideoPanel: React.FC<{
   user: Pick<UserInfo, 'avatar' | 'name'>;
   mirrroCamera: boolean;
   fixAsp?: number;
+  className?: string;
 }> = ({
   camStream,
   screenStream,
@@ -22,6 +23,7 @@ const VideoPanel: React.FC<{
   limitHeight = false,
   expendVideo = true,
   fixAsp,
+  className = '',
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -43,7 +45,7 @@ const VideoPanel: React.FC<{
 
   return (
     <div
-      className="relative overflow-hidden rounded-lg bg-gray-100"
+      className={'relative overflow-hidden bg-gray-100 ' + className}
       style={{
         aspectRatio: expandPanel ? 'auto' : asp,
         width: expandPanel ? '100%' : 'auto',
@@ -73,5 +75,3 @@ const VideoPanel: React.FC<{
     </div>
   );
 };
-
-export default VideoPanel;

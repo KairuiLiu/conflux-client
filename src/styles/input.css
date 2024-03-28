@@ -16,6 +16,6 @@
   }
 
   .input-underline {
-    @apply rounded-none border-l-0 border-r-0 border-t-0;
+    @apply rounded-none border-l-0 border-r-0 border-t-0 focus:ring-0;
   }
 }

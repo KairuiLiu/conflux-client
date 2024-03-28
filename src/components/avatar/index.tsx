@@ -1,3 +1,12 @@
+function getUserShortName(name: string) {
+  const input = name.trim();
+  if (input.includes(' ')) {
+    const parts = input.split(' ');
+    const abbreviation = parts[0].charAt(0) + parts.at(-1)!.charAt(0);
+    return abbreviation.toUpperCase();
+  } else return input.substring(0, 2).toUpperCase();
+}
+
 const Avatar: React.FC<{
   user: Pick<UserInfoExchange, 'avatar' | 'name'>;
   size?: number;
@@ -25,9 +34,9 @@ const Avatar: React.FC<{
           >
             <span
               className="font-bold text-white"
-              style={{ fontSize: size / 2 }}
+              style={{ fontSize: size / 2.3 }}
             >
-              {username.slice(0, 2).toUpperCase()}
+              {getUserShortName(username)}
             </span>
           </div>
         )}

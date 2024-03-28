@@ -1,13 +1,13 @@
 import { Context } from '@/context';
 import { Listbox, Switch, Transition } from '@headlessui/react';
-import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { pick } from 'lodash-es';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/solid';
 import MicrophoneVolume from '@/components/microphone-volume';
 import { refreshMediaDevice } from '@/utils/media-devices';
 import { setStreamWithId } from '@/utils/media-stream';
 import { stopStream } from '@/utils/media-stream';
-import VideoPanel from '@/components/video-panel';
+import { VideoPanel } from '@/components/video-panel';
 import testSound from '@/assets/test-sound.mp3';
 import SpeakerVolume from '@/components/speaker-volume';
 
@@ -508,6 +508,7 @@ export default function MeetSetting() {
             mirrroCamera={meetingConfig.mirrorCamera}
             screenStream={null}
             expendVideo={false}
+            className="rounded-lg"
           />
         </div>
       </section>

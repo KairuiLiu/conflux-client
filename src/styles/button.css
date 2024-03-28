@@ -40,7 +40,7 @@
   }
 
   .btn-disabled {
-    @apply cursor-not-allowed bg-gray-400 text-white;
+    @apply cursor-not-allowed bg-gray-400 text-white hover:bg-gray-400  active:bg-gray-400;
   }
 
   .btn-text {

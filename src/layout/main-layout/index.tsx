@@ -10,7 +10,7 @@ function MainLayout() {
 
   return (
     <>
-      <header className="flex h-16 flex-shrink-0 flex-grow-0 items-center">
+      <header className="flex h-16 flex-shrink-0 flex-grow-0 items-center z-10">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <Link
