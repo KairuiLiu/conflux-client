@@ -6,14 +6,18 @@ import { useContext, useEffect, useState } from 'react';
 const useMediaStream = (
   defauleMediaLabel: string,
   mediaType: 'video' | 'audio',
-  deviceKey: 'camera' | 'microphone'
+  deviceKey: 'camera' | 'microphone',
+  defaultEnableStream: boolean = true
 ): [
   string,
   React.Dispatch<React.SetStateAction<string>>,
   MediaStream | null,
+  enableStream: boolean,
+  React.Dispatch<React.SetStateAction<boolean>>,
 ] => {
   const { state, setState } = useContext(Context);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [enableStream, setEnableStream] = useState(defaultEnableStream);
   const [selectedDeviceLabel, setSelectedDeviceLabel] =
     useState(defauleMediaLabel);
 
@@ -22,6 +26,12 @@ const useMediaStream = (
   });
 
   useEffect(() => {
+    if (!enableStream) {
+      stopStream(stream);
+      setStream(null);
+      return;
+    }
+
     // try to find the given device
     const device = state.mediaDiveces[deviceKey].find(
       (d) => d.label === selectedDeviceLabel
@@ -39,7 +49,7 @@ const useMediaStream = (
     return () => {
       stopStream(stream);
     };
-  }, [state.mediaDiveces[deviceKey], selectedDeviceLabel]);
+  }, [state.mediaDiveces[deviceKey], selectedDeviceLabel, enableStream]);
 
   useEffect(() => {
     return () => {
@@ -47,7 +57,13 @@ const useMediaStream = (
     };
   }, [stream]);
 
-  return [selectedDeviceLabel, setSelectedDeviceLabel, stream];
+  return [
+    selectedDeviceLabel,
+    setSelectedDeviceLabel,
+    stream,
+    enableStream,
+    setEnableStream,
+  ];
 };
 
 export default useMediaStream;

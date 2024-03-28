@@ -9,15 +9,16 @@ import SpeakerVolume from '@/components/speaker-volume';
 import useMediaStream from '@/utils/use-media-stream';
 import useSpeakerStream from '@/utils/use-speaker-stream';
 
+// TODO callback to session setting when default configuration is changed
+
 export default function MeetSetting() {
   const { state, setState } = useContext(Context);
   const [musicLover, setMusicLover] = useState(false);
+
   const [selectedCameraLabel, setSelectedCameraLabel, videoStream] =
     useMediaStream(state.user.defaultCamera || '', 'video', 'camera');
-
   const [selectedMicrophoneLabel, setSelectedMicrophoneLabel, audioStream] =
     useMediaStream(state.user.defaultMic || '', 'audio', 'microphone');
-
   const [
     selectedSpeakerLabel,
     setSelectedSpeakerLabel,

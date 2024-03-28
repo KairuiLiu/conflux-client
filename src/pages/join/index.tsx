@@ -1,36 +1,26 @@
 import { Context } from '@/context';
 import MeetConfigLayout from '@/layout/meet-config-layout';
 import { useContext, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export default function Join() {
   const { state } = useContext(Context);
-  const [sessionMediaConfig, setSessionConfig] = useState(state.mediaDiveces);
-  const [meetingTitle, setMeetingTitle] = useState(
-    `${state.user.name}'s Meeting`
+  const { id } = useParams();
+  const [meetingNumber, setMeetingNumber] = useState(
+    id && id.match(/^[0-9]{9}$/) ? id : ''
   );
-  const [meetingNumber, setMeetingNumber] = useState('');
   const [userName, setUserName] = useState(state.user.name);
   const [canJoin, setCanJoin] = useState(false);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    setCanJoin(
-      meetingNumber.length === 9 &&
-        userName.length > 0 &&
-        meetingTitle.length > 0
-    );
-  }, [meetingNumber, userName, meetingTitle]);
+    setCanJoin(meetingNumber.length === 9 && userName.length > 0);
+  }, [meetingNumber, userName]);
 
   return (
     <MeetConfigLayout
-      titleBar={
-        <input
-          className="input input-underline bg-transparent invalid:border-red-600"
-          value={meetingTitle}
-          onChange={(e) => setMeetingTitle(e.target.value)}
-          placeholder="Meeting Title"
-          required
-        ></input>
-      }
+      titleBar={<></>}
       configForm={
         <>
           <h3 className="pb-7 text-xl font-semibold lg:pb-0">Join a Meeting</h3>
@@ -59,6 +49,16 @@ export default function Join() {
             <button
               disabled={!canJoin}
               className={`btn btn-primary p-1 ${canJoin ? '' : 'btn-disabled'}`}
+              onClick={() => {
+                /* TODO logic & toast */
+                navigate('/exit', {
+                  state: {
+                    reason: 'exit',
+                    roomId: meetingNumber,
+                    userName,
+                  } as ExitInfo,
+                });
+              }}
             >
               Join
             </button>

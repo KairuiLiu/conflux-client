@@ -18,7 +18,8 @@ const routes = createBrowserRouter([
       },
       {
         path: '/j/:id?',
-        element: <Navigate to="/join" />,
+        element: <Join />,
+        errorElement: <div>TODO</div>,
       },
       {
         path: '/join/:id?',

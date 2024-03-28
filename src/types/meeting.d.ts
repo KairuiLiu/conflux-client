@@ -7,3 +7,13 @@ interface MeetingInfo {
   organizer: UserInfo;
   participants: UserInfo[];
 }
+
+interface UserMeetingDeviceInfo {
+  enableCamera: boolean;
+  enableMic: boolean;
+  enableScreenShare: boolean;
+  enableSpeaker: boolean;
+  cameraLabel: string;
+  micLabel: string;
+  speakerLabel: string;
+}
