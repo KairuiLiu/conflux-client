@@ -94,7 +94,7 @@ const UserItemCard = () => {
             <span className="text-xs text-gray-500">Host</span>
           </div>
         </div>
-        <div>
+        <div className='whitespace-nowrap'>
           <button className="btn btn-remove-focus btn-text p-1">
             <MicrophoneIcon className="h-4 w-4 " />
           </button>

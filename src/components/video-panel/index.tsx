@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Avatar from '../avatar';
 import { useElementSize } from '@/utils/use-element-size';
-
-export const aspRange = [1.25, 1.8];
+import { aspRange } from '@/utils/use-panel-size';
 
 export const VideoPanel: React.FC<{
   limitWidth?: boolean;
@@ -11,30 +10,34 @@ export const VideoPanel: React.FC<{
   camStream: MediaStream | null;
   screenStream: MediaStream | null;
   user: Pick<UserInfo, 'avatar' | 'name'>;
-  mirrroCamera: boolean;
+  mirrroCamera?: boolean;
   fixAsp?: number;
   className?: string;
+  fixAvatarSize?: number;
 }> = ({
   camStream,
   screenStream,
   user,
-  mirrroCamera,
+  mirrroCamera = false,
   limitWidth = false,
   limitHeight = false,
   expendVideo = true,
   fixAsp,
   className = '',
+  fixAvatarSize = 0,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [panelRef, panelSize] = useElementSize<HTMLDivElement>();
+  const [panelRef, panelSize] = useElementSize<HTMLDivElement>(!fixAvatarSize);
 
   // limit both, or none => fill panel
   const expandPanel = limitWidth === limitHeight;
   const asp = fixAsp || (limitWidth ? aspRange[0] : aspRange[1]);
-  const avatarSize = expandPanel
-    ? Math.max(panelSize.height, panelSize.width) / asp
-    : Math.min(panelSize.height, panelSize.width);
+  const avatarSize = fixAvatarSize
+    ? fixAvatarSize
+    : expandPanel
+      ? Math.max(panelSize.height, panelSize.width) / asp
+      : Math.min(panelSize.height, panelSize.width);
 
   useEffect(() => {
     const stream = screenStream || camStream;
@@ -45,7 +48,9 @@ export const VideoPanel: React.FC<{
 
   return (
     <div
-      className={'relative overflow-hidden bg-gray-100 flex items-center ' + className}
+      className={
+        'relative flex items-center overflow-hidden bg-gray-100 ' + className
+      }
       style={{
         aspectRatio: expandPanel ? 'auto' : asp,
         width: expandPanel ? '100%' : 'auto',

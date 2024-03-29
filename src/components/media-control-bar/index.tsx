@@ -26,6 +26,7 @@ const MediaControlBar: React.FC<{
   setCameraEnable: React.Dispatch<React.SetStateAction<boolean>>;
   setMicrophoneEnable: React.Dispatch<React.SetStateAction<boolean>>;
   setSpeakerEnable: React.Dispatch<React.SetStateAction<boolean>>;
+  iconColor?: string;
 }> = ({
   selectedCameraLabel,
   setSelectedCameraLabel,
@@ -39,6 +40,7 @@ const MediaControlBar: React.FC<{
   setCameraEnable,
   setMicrophoneEnable,
   setSpeakerEnable,
+  iconColor = 'text-white',
 }) => {
   const { state } = useContext(Context);
 
@@ -50,7 +52,7 @@ const MediaControlBar: React.FC<{
           onClick={() => setMicrophoneEnable((d) => !d)}
         >
           {isMicrophoneEnabled ? (
-            <MicrophoneIcon className="h-4 w-4 text-white" />
+            <MicrophoneIcon className={`h-4 w-4 ${iconColor}`} />
           ) : (
             <MicroPhoneMuteIcon className="h-4 w-4 text-red-500" />
           )}
@@ -74,7 +76,7 @@ const MediaControlBar: React.FC<{
                 {state.mediaDiveces.microphone.length ? (
                   <ChevronUpIcon
                     strokeWidth="2px"
-                    className="h-4 w-4 text-white"
+                    className={`h-4 w-4 ${iconColor}`}
                     aria-hidden="true"
                   />
                 ) : (
@@ -130,7 +132,7 @@ const MediaControlBar: React.FC<{
           onClick={() => setCameraEnable((d) => !d)}
         >
           {isCameraEnabled ? (
-            <VideoCameraIcon className="h-4 w-4 text-white" />
+            <VideoCameraIcon className={`h-4 w-4 ${iconColor}`} />
           ) : (
             <VideoCameraSlashIcon className="h-4 w-4 text-red-500" />
           )}
@@ -154,7 +156,7 @@ const MediaControlBar: React.FC<{
                 {state.mediaDiveces.camera.length ? (
                   <ChevronUpIcon
                     strokeWidth="2px"
-                    className="h-4 w-4 text-white"
+                    className={`h-4 w-4 ${iconColor}`}
                     aria-hidden="true"
                   />
                 ) : (
@@ -210,7 +212,7 @@ const MediaControlBar: React.FC<{
           onClick={() => setSpeakerEnable((d) => !d)}
         >
           {isSpeakerEnabled ? (
-            <SpeakerWaveIcon className="h-4 w-4 text-white" />
+            <SpeakerWaveIcon className={`h-4 w-4 ${iconColor}`} />
           ) : (
             <SpeakerXMarkIcon className="h-4 w-4 text-red-500" />
           )}
@@ -234,7 +236,7 @@ const MediaControlBar: React.FC<{
                 {state.mediaDiveces.speaker.length ? (
                   <ChevronUpIcon
                     strokeWidth="2px"
-                    className="h-4 w-4 text-white"
+                    className={`h-4 w-4 ${iconColor}`}
                     aria-hidden="true"
                   />
                 ) : (
