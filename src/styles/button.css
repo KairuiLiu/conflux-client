@@ -48,7 +48,7 @@
   }
 
   .btn-text {
-    @apply bg-transparent hover:bg-gray-100;
+    @apply bg-transparent hover:bg-gray-100 active:bg-gray-200;
   }
 
   .btn-remove-focus {
