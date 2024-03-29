@@ -10,39 +10,53 @@ import {
 import { useState } from 'react';
 
 const MeetingPanel: React.FC = () => {
-  const [tmpCount, setTmpCount] = useState(2);
-  const [videoPanelRef, videoPanelSize, setItemCount] =
-    useVideoPanelSize(tmpCount);
+  const [itemCount, setItemCount] = useState(2);
+  const [videoPanelRef, videoPanelSize] = useVideoPanelSize(itemCount);
+
+  const itemLayout = new Array(videoPanelSize.row)
+    .fill(0)
+    .map((_, row) =>
+      Math.min(itemCount - row * videoPanelSize.col, videoPanelSize.col)
+    );
 
   return (
     <>
       <section
         ref={videoPanelRef}
-        className="flex flex-grow flex-wrap content-center items-center justify-center overflow-hidden rounded-lg"
+        className="flex flex-grow flex-col items-center justify-center gap-4 overflow-hidden rounded-lg"
       >
-        {new Array(tmpCount).fill(0).map((_, index) => (
+        {itemLayout.map((col, row) => (
           <div
-            key={index}
-            style={{
-              width: videoPanelSize.width - 32,
-              height: videoPanelSize.height - 32,
-            }}
-            className="flex-shrink-0 p-2 transition-all"
+            key={row}
+            className="flex flex-nowrap content-center items-center justify-center gap-4 overflow-hidden"
           >
-            <div className="h-full w-full overflow-hidden rounded-lg">
-              <VideoPanel
-                user={{
-                  name: 'Kairui liu',
-                  avatar: null,
+            {new Array(col).fill(0).map((_, index) => (
+              <div
+                key={`${row} ${index}`}
+                style={{
+                  width:
+                    videoPanelSize.width -
+                    ((videoPanelSize.col + 1) * 16) / videoPanelSize.col,
+                  height:
+                    videoPanelSize.height -
+                    ((videoPanelSize.row + 1) * 16) / videoPanelSize.row,
                 }}
-                camStream={null}
-                screenStream={null}
-                fixAvatarSize={
-                  Math.min(videoPanelSize.width, videoPanelSize.height) / 2 ||
-                  32
-                }
-              />
-            </div>
+                className="flex-shrink-0 overflow-hidden rounded-lg"
+              >
+                <VideoPanel
+                  user={{
+                    name: 'Kairui liu',
+                    avatar: null,
+                  }}
+                  camStream={null}
+                  screenStream={null}
+                  fixAvatarSize={
+                    Math.min(videoPanelSize.width, videoPanelSize.height) / 2 ||
+                    32
+                  }
+                />
+              </div>
+            ))}
           </div>
         ))}
       </section>
@@ -51,7 +65,6 @@ const MeetingPanel: React.FC = () => {
           <button
             className="btn btn-primary p-0"
             onClick={() => {
-              setTmpCount((pre) => pre + 1);
               setItemCount((pre) => pre + 1);
             }}
           >
