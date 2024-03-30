@@ -29,10 +29,6 @@ export const VideoPanel: React.FC<{
   const videoRef = useRef<HTMLVideoElement>(null);
   const [panelRef, panelSize] = useElementSize<HTMLDivElement>(!fixAvatarSize);
 
-  useEffect(() => {
-    console.log('limitHeight: ', limitHeight);
-  }, [limitHeight]);
-
   // limit both, or none => fill panel
   const expandPanel = limitWidth === limitHeight;
   const asp = fixAsp || (limitWidth ? aspRange[0] : aspRange[1]);
@@ -61,13 +57,15 @@ export const VideoPanel: React.FC<{
       }}
       ref={panelRef}
     >
-      {screenStream || camStream ? (
+      {!!screenStream || !!camStream ? (
         <video
-          className={`${!screenStream ? 'scale-X-[-1]' : ''} h-full w-full ${expandCamera ? 'object-cover' : 'object-contain'}`}
+          className={`${!screenStream ? 'scale-X-[-1]' : ''} h-full w-full ${expandCamera && !screenStream ? 'object-cover' : 'object-contain'}`}
           autoPlay
           playsInline
           ref={videoRef}
-          style={{ transform: `scaleX(${mirrroCamera ? -1 : 1})` }}
+          style={{
+            transform: `scaleX(${mirrroCamera && !screenStream ? -1 : 1})`,
+          }}
         />
       ) : (
         <div

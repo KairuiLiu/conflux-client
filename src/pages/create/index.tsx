@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Create() {
   const { state } = useContext(Context);
+  
   const [meetingTitle, setMeetingTitle] = useState(
     `${state.user.name}'s Meeting`
   );

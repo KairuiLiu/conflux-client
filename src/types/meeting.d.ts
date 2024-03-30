@@ -1,6 +1,6 @@
 import { UserInfo } from './user';
 
-interface MeetingInfo {
+interface MeetingState {
   id: string;
   title: string;
   meetingStartTime: number;
@@ -8,12 +8,17 @@ interface MeetingInfo {
   participants: UserInfo[];
 }
 
-interface UserMeetingDeviceInfo {
+interface MeetingDeviceState {
   enableCamera: boolean;
-  enableMic: boolean;
-  enableScreenShare: boolean;
-  enableSpeaker: boolean;
   cameraLabel: string;
+  enableMic: boolean;
   micLabel: string;
+  enableSpeaker: boolean;
   speakerLabel: string;
+}
+
+interface MeetingContext {
+  meetingState: MeetingState;
+  meetingDeviceState: MeetingDeviceState;
+  meeetingUserName: string;
 }
