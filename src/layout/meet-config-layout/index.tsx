@@ -77,6 +77,7 @@ const MeetConfigLayout = ({
             mirrroCamera={state.user.mirrorCamera}
             camStream={enableCamera ? videoStream : null}
             screenStream={null}
+            expandCamera={state.user.expandCamera}
             limitHeight
           />
           <div className="absolute bottom-4 flex w-full items-center justify-center gap-4 overflow-x-clip">

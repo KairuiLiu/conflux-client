@@ -51,12 +51,8 @@ export default function Join() {
               className={`btn btn-primary p-1 ${canJoin ? '' : 'btn-disabled'}`}
               onClick={() => {
                 /* TODO logic & toast */
-                navigate('/exit', {
-                  state: {
-                    reason: 'exit',
-                    roomId: meetingNumber,
-                    userName,
-                  } as ExitInfo,
+                navigate(`/room/${meetingNumber}`, {
+                  state: {},
                 });
               }}
             >

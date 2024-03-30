@@ -18,6 +18,7 @@ export function initState(): StateType {
       autoEnableSpeaker: true,
       defaultSpeaker: null,
       mirrorCamera: true,
+      expandCamera: true,
     },
     mediaDiveces: {
       camera: [],

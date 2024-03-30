@@ -50,12 +50,9 @@ export default function Create() {
               className={`btn btn-primary p-1 ${canCreate ? '' : 'btn-disabled'}`}
               onClick={() => {
                 /* TODO logic & toast */
-                navigate('/exit', {
-                  state: {
-                    reason: 'finish',
-                    roomId: null,
-                    userName,
-                  } as ExitInfo,
+                /* TODO Context */
+                navigate(`/room/123456789`, {
+                  state: {},
                 });
               }}
             >

@@ -27,6 +27,7 @@ const MediaControlBar: React.FC<{
   setMicrophoneEnable: React.Dispatch<React.SetStateAction<boolean>>;
   setSpeakerEnable: React.Dispatch<React.SetStateAction<boolean>>;
   iconColor?: string;
+  optionsAside?: boolean;
 }> = ({
   selectedCameraLabel,
   setSelectedCameraLabel,
@@ -41,12 +42,13 @@ const MediaControlBar: React.FC<{
   setMicrophoneEnable,
   setSpeakerEnable,
   iconColor = 'text-white',
+  optionsAside = true,
 }) => {
   const { state } = useContext(Context);
 
   return (
     <>
-      <div className="flex flex-nowrap">
+      <div className="relative flex flex-nowrap overflow-y-visible">
         <button
           className="btn btn-gray-glass flex-shrink-0 rounded-r-none"
           onClick={() => setMicrophoneEnable((d) => !d)}
@@ -94,7 +96,11 @@ const MediaControlBar: React.FC<{
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="list-options list-options-top">
+              <Listbox.Options
+                className={`list-options list-options-top ${
+                  optionsAside ? '' : 'list-options-middle'
+                } absolute`}
+              >
                 {state.mediaDiveces.microphone.map((microphone) => (
                   <Listbox.Option
                     key={microphone.label}
@@ -126,7 +132,7 @@ const MediaControlBar: React.FC<{
           </div>
         </Listbox>
       </div>
-      <div className="flex flex-nowrap">
+      <div className="relative flex flex-nowrap overflow-y-visible">
         <button
           className="btn btn-gray-glass flex-shrink-0 rounded-r-none"
           onClick={() => setCameraEnable((d) => !d)}
@@ -174,7 +180,11 @@ const MediaControlBar: React.FC<{
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="list-options list-options-top">
+              <Listbox.Options
+                className={`list-options list-options-top ${
+                  optionsAside ? '' : 'list-options-middle'
+                } absolute`}
+              >
                 {state.mediaDiveces.camera.map((camera) => (
                   <Listbox.Option
                     key={camera.label}
@@ -206,7 +216,7 @@ const MediaControlBar: React.FC<{
           </div>
         </Listbox>
       </div>
-      <div className="flex flex-nowrap">
+      <div className="relative flex flex-nowrap overflow-y-visible">
         <button
           className="btn btn-gray-glass flex-shrink-0 rounded-r-none"
           onClick={() => setSpeakerEnable((d) => !d)}
@@ -254,7 +264,11 @@ const MediaControlBar: React.FC<{
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="list-options list-options-top list-options-right">
+              <Listbox.Options
+                className={`list-options list-options-top ${
+                  optionsAside ? 'list-options-right' : 'list-options-middle'
+                } absolute`}
+              >
                 {state.mediaDiveces.speaker.map((speaker) => (
                   <Listbox.Option
                     key={speaker.label}

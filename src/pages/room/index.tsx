@@ -9,14 +9,18 @@ export default function Room() {
   return (
     <div className="flex h-dvh max-h-dvh flex-grow flex-col">
       <MeetingHeader />
-      <main className="flex h-0 flex-grow gap-4 px-2 pb-2 transition-all">
-        <section className="panel-classic flex w-full flex-shrink flex-grow flex-col shadow-none transition-all">
-          <MeetingPanel />
+      <main
+        className={`flex h-0 flex-grow gap-0 px-2 pb-2 transition-all ${
+          showUserPanel ? 'sm:gap-4' : 'sm:gap-0'
+        }`}
+      >
+        <section className="panel-classic flex w-0 flex-grow flex-col overflow-hidden shadow-none transition-all">
+          <MeetingPanel setShowUserPanel={setShowUserPanel} />
         </section>
         <aside
           className={`panel-classic flex flex-shrink-0 flex-col shadow-none transition-all ${
             showUserPanel
-              ? 'w-[33vmin] overflow-visible'
+              ? 'w-full overflow-visible sm:w-[33vmin] '
               : 'w-0 overflow-hidden'
           }`}
         >

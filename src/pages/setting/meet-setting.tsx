@@ -35,6 +35,7 @@ export default function MeetSetting() {
       'autoEnableSpeaker',
       'defaultSpeaker',
       'mirrorCamera',
+      'expandCamera',
     ])
   );
 
@@ -128,6 +129,29 @@ export default function MeetSetting() {
             />
           </Switch>
           <span>Mirror camera</span>
+          <Switch
+            checked={meetingConfig.expandCamera}
+            onChange={(expandCamera) =>
+              setMeetingConfig({
+                ...meetingConfig,
+                expandCamera,
+              })
+            }
+            className={
+              meetingConfig.expandCamera
+                ? 'switch-wapper-enable'
+                : 'switch-wapper-disable'
+            }
+          >
+            <span
+              className={
+                meetingConfig.expandCamera
+                  ? 'switch-core-enable'
+                  : 'switch-core-disable'
+              }
+            />
+          </Switch>
+          <span>Fill container with video</span>
         </div>
         <div className="grid flex-grow grid-cols-[min-content_minmax(0px,_1fr)_min-content] items-center gap-3 p-2">
           <p className="flex items-center">Speaker</p>
@@ -359,8 +383,9 @@ export default function MeetSetting() {
             user={state.user}
             mirrroCamera={meetingConfig.mirrorCamera}
             screenStream={null}
-            expendVideo={false}
             className="rounded-lg"
+            expandCamera={meetingConfig.expandCamera}
+            limitHeight
           />
         </div>
       </section>
@@ -378,6 +403,7 @@ export default function MeetSetting() {
                 'autoEnableSpeaker',
                 'defaultSpeaker',
                 'mirrorCamera',
+                'expandCamera',
               ])
             );
           }}

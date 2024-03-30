@@ -4,7 +4,7 @@
 
 @layer components {
   .btn {
-    @apply truncate rounded-md border-2 border-transparent p-2 font-semibold transition-all focus:outline-none focus:ring-0 focus-visible:ring-0 active:ring-0;
+    @apply select-none truncate rounded-md border-2 border-transparent p-2 font-semibold transition-all focus:outline-none focus:ring-0 focus-visible:ring-0 active:ring-0;
   }
 
   .btn-gray-glass {

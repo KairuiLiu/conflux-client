@@ -1,7 +1,7 @@
 html,
 body,
 #root {
-  @apply h-fit min-h-dvh;
+  @apply h-fit min-h-dvh overflow-x-hidden;
 }
 
 #root {

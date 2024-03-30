@@ -24,7 +24,7 @@ const MeetingHeader: React.FC = () => {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="l-0 felx absolute mt-2 w-min flex-col rounded-md bg-white text-base shadow-panel">
+          <Menu.Items className="l-0 felx absolute z-10 mt-2 w-min flex-col rounded-md bg-white text-base shadow-panel">
             <section className="p-4">
               <h3 className="pb-3 text-lg font-semibold">Karry's Meeting</h3>
               <div className="grid grid-cols-[min-content_1fr] gap-3 whitespace-nowrap">

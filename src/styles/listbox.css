@@ -21,6 +21,10 @@
     @apply right-0;
   }
 
+  .list-options-middle {
+    @apply -translate-x-1/2;
+  }
+
   .list-item {
     @apply relative cursor-default select-none py-2 pl-10 pr-4;
   }

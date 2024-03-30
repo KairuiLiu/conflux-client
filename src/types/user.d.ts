@@ -18,6 +18,7 @@ interface MeetingConfig {
   autoEnableSpeaker: boolean;
   defaultSpeaker: string?;
   mirrorCamera: boolean;
+  expandCamera: boolean;
 }
 
 interface UserInfo extends MeetingConfig {
