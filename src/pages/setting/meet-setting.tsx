@@ -1,7 +1,6 @@
-import { Context } from '@/context';
+import useGlobalStore from '@/context/global-context';
 import { Listbox, Switch, Transition } from '@headlessui/react';
-import { Fragment, useContext, useState } from 'react';
-import { pick } from 'lodash-es';
+import { Fragment, useState } from 'react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/solid';
 import MicrophoneVolume from '@/components/microphone-volume';
 import { VideoPanel } from '@/components/video-panel';
@@ -9,145 +8,152 @@ import SpeakerVolume from '@/components/speaker-volume';
 import useMediaStream from '@/utils/use-media-stream';
 import useSpeakerStream from '@/utils/use-speaker-stream';
 
-// TODO callback to session setting when default configuration is changed
-
 export default function MeetSetting() {
-  const { state, setState } = useContext(Context);
+  const state = useGlobalStore((d) => d);
+  const setState = useGlobalStore.setState;
+
   const [musicLover, setMusicLover] = useState(false);
 
-  const [selectedCameraLabel, setSelectedCameraLabel, videoStream] =
-    useMediaStream(state.user.defaultCamera || '', 'video', 'camera');
-  const [selectedMicrophoneLabel, setSelectedMicrophoneLabel, audioStream] =
-    useMediaStream(state.user.defaultMic || '', 'audio', 'microphone');
-  const [
-    selectedSpeakerLabel,
-    setSelectedSpeakerLabel,
-    audioElementAnylist,
-    handleSpeakerTest,
-  ] = useSpeakerStream(state.user.defaultSpeaker || '');
-
-  const [meetingConfig, setMeetingConfig] = useState<MeetingConfig>(
-    pick(state.user, [
-      'autoEnableCamera',
-      'defaultCamera',
-      'autoEnableMic',
-      'defaultMic',
-      'autoEnableSpeaker',
-      'defaultSpeaker',
-      'mirrorCamera',
-      'expandCamera',
-    ])
+  const [selectedSpeakerLabel, setSelectedSpeakerLabel] = useState(
+    state.user.defaultSpeaker || ''
   );
+  const [selectedMicrophoneLabel, setSelectedMicrophoneLabel] = useState(
+    state.user.defaultMic || ''
+  );
+  const [selectedCameraLabel, setSelectedCameraLabel] = useState(
+    state.user.defaultCamera || ''
+  );
+  const [autoEnableCamera, setAutoEnableCamera] = useState(
+    state.user.autoEnableCamera
+  );
+  const [autoEnableMic, setAutoEnableMic] = useState(state.user.autoEnableMic);
+  const [autoEnableSpeaker, setAutoEnableSpeaker] = useState(
+    state.user.autoEnableSpeaker
+  );
+  const [mirrorCamera, setMirrorCamera] = useState(state.user.mirrorCamera);
+  const [expandCamera, setExpandCamera] = useState(state.user.expandCamera);
+
+  const [videoStream] = useMediaStream(
+    selectedCameraLabel,
+    setSelectedCameraLabel,
+    true,
+    'video',
+    'camera'
+  );
+  const [audioStream] = useMediaStream(
+    selectedMicrophoneLabel,
+    setSelectedMicrophoneLabel,
+    true,
+    'audio',
+    'microphone'
+  );
+  const [audioElementAnylist, handleSpeakerTest] = useSpeakerStream(
+    selectedSpeakerLabel,
+    setSelectedSpeakerLabel
+  );
+
+  const initState = () => {
+    setSelectedSpeakerLabel(state.user.defaultSpeaker || '');
+    setSelectedMicrophoneLabel(state.user.defaultMic || '');
+    setSelectedCameraLabel(state.user.defaultCamera || '');
+    setAutoEnableCamera(state.user.autoEnableCamera);
+    setAutoEnableMic(state.user.autoEnableMic);
+    setAutoEnableSpeaker(state.user.autoEnableSpeaker);
+    setMirrorCamera(state.user.mirrorCamera);
+    setExpandCamera(state.user.expandCamera);
+  };
+
+  const submitState = () => {
+    setState((state) => ({
+      ...state,
+      user: {
+        ...state.user,
+        defaultSpeaker: selectedSpeakerLabel,
+        defaultMic: selectedMicrophoneLabel,
+        defaultCamera: selectedCameraLabel,
+        autoEnableCamera,
+        autoEnableMic,
+        autoEnableSpeaker,
+        mirrorCamera,
+        expandCamera,
+      },
+    }));
+  };
 
   return (
     <>
       <section className="flex flex-shrink flex-col overflow-y-auto">
         <div className="grid flex-grow grid-cols-[min-content_1fr] gap-3 p-2">
           <Switch
-            checked={meetingConfig.autoEnableCamera}
-            onChange={(autoEnableCamera) =>
-              setMeetingConfig({ ...meetingConfig, autoEnableCamera })
-            }
+            checked={autoEnableCamera}
+            onChange={() => setAutoEnableCamera((d) => !d)}
             className={
-              meetingConfig.autoEnableCamera
+              autoEnableCamera
                 ? 'switch-wapper-enable'
                 : 'switch-wapper-disable'
             }
           >
             <span
               className={
-                meetingConfig.autoEnableCamera
-                  ? 'switch-core-enable'
-                  : 'switch-core-disable'
+                autoEnableCamera ? 'switch-core-enable' : 'switch-core-disable'
               }
             />
           </Switch>
           <span>Auto-enable camera at meeting join</span>
           <Switch
-            checked={meetingConfig.autoEnableSpeaker}
-            onChange={(autoEnableSpeaker) =>
-              setMeetingConfig({ ...meetingConfig, autoEnableSpeaker })
-            }
+            checked={autoEnableSpeaker}
+            onChange={() => setAutoEnableSpeaker((d) => !d)}
             className={
-              meetingConfig.autoEnableSpeaker
+              autoEnableSpeaker
                 ? 'switch-wapper-enable'
                 : 'switch-wapper-disable'
             }
           >
             <span
               className={
-                meetingConfig.autoEnableSpeaker
-                  ? 'switch-core-enable'
-                  : 'switch-core-disable'
+                autoEnableSpeaker ? 'switch-core-enable' : 'switch-core-disable'
               }
             />
           </Switch>
           <span>Auto-enable speaker at meeting join</span>
           <Switch
-            checked={!meetingConfig.autoEnableMic}
-            onChange={(autoMute) =>
-              setMeetingConfig({
-                ...meetingConfig,
-                autoEnableMic: !autoMute,
-              })
-            }
+            checked={!autoEnableMic}
+            onChange={() => setAutoEnableMic((autoMute) => !autoMute)}
             className={
-              !meetingConfig.autoEnableMic
-                ? 'switch-wapper-enable'
-                : 'switch-wapper-disable'
+              !autoEnableMic ? 'switch-wapper-enable' : 'switch-wapper-disable'
             }
           >
             <span
               className={
-                !meetingConfig.autoEnableMic
-                  ? 'switch-core-enable'
-                  : 'switch-core-disable'
+                !autoEnableMic ? 'switch-core-enable' : 'switch-core-disable'
               }
             />
           </Switch>
           <span>Auto-mute at meeting join</span>
           <Switch
-            checked={meetingConfig.mirrorCamera}
-            onChange={(mirrorCamera) =>
-              setMeetingConfig({
-                ...meetingConfig,
-                mirrorCamera,
-              })
-            }
+            checked={mirrorCamera}
+            onChange={() => setMirrorCamera((d) => !d)}
             className={
-              meetingConfig.mirrorCamera
-                ? 'switch-wapper-enable'
-                : 'switch-wapper-disable'
+              mirrorCamera ? 'switch-wapper-enable' : 'switch-wapper-disable'
             }
           >
             <span
               className={
-                meetingConfig.mirrorCamera
-                  ? 'switch-core-enable'
-                  : 'switch-core-disable'
+                mirrorCamera ? 'switch-core-enable' : 'switch-core-disable'
               }
             />
           </Switch>
           <span>Mirror camera</span>
           <Switch
-            checked={meetingConfig.expandCamera}
-            onChange={(expandCamera) =>
-              setMeetingConfig({
-                ...meetingConfig,
-                expandCamera,
-              })
-            }
+            checked={expandCamera}
+            onChange={() => setExpandCamera((d) => !d)}
             className={
-              meetingConfig.expandCamera
-                ? 'switch-wapper-enable'
-                : 'switch-wapper-disable'
+              expandCamera ? 'switch-wapper-enable' : 'switch-wapper-disable'
             }
           >
             <span
               className={
-                meetingConfig.expandCamera
-                  ? 'switch-core-enable'
-                  : 'switch-core-disable'
+                expandCamera ? 'switch-core-enable' : 'switch-core-disable'
               }
             />
           </Switch>
@@ -381,10 +387,10 @@ export default function MeetSetting() {
           <VideoPanel
             camStream={videoStream}
             user={state.user}
-            mirrroCamera={meetingConfig.mirrorCamera}
+            mirrroCamera={mirrorCamera}
             screenStream={null}
             className="rounded-lg"
-            expandCamera={meetingConfig.expandCamera}
+            expandCamera={expandCamera}
             limitHeight
           />
         </div>
@@ -393,37 +399,11 @@ export default function MeetSetting() {
       <div className="flex flex-shrink-0 flex-grow-0 justify-end gap-3 p-5 pb-0">
         <button
           className="btn btn-remove-focus btn-primary-outline"
-          onClick={() => {
-            setMeetingConfig(
-              pick(state.user, [
-                'autoEnableCamera',
-                'defaultCamera',
-                'autoEnableMic',
-                'defaultMic',
-                'autoEnableSpeaker',
-                'defaultSpeaker',
-                'mirrorCamera',
-                'expandCamera',
-              ])
-            );
-          }}
+          onClick={initState}
         >
           Reset
         </button>
-        <button
-          className="btn btn-primary"
-          onClick={() =>
-            setState((state) => ({
-              ...state,
-              user: {
-                ...state.user,
-                ...meetingConfig,
-                defaultCamera: selectedCameraLabel,
-                defaultMic: selectedMicrophoneLabel,
-              },
-            }))
-          }
-        >
+        <button className="btn btn-primary" onClick={submitState}>
           Save
         </button>
       </div>

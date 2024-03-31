@@ -1,9 +1,8 @@
 import RTCPanel from '@/components/rtc-info-panel';
-import { Context } from '@/context';
-import { useContext } from 'react';
+import useGlobalStore from '@/context/global-context';
 
 export default function MeetSystemInfo() {
-  const { state } = useContext(Context);
+  const state = useGlobalStore((d) => d);
 
   return (
     <div className="flex flex-col gap-2">

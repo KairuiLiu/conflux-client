@@ -1,25 +1,70 @@
-import { Context } from '@/context';
+import useGlobalStore from '@/context/global-context';
+import useMeetingContext from '@/context/meeting-context';
 import MeetConfigLayout from '@/layout/meet-config-layout';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function Join() {
-  const { state } = useContext(Context);
+  const meetingContext = useMeetingContext((d) => d);
+  const state = useGlobalStore((d) => d);
   const { id } = useParams();
-  const [meetingNumber, setMeetingNumber] = useState(
-    id && id.match(/^[0-9]{9}$/) ? id : ''
-  );
-  const [userName, setUserName] = useState(state.user.name);
+  const navigate = useNavigate();
   const [canJoin, setCanJoin] = useState(false);
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    meetingContext.resetMeetingContext();
+  }, []);
+
+  function onJoin() {
+    /* TODO mock logic & toast */
+    meetingContext.setMeetingState.setTitle(
+      `ID ${meetingContext.meetingState.id}'s Meeting`
+    );
+    meetingContext.setMeetingState.setOrganizer({
+      id: '123456',
+      name: 'Mock Organizer',
+      avatar: null,
+    });
+    meetingContext.setMeetingState.setParticipants([
+      {
+        id: state.user.uuid,
+        name: state.user.name,
+        avatar: state.user.avatar,
+      },
+      {
+        id: '123456',
+        name: 'Mock Organizer',
+        avatar: null,
+      },
+      {
+        id: '1234567',
+        name: 'Mock Participant',
+        avatar: null,
+      },
+    ]);
+    meetingContext.setMeetingState.setMeetingStartTime(
+      Date.now() - 1000 * 5 * 60
+    );
+
+    navigate(`/room/${meetingContext.meetingState.id}`);
+  }
 
   useEffect(() => {
-    setCanJoin(meetingNumber.length === 9 && userName.length > 0);
-  }, [meetingNumber, userName]);
+    meetingContext.setMeetingState.setId(
+      id && id.match(/^[0-9]{9}$/) ? id : ''
+    );
+  }, [id]);
+
+  useEffect(() => {
+    setCanJoin(
+      meetingContext.meetingState.id.length === 9 &&
+        meetingContext.meeetingUserName.length > 0
+    );
+  }, [meetingContext.meetingState.id, meetingContext.meeetingUserName]);
 
   return (
     <MeetConfigLayout
+      meetingContext={meetingContext}
       titleBar={<></>}
       configForm={
         <>
@@ -29,19 +74,23 @@ export default function Join() {
               <input
                 className="input"
                 placeholder="Meeting ID"
-                value={meetingNumber.replace(/(.{1,3})/g, '$1 ').trim()}
+                value={meetingContext.meetingState.id
+                  .replace(/(.{1,3})/g, '$1 ')
+                  .trim()}
                 maxLength={11}
                 onChange={(e) =>
-                  setMeetingNumber(e.target.value.trim().replace(/\D/g, ''))
+                  meetingContext.setMeetingState.setId(
+                    e.target.value.trim().replace(/\D/g, '')
+                  )
                 }
                 required
               ></input>
               <input
                 className="input"
                 placeholder="Your Name"
-                value={userName}
+                value={meetingContext.meeetingUserName}
                 onChange={(e) => {
-                  setUserName(e.target.value.trim());
+                  meetingContext.setMeetingUserName(e.target.value.trim());
                 }}
                 required
               ></input>
@@ -49,12 +98,7 @@ export default function Join() {
             <button
               disabled={!canJoin}
               className={`btn btn-primary p-1 ${canJoin ? '' : 'btn-disabled'}`}
-              onClick={() => {
-                /* TODO logic & toast */
-                navigate(`/room/${meetingNumber}`, {
-                  state: {},
-                });
-              }}
+              onClick={onJoin}
             >
               Join
             </button>

@@ -1,30 +1,72 @@
-import { Context } from '@/context';
+import useGlobalStore from '@/context/global-context';
+import useMeetingContext from '@/context/meeting-context';
 import MeetConfigLayout from '@/layout/meet-config-layout';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Create() {
-  const { state } = useContext(Context);
-  
-  const [meetingTitle, setMeetingTitle] = useState(
-    `${state.user.name}'s Meeting`
-  );
-  const [userName, setUserName] = useState(state.user.name);
+  const state = useGlobalStore((d) => d);
+  const meetingContext = useMeetingContext((d) => d);
   const [canCreate, setCanCreate] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    setCanCreate(userName.length > 0 && meetingTitle.length > 0);
-  }, [userName, meetingTitle]);
+    meetingContext.resetMeetingContext();
+  }, []);
+
+  function onCreate() {
+    /* TODO mock logic & toast */
+    meetingContext.setMeetingState.setId('123456789');
+    meetingContext.setMeetingState.setOrganizer({
+      id: state.user.uuid,
+      name: meetingContext.meeetingUserName,
+      avatar: state.user.avatar,
+    });
+    meetingContext.setMeetingState.setMeetingStartTime(Date.now());
+    meetingContext.setMeetingState.setParticipants([
+      {
+        id: state.user.uuid,
+        name: meetingContext.meeetingUserName,
+        avatar: state.user.avatar,
+      },
+    ]);
+    meetingContext.setMeetingState.setParticipants([
+      {
+        id: state.user.uuid,
+        name: state.user.name,
+        avatar: state.user.avatar,
+      },
+      {
+        id: '123456',
+        name: 'Mock Participant 1',
+        avatar: null,
+      },
+      {
+        id: '1234567',
+        name: 'Mock Participant 2',
+        avatar: null,
+      },
+    ]);
+    navigate(`/room/${123456789}`);
+  }
+
+  useEffect(() => {
+    setCanCreate(
+      meetingContext.meeetingUserName.length > 0 &&
+        meetingContext.meetingState.title.length > 0
+    );
+  }, [meetingContext.meeetingUserName, meetingContext.meetingState.title]);
 
   return (
     <MeetConfigLayout
+      meetingContext={meetingContext}
       titleBar={
         <input
           className="input input-underline bg-transparent invalid:border-red-600"
-          value={meetingTitle}
-          onChange={(e) => setMeetingTitle(e.target.value)}
+          value={meetingContext.meetingState.title}
+          onChange={(e) =>
+            meetingContext.setMeetingState.setTitle(e.target.value)
+          }
           placeholder="Meeting Title"
           required
         ></input>
@@ -39,9 +81,9 @@ export default function Create() {
               <input
                 className="input"
                 placeholder="Your Name"
-                value={userName}
+                value={meetingContext.meeetingUserName}
                 onChange={(e) => {
-                  setUserName(e.target.value.trim());
+                  meetingContext.setMeetingUserName(e.target.value.trim());
                 }}
                 required
               ></input>
@@ -49,13 +91,7 @@ export default function Create() {
             <button
               disabled={!canCreate}
               className={`btn btn-primary p-1 ${canCreate ? '' : 'btn-disabled'}`}
-              onClick={() => {
-                /* TODO logic & toast */
-                /* TODO Context */
-                navigate(`/room/123456789`, {
-                  state: {},
-                });
-              }}
+              onClick={onCreate}
             >
               Start
             </button>

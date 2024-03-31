@@ -1,9 +1,10 @@
 import Avatar from '@/components/avatar';
-import { Context } from '@/context';
-import { useContext, useState } from 'react';
+import useGlobalStore from '@/context/global-context';
+import { useState } from 'react';
 
 export default function UserSetting() {
-  const { state, setState } = useContext(Context);
+  const state = useGlobalStore((d) => d);
+  const setState = useGlobalStore.setState;
 
   const [avatar, setAvatar] = useState<string | null>(state.user.avatar);
   const [name, setName] = useState<string>(state.user.name);

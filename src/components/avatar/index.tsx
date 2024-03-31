@@ -19,7 +19,7 @@ const Avatar: React.FC<{
   return (
     size > 0 && (
       <div
-        className="flex select-none items-center justify-center overflow-hidden rounded-full"
+        className="flex select-none items-center justify-center overflow-hidden rounded-full flex-shrink-0"
         style={{ width: size, height: size }}
       >
         {user.avatar ? (

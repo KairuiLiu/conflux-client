@@ -10,7 +10,9 @@ import { Dialog, Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react/jsx-runtime';
 import { useState } from 'react';
 
-const UserItemCard = () => {
+const UserItemCard: React.FC<{
+  user: UserInfo;
+}> = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div>
@@ -81,20 +83,19 @@ const UserItemCard = () => {
         </Dialog>
       </Transition>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Avatar
-            user={{
-              name: 'Demo',
-              avatar: null,
-            }}
-          />
-          <div className="flex flex-col">
-            <h4 className="text-sm">Demo</h4>
-            <span className="text-xs text-gray-500">Host</span>
+      <div className="flex w-full flex-shrink items-center justify-between">
+        <div className="flex w-0 flex-grow items-center gap-3">
+          <Avatar user={user} />
+          <div className="flex w-0 flex-grow flex-col">
+            <h4 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+              {user.name}
+            </h4>
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
+              Host
+            </span>
           </div>
         </div>
-        <div className='whitespace-nowrap'>
+        <div className="flex-shrink-0 whitespace-nowrap">
           <button className="btn btn-remove-focus btn-text p-1">
             <MicrophoneIcon className="h-4 w-4 " />
           </button>

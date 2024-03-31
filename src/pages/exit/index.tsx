@@ -4,6 +4,7 @@ export default function Exit() {
   const location = useLocation();
   const navigate = useNavigate();
   const exitInfo = location.state as ExitInfo;
+
   return (
     <main className="flex flex-grow items-center justify-center px-2">
       <section className="flex flex-col items-center gap-16 ">

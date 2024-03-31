@@ -1,18 +1,17 @@
 import { refreshMediaDevice } from '@/utils/media-devices';
-import { Dispatch, SetStateAction } from 'react';
 
 let registeredMeidaChange = false;
 let registeredPermissionChange = false;
 
 export function initListener(
-  setState: React.Dispatch<React.SetStateAction<StateType>>
-) {
+  setState: (v: (state: StateType) => StateType) => void
+): void {
   addMediaStateListener(setState);
   addMediaPermissionListener(setState);
 }
 
 function addMediaPermissionListener(
-  setState: Dispatch<SetStateAction<StateType>>
+  setState: (v: (state: StateType) => StateType) => void
 ) {
   if (!navigator.mediaDevices || registeredPermissionChange) return;
   registeredPermissionChange = true;
@@ -38,7 +37,9 @@ function addMediaPermissionListener(
   }
 }
 
-function addMediaStateListener(setState: Dispatch<SetStateAction<StateType>>) {
+function addMediaStateListener(
+  setState: (v: (state: StateType) => StateType) => void
+) {
   if (!navigator.mediaDevices || registeredMeidaChange) return;
   registeredMeidaChange = true;
   navigator.mediaDevices.addEventListener('devicechange', () => {

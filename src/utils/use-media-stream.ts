@@ -1,25 +1,18 @@
-import { Context } from '@/context';
+import useGlobalStore from '@/context/global-context';
 import { refreshMediaDevice } from '@/utils/media-devices';
 import { setStreamWithId, stopStream } from '@/utils/media-stream';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const useMediaStream = (
-  defauleMediaLabel: string,
-  mediaType: 'video' | 'audio',
-  deviceKey: 'camera' | 'microphone',
-  defaultEnableStream: boolean = true
-): [
-  string,
-  React.Dispatch<React.SetStateAction<string>>,
-  MediaStream | null,
+  selectedDeviceLabel: string,
+  setSelectedDeviceLabel: (prevState: string) => void,
   enableStream: boolean,
-  React.Dispatch<React.SetStateAction<boolean>>,
-] => {
-  const { state, setState } = useContext(Context);
+  mediaType: 'video' | 'audio',
+  deviceKey: 'camera' | 'microphone'
+): [MediaStream | null] => {
+  const state = useGlobalStore((d) => d);
+  const setState = useGlobalStore.setState;
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [enableStream, setEnableStream] = useState(defaultEnableStream);
-  const [selectedDeviceLabel, setSelectedDeviceLabel] =
-    useState(defauleMediaLabel);
 
   useEffect(() => {
     refreshMediaDevice(mediaType, setState);
@@ -57,13 +50,7 @@ const useMediaStream = (
     };
   }, [stream]);
 
-  return [
-    selectedDeviceLabel,
-    setSelectedDeviceLabel,
-    stream,
-    enableStream,
-    setEnableStream,
-  ];
+  return [stream];
 };
 
 export default useMediaStream;

@@ -9,42 +9,17 @@ import {
 import React, { Fragment, useState } from 'react';
 import SettingPanel from '../setting/setting-panel';
 import { useNavigate } from 'react-router-dom';
+import useMeetingStore from '@/context/meeting-context';
+import { v4 } from 'uuid';
 
 const MeetingControlBar: React.FC<{
-  setItemCount: React.Dispatch<React.SetStateAction<number>>;
-  enableCamera: boolean;
-  setEnableCameraStream: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedCameraLabel: string;
-  setSelectedCameraLabel: React.Dispatch<React.SetStateAction<string>>;
   setEnableScreenShareStream: React.Dispatch<React.SetStateAction<boolean>>;
-  enableMicrophoneStream: boolean;
-  setEnableMicrophoneStream: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedMicrophoneLabel: string;
-  setSelectedMicrophoneLabel: React.Dispatch<React.SetStateAction<string>>;
-  enableSpeaker: boolean;
-  setEnableSpeaker: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedSpeakerLabel: string;
-  setSelectedSpeakerLabel: React.Dispatch<React.SetStateAction<string>>;
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({
-  setItemCount,
-  enableCamera,
-  setEnableCameraStream,
-  selectedCameraLabel,
-  setSelectedCameraLabel,
-  setEnableScreenShareStream,
-  enableMicrophoneStream,
-  setEnableMicrophoneStream,
-  selectedMicrophoneLabel,
-  setSelectedMicrophoneLabel,
-  enableSpeaker,
-  setEnableSpeaker,
-  selectedSpeakerLabel,
-  setSelectedSpeakerLabel,
-  setShowUserPanel,
-}) => {
+}> = ({ setEnableScreenShareStream, setShowUserPanel }) => {
   const [showSetting, setShowSetting] = useState(false);
   const navigate = useNavigate();
+  const meetingContext = useMeetingStore((d) => d);
+
   return (
     <>
       <section className="flex items-center justify-between gap-4 px-3 py-2">
@@ -52,27 +27,24 @@ const MeetingControlBar: React.FC<{
           <button
             className="btn btn-primary p-0"
             onClick={() => {
-              setItemCount((pre) => pre + 1);
+              const uuid = v4();
+              meetingContext.setMeetingState.setParticipants([
+                ...meetingContext.meetingState.participants,
+                {
+                  id: uuid,
+                  name: 'User_' + uuid.slice(0, 5),
+                  avatar: null,
+                },
+              ]);
             }}
           >
-            +1
+            Add Mock User
           </button>
         </div>
         <div className="flex flex-shrink flex-wrap gap-4">
           <MediaControlBar
             iconColor="text-gray-600"
-            isCameraEnabled={enableCamera}
-            setCameraEnable={setEnableCameraStream}
-            selectedCameraLabel={selectedCameraLabel}
-            setSelectedCameraLabel={setSelectedCameraLabel}
-            isMicrophoneEnabled={enableMicrophoneStream}
-            setMicrophoneEnable={setEnableMicrophoneStream}
-            selectedMicrophoneLabel={selectedMicrophoneLabel}
-            setSelectedMicrophoneLabel={setSelectedMicrophoneLabel}
-            isSpeakerEnabled={enableSpeaker}
-            setSpeakerEnable={setEnableSpeaker}
-            setSelectedSpeakerLabel={setSelectedSpeakerLabel}
-            selectedSpeakerLabel={selectedSpeakerLabel}
+            meetingContext={meetingContext}
             optionsAside={false}
           />
           <button
@@ -115,8 +87,8 @@ const MeetingControlBar: React.FC<{
                       navigate('/exit', {
                         state: {
                           reason: 'exit',
-                          roomId: '123456789',
-                          userName: '123',
+                          roomId: meetingContext.meetingState.id,
+                          userName: meetingContext.meeetingUserName,
                         } as ExitInfo,
                       });
                     }}
@@ -124,22 +96,25 @@ const MeetingControlBar: React.FC<{
                     Leave Meeting
                   </button>
                 </Menu.Item>
-                <Menu.Item>
-                  <button
-                    className={'btn btn-danger-secondary-outline w-full'}
-                    onClick={() => {
-                      navigate('/exit', {
-                        state: {
-                          reason: 'finish',
-                          roomId: '123456789',
-                          userName: '123',
-                        } as ExitInfo,
-                      });
-                    }}
-                  >
-                    Finish Meeting
-                  </button>
-                </Menu.Item>
+                {meetingContext.meeetingUserName ===
+                  meetingContext.meetingState.organizer.name && (
+                  <Menu.Item>
+                    <button
+                      className={'btn btn-danger-secondary-outline w-full'}
+                      onClick={() => {
+                        navigate('/exit', {
+                          state: {
+                            reason: 'finish',
+                            roomId: meetingContext.meetingState.id,
+                            userName: meetingContext.meeetingUserName,
+                          } as ExitInfo,
+                        });
+                      }}
+                    >
+                      Finish Meeting
+                    </button>
+                  </Menu.Item>
+                )}
               </Menu.Items>
             </Transition>
           </Menu>

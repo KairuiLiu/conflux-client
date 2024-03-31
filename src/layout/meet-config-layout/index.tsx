@@ -1,12 +1,13 @@
 import MediaControlBar from '@/components/media-control-bar';
 import { VideoPanel } from '@/components/video-panel';
-import { Context } from '@/context';
+import useGlobalStore from '@/context/global-context';
 import SettingPanel from '@/pages/setting/setting-panel';
+import { MeetingContextType } from '@/types/meeting';
 import useMediaStream from '@/utils/use-media-stream';
 import useSpeakerStream from '@/utils/use-speaker-stream';
 import { Dialog } from '@headlessui/react';
 import { Cog8ToothIcon } from '@heroicons/react/24/solid';
-import { ReactNode, useContext, useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 // const maxHeight = 75;
 // const maxWidth = (maxHeight / 2) * aspRange[1];
@@ -14,46 +15,35 @@ import { ReactNode, useContext, useState } from 'react';
 const MeetConfigLayout = ({
   titleBar,
   configForm,
+  meetingContext,
 }: {
   titleBar: ReactNode;
   configForm: ReactNode;
+  meetingContext: MeetingContextType;
 }) => {
-  const { state } = useContext(Context);
+  const state = useGlobalStore((d) => d);
   const [showSetting, setShowSetting] = useState(false);
 
-  const [
-    selectedMicrophoneLabel,
-    setSelectedMicrophoneLabel,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _,
-    enableMicrophoneStream,
-    setEnableMicrophoneStream,
-  ] = useMediaStream(
-    state.user.defaultMic || '',
+  useMediaStream(
+    meetingContext.meetingDeviceState.micLabel,
+    meetingContext.setMeetingDeviceState.setMicLabel,
+    meetingContext.meetingDeviceState.enableMic,
     'audio',
-    'microphone',
-    state.user.defaultMic !== '' && state.user.autoEnableMic
+    'microphone'
   );
 
   // never need audio stream (because it just a testing stream, not a real stream)
-  const [enableSpeaker, setEnableSpeaker] = useState(
-    state.user.defaultSpeaker !== '' && state.user.autoEnableSpeaker
-  );
-  const [selectedSpeakerLabel, setSelectedSpeakerLabel] = useSpeakerStream(
-    state.user.defaultSpeaker || ''
+  useSpeakerStream(
+    meetingContext.meetingDeviceState.speakerLabel,
+    meetingContext.setMeetingDeviceState.setSpeakerLabel
   );
 
-  const [
-    selectedCameraLabel,
-    setSelectedCameraLabel,
-    videoStream,
-    enableCamera,
-    setEnableCameraStream,
-  ] = useMediaStream(
-    state.user.defaultCamera || '',
+  const [videoStream] = useMediaStream(
+    meetingContext.meetingDeviceState.cameraLabel,
+    meetingContext.setMeetingDeviceState.setCameraLabel,
+    meetingContext.meetingDeviceState.enableCamera,
     'video',
-    'camera',
-    state.user.defaultCamera !== '' && state.user.autoEnableCamera
+    'camera'
   );
 
   return (
@@ -75,26 +65,17 @@ const MeetConfigLayout = ({
           <VideoPanel
             user={state.user}
             mirrroCamera={state.user.mirrorCamera}
-            camStream={enableCamera ? videoStream : null}
+            camStream={
+              meetingContext.meetingDeviceState.enableCamera
+                ? videoStream
+                : null
+            }
             screenStream={null}
             expandCamera={state.user.expandCamera}
             limitHeight
           />
           <div className="absolute bottom-4 flex w-full items-center justify-center gap-4 overflow-x-clip">
-            <MediaControlBar
-              isCameraEnabled={enableCamera}
-              setCameraEnable={setEnableCameraStream}
-              selectedCameraLabel={selectedCameraLabel}
-              setSelectedCameraLabel={setSelectedCameraLabel}
-              isMicrophoneEnabled={enableMicrophoneStream}
-              setMicrophoneEnable={setEnableMicrophoneStream}
-              selectedMicrophoneLabel={selectedMicrophoneLabel}
-              setSelectedMicrophoneLabel={setSelectedMicrophoneLabel}
-              isSpeakerEnabled={enableSpeaker}
-              setSpeakerEnable={setEnableSpeaker}
-              setSelectedSpeakerLabel={setSelectedSpeakerLabel}
-              selectedSpeakerLabel={selectedSpeakerLabel}
-            />
+            <MediaControlBar meetingContext={meetingContext} />
             <button
               className="btn btn-gray-glass"
               onClick={() => {

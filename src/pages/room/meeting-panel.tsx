@@ -1,46 +1,31 @@
 import { VideoPanel } from '@/components/video-panel';
 import { useVideoPanelSize } from '@/utils/use-panel-size';
-import { useContext, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useMediaStream from '@/utils/use-media-stream';
-import { Context } from '@/context';
+import useGlobalStore from '@/context/global-context';
 import useSpeakerStream from '@/utils/use-speaker-stream';
 import useScreenshareStream from '@/utils/use-screenshare-stream';
 import MeetingControlBar from './meeting-control-bar';
+import useMeetingStore from '@/context/meeting-context';
 
 const MeetingPanel: React.FC<{
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
 }> = ({ setShowUserPanel }) => {
-  const { state } = useContext(Context);
-
-  // participant
-  const [itemCount, setItemCount] = useState(1);
-  const [videoPanelRef, videoPanelSize] = useVideoPanelSize(itemCount);
-  const itemLayout = new Array(videoPanelSize.row)
-    .fill(0)
-    .map((_, row) =>
-      Math.min(itemCount - row * videoPanelSize.col, videoPanelSize.col)
-    );
+  const state = useGlobalStore((d) => d);
+  const meetingContext = useMeetingStore((d) => d);
 
   // Audio
-  const [
-    selectedMicrophoneLabel,
-    setSelectedMicrophoneLabel,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _,
-    enableMicrophoneStream,
-    setEnableMicrophoneStream,
-  ] = useMediaStream(
-    state.user.defaultMic || '',
+  useMediaStream(
+    meetingContext.meetingDeviceState.micLabel,
+    meetingContext.setMeetingDeviceState.setMicLabel,
+    meetingContext.meetingDeviceState.enableMic,
     'audio',
-    'microphone',
-    state.user.defaultMic !== '' && state.user.autoEnableMic
+    'microphone'
   );
 
-  const [enableSpeaker, setEnableSpeaker] = useState(
-    state.user.defaultSpeaker !== '' && state.user.autoEnableSpeaker
-  );
-  const [selectedSpeakerLabel, setSelectedSpeakerLabel] = useSpeakerStream(
-    state.user.defaultSpeaker || ''
+  useSpeakerStream(
+    meetingContext.meetingDeviceState.speakerLabel,
+    meetingContext.setMeetingDeviceState.setSpeakerLabel
   );
 
   // Video
@@ -48,22 +33,82 @@ const MeetingPanel: React.FC<{
     screenShareStream,
     enableScreenShareStream,
     setEnableScreenShareStream,
-    enableScreenShareAudio,
-    setEnableScreenShareAudio,
+    // enableScreenShareAudio,
+    // setEnableScreenShareAudio,
   ] = useScreenshareStream();
 
-  const [
-    selectedCameraLabel,
-    setSelectedCameraLabel,
-    videoStream,
-    enableCamera,
-    setEnableCameraStream,
-  ] = useMediaStream(
-    state.user.defaultCamera || '',
+  const [videoStream] = useMediaStream(
+    meetingContext.meetingDeviceState.cameraLabel,
+    meetingContext.setMeetingDeviceState.setCameraLabel,
+    meetingContext.meetingDeviceState.enableCamera,
     'video',
-    'camera',
-    state.user.defaultCamera !== '' && state.user.autoEnableCamera
+    'camera'
   );
+
+  // participant
+  const itemCount = useMemo(
+    () =>
+      meetingContext.meetingState.participants.length +
+      (enableScreenShareStream ? 1 : 0),
+    [meetingContext.meetingState.participants, enableScreenShareStream]
+  );
+  const [videoPanelRef, videoPanelSize] = useVideoPanelSize(itemCount);
+  const [userPanelConfigArr, setUsePanelConfigArr] = useState<
+    {
+      user: Pick<UserInfo, 'name' | 'avatar'>;
+      camStream: MediaStream | null;
+      screenStream: MediaStream | null;
+      mirrroCamera: boolean;
+      expandCamera: boolean;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    const res = [];
+    res.push({
+      user: {
+        name: meetingContext.meeetingUserName,
+        avatar: state.user.avatar,
+      },
+      camStream: videoStream,
+      screenStream: null,
+      mirrroCamera: state.user.mirrorCamera,
+      expandCamera: state.user.expandCamera,
+    });
+    if (enableScreenShareStream) {
+      res.push({
+        user: {
+          name: meetingContext.meeetingUserName,
+          avatar: state.user.avatar,
+        },
+        camStream: null,
+        screenStream: screenShareStream,
+        mirrroCamera: state.user.mirrorCamera,
+        expandCamera: state.user.expandCamera,
+      });
+    }
+    meetingContext.meetingState.participants.forEach((participant, i) => {
+      if (i === 0) return;
+      res.push({
+        user: {
+          name: participant.name,
+          avatar: participant.avatar,
+        },
+        camStream: null,
+        screenStream: null,
+        mirrroCamera: state.user.mirrorCamera,
+        expandCamera: state.user.expandCamera,
+      });
+    });
+    console.log(JSON.stringify(res, null, 2));
+    setUsePanelConfigArr(res);
+  }, [
+    itemCount,
+    state.user,
+    meetingContext.meetingDeviceState.enableCamera,
+    screenShareStream,
+    videoStream,
+  ]);
 
   return (
     <>
@@ -71,57 +116,49 @@ const MeetingPanel: React.FC<{
         ref={videoPanelRef}
         className="flex flex-grow flex-col items-center justify-center gap-4 overflow-hidden rounded-lg"
       >
-        {itemLayout.map((col, row) => (
+        {Array.from({ length: videoPanelSize.row }).map((_, rowIndex) => (
           <div
-            key={row}
+            key={rowIndex}
             className="flex flex-nowrap content-center items-center justify-center gap-4 overflow-hidden rounded-lg"
           >
-            {new Array(col).fill(0).map((_, index) => (
-              <div
-                key={`${row} ${index}`}
-                style={{
-                  width:
-                    videoPanelSize.width -
-                    ((videoPanelSize.col + 1) * 16) / videoPanelSize.col,
-                  height:
-                    videoPanelSize.height -
-                    ((videoPanelSize.row + 1) * 16) / videoPanelSize.row,
-                }}
-                className="flex-shrink-0 overflow-hidden rounded-lg"
-              >
-                <VideoPanel
-                  user={{
-                    name: 'Kairui liu',
-                    avatar: null,
+            {Array.from({ length: videoPanelSize.col }).map((_, colIndex) => {
+              const panelIndex = rowIndex * videoPanelSize.col + colIndex;
+              if (panelIndex >= userPanelConfigArr.length) return null;
+              const panelConfig = userPanelConfigArr[panelIndex];
+
+              console.log('renderiong panel', panelIndex, panelConfig);
+
+              return (
+                <div
+                  key={`${rowIndex} ${colIndex}`}
+                  style={{
+                    width:
+                      videoPanelSize.width -
+                      ((videoPanelSize.col + 1) * 16) / videoPanelSize.col,
+                    height:
+                      videoPanelSize.height -
+                      ((videoPanelSize.row + 1) * 16) / videoPanelSize.row,
                   }}
-                  camStream={videoStream}
-                  screenStream={screenShareStream}
-                  fixAvatarSize={
-                    Math.min(videoPanelSize.width, videoPanelSize.height) / 2 ||
-                    32
-                  }
-                  mirrroCamera={state.user.mirrorCamera}
-                  expandCamera={state.user.expandCamera}
-                />
-              </div>
-            ))}
+                  className="flex-shrink-0 overflow-hidden rounded-lg"
+                >
+                  <VideoPanel
+                    user={panelConfig.user}
+                    camStream={panelConfig.camStream}
+                    screenStream={panelConfig.screenStream}
+                    fixAvatarSize={
+                      Math.min(videoPanelSize.width, videoPanelSize.height) /
+                        2 || 32
+                    }
+                    mirrroCamera={panelConfig.mirrroCamera}
+                    expandCamera={panelConfig.expandCamera}
+                  />
+                </div>
+              );
+            })}
           </div>
         ))}
       </section>
       <MeetingControlBar
-        setItemCount={setItemCount}
-        enableCamera={enableCamera}
-        setEnableCameraStream={setEnableCameraStream}
-        selectedCameraLabel={selectedCameraLabel}
-        setSelectedCameraLabel={setSelectedCameraLabel}
-        enableMicrophoneStream={enableMicrophoneStream}
-        setEnableMicrophoneStream={setEnableMicrophoneStream}
-        selectedMicrophoneLabel={selectedMicrophoneLabel}
-        setSelectedMicrophoneLabel={setSelectedMicrophoneLabel}
-        enableSpeaker={enableSpeaker}
-        setEnableSpeaker={setEnableSpeaker}
-        setSelectedSpeakerLabel={setSelectedSpeakerLabel}
-        selectedSpeakerLabel={selectedSpeakerLabel}
         setEnableScreenShareStream={setEnableScreenShareStream}
         setShowUserPanel={setShowUserPanel}
       ></MeetingControlBar>

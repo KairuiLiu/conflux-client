@@ -1,19 +1,16 @@
-import { Context } from '@/context';
+import useGlobalStore from '@/context/global-context';
 import { refreshMediaDevice } from '@/utils/media-devices';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import testSound from '@/assets/Bluestone_Alley_clip.mp3';
 import testSoundFull from '@/assets/Bluestone_Alley.mp3';
 
 const useSpeakerStream = (
-  defauleSpeakerLabel: string
-): [
-  string,
-  React.Dispatch<React.SetStateAction<string>>,
-  HTMLAudioElement | undefined,
-  (full?: boolean) => void,
-] => {
-  const { state, setState } = useContext(Context);
-  const [speakerLabel, setSpeakerLabel] = useState(defauleSpeakerLabel);
+  speakerLabel: string,
+  setSpeakerLabel: (speakerLabel: string) => void
+): [HTMLAudioElement | undefined, (full?: boolean) => void] => {
+  const state = useGlobalStore();
+  const setState = useGlobalStore.setState;
+
   const [audioElementAnylist, setAudioElementAnylist] =
     useState<HTMLAudioElement>();
   const [audioElement, setAudioElement] = useState<HTMLAudioElement>();
@@ -41,6 +38,7 @@ const useSpeakerStream = (
         if (full) element.src = testSoundFull;
         else element.src = testSound;
         try {
+          // @ts-expect-error: Property 'setSinkId' does not exist on type 'HTMLAudioElement'.
           await element.setSinkId(speaker.deviceId);
           element.play();
           setElem(element);
@@ -97,12 +95,7 @@ const useSpeakerStream = (
 
   useEffect(() => {}, []);
 
-  return [
-    speakerLabel,
-    setSpeakerLabel,
-    audioElementAnylist,
-    speakerTestCallback,
-  ];
+  return [audioElementAnylist, speakerTestCallback];
 };
 
 export default useSpeakerStream;

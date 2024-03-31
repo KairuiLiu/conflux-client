@@ -5,7 +5,6 @@ export function initState(): StateType {
   const localStorageStateParsed =
     localStorageState && JSON.parse(localStorageState);
   const uuid = uuidv4();
-
   return {
     user: localStorageStateParsed?.user || {
       uuid: uuid,

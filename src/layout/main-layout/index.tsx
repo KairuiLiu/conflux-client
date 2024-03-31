@@ -1,12 +1,11 @@
 import { Outlet } from 'react-router-dom';
 import LogoColored from '@/assets/logo_color.svg?react';
-import { useContext } from 'react';
-import { Context } from '@/context';
 import Avatar from '@/components/avatar';
 import { Link } from 'react-router-dom';
+import useGlobalStore from '@/context/global-context';
 
 function MainLayout() {
-  const { state } = useContext(Context);
+  const state = useGlobalStore((d) => d);
 
   return (
     <>

@@ -1,4 +1,5 @@
 interface ExitInfo {
   reason: 'exit' | 'finish';
-  meetingState?: MeetingState;
+  roomId: string;
+  userName: string;
 }

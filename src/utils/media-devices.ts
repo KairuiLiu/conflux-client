@@ -46,8 +46,8 @@ function isDeviceChanged(
 
 export async function fetchMediaDevice(
   type: 'audio' | 'video',
-  setState: React.Dispatch<React.SetStateAction<StateType>>
-) {
+  setState: (v: (state: StateType) => StateType) => void
+  ) {
   const newDevices = await navigator.mediaDevices.enumerateDevices();
   const newDevicesInfo: DevicesList = {
     camera: newDevices.filter(
@@ -61,7 +61,7 @@ export async function fetchMediaDevice(
     ),
   };
 
-  setState((prevState) => {
+  setState((prevState:StateType) => {
     if (
       type === 'video' &&
       isDeviceChanged(prevState.mediaDiveces.camera, newDevicesInfo.camera)
@@ -96,9 +96,9 @@ export async function fetchMediaDevice(
 
 export async function refreshMediaDevice(
   type: 'audio' | 'video',
-  setContext: React.Dispatch<React.SetStateAction<StateType>>
+  setState: (v: (state: StateType) => StateType) => void
 ) {
   const granted = await checkPermission(type);
   if (!granted) await requestPermission(type);
-  fetchMediaDevice(type, setContext);
+  fetchMediaDevice(type, setState);
 }

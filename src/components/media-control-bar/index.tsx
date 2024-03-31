@@ -8,61 +8,40 @@ import {
   VideoCameraSlashIcon,
 } from '@heroicons/react/24/solid';
 import MicroPhoneMuteIcon from '@/assets/MicrophoneMuteIcon.svg?react';
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment } from 'react';
 import { ChevronUpIcon } from '@heroicons/react/24/outline';
-import { Context } from '@/context';
 import { Listbox, Transition } from '@headlessui/react';
+import { MeetingContextType } from '@/types/meeting';
+import useGlobalStore from '@/context/global-context';
 
 const MediaControlBar: React.FC<{
-  selectedCameraLabel: string;
-  setSelectedCameraLabel: React.Dispatch<React.SetStateAction<string>>;
-  selectedMicrophoneLabel: string;
-  setSelectedMicrophoneLabel: React.Dispatch<React.SetStateAction<string>>;
-  selectedSpeakerLabel: string;
-  setSelectedSpeakerLabel: React.Dispatch<React.SetStateAction<string>>;
-  isMicrophoneEnabled: boolean;
-  isSpeakerEnabled: boolean;
-  isCameraEnabled: boolean;
-  setCameraEnable: React.Dispatch<React.SetStateAction<boolean>>;
-  setMicrophoneEnable: React.Dispatch<React.SetStateAction<boolean>>;
-  setSpeakerEnable: React.Dispatch<React.SetStateAction<boolean>>;
+  meetingContext: MeetingContextType;
   iconColor?: string;
   optionsAside?: boolean;
-}> = ({
-  selectedCameraLabel,
-  setSelectedCameraLabel,
-  selectedMicrophoneLabel,
-  setSelectedMicrophoneLabel,
-  selectedSpeakerLabel,
-  setSelectedSpeakerLabel,
-  isCameraEnabled,
-  isMicrophoneEnabled,
-  isSpeakerEnabled,
-  setCameraEnable,
-  setMicrophoneEnable,
-  setSpeakerEnable,
-  iconColor = 'text-white',
-  optionsAside = true,
-}) => {
-  const { state } = useContext(Context);
+}> = ({ meetingContext, iconColor = 'text-white', optionsAside = true }) => {
+  const state = useGlobalStore((d) => d);
 
   return (
     <>
       <div className="relative flex flex-nowrap overflow-y-visible">
         <button
           className="btn btn-gray-glass flex-shrink-0 rounded-r-none"
-          onClick={() => setMicrophoneEnable((d) => !d)}
+          onClick={() =>
+            meetingContext.setMeetingDeviceState.setEnableMic(
+              !meetingContext.meetingDeviceState.enableMic
+            )
+          }
         >
-          {isMicrophoneEnabled ? (
+          {meetingContext.meetingDeviceState.enableMic ? (
             <MicrophoneIcon className={`h-4 w-4 ${iconColor}`} />
           ) : (
             <MicroPhoneMuteIcon className="h-4 w-4 text-red-500" />
           )}
         </button>
         <Listbox
-          value={selectedMicrophoneLabel}
+          value={meetingContext.meetingDeviceState.micLabel}
           onChange={(d) => {
-            setSelectedMicrophoneLabel(d);
+            meetingContext.setMeetingDeviceState.setMicLabel(d);
           }}
         >
           <div className="w-full flex-shrink flex-grow">
@@ -135,18 +114,22 @@ const MediaControlBar: React.FC<{
       <div className="relative flex flex-nowrap overflow-y-visible">
         <button
           className="btn btn-gray-glass flex-shrink-0 rounded-r-none"
-          onClick={() => setCameraEnable((d) => !d)}
+          onClick={() =>
+            meetingContext.setMeetingDeviceState.setEnableCamera(
+              !meetingContext.meetingDeviceState.enableCamera
+            )
+          }
         >
-          {isCameraEnabled ? (
+          {meetingContext.meetingDeviceState.enableCamera ? (
             <VideoCameraIcon className={`h-4 w-4 ${iconColor}`} />
           ) : (
             <VideoCameraSlashIcon className="h-4 w-4 text-red-500" />
           )}
         </button>
         <Listbox
-          value={selectedCameraLabel}
+          value={meetingContext.meetingDeviceState.cameraLabel}
           onChange={(d) => {
-            setSelectedCameraLabel(d);
+            meetingContext.setMeetingDeviceState.setCameraLabel(d);
           }}
         >
           <div className="w-full flex-shrink flex-grow">
@@ -219,18 +202,22 @@ const MediaControlBar: React.FC<{
       <div className="relative flex flex-nowrap overflow-y-visible">
         <button
           className="btn btn-gray-glass flex-shrink-0 rounded-r-none"
-          onClick={() => setSpeakerEnable((d) => !d)}
+          onClick={() =>
+            meetingContext.setMeetingDeviceState.setEnableSpeaker(
+              !meetingContext.meetingDeviceState.enableSpeaker
+            )
+          }
         >
-          {isSpeakerEnabled ? (
+          {meetingContext.meetingDeviceState.enableSpeaker ? (
             <SpeakerWaveIcon className={`h-4 w-4 ${iconColor}`} />
           ) : (
             <SpeakerXMarkIcon className="h-4 w-4 text-red-500" />
           )}
         </button>
         <Listbox
-          value={selectedSpeakerLabel}
+          value={meetingContext.meetingDeviceState.speakerLabel}
           onChange={(d) => {
-            setSelectedSpeakerLabel(d);
+            meetingContext.setMeetingDeviceState.setSpeakerLabel(d);
           }}
         >
           <div className="w-full flex-shrink flex-grow">
