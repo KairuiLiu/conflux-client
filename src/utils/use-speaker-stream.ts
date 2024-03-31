@@ -38,7 +38,7 @@ const useSpeakerStream = (
         if (full) element.src = testSoundFull;
         else element.src = testSound;
         try {
-          // @ts-expect-error: Property 'setSinkId' does not exist on type 'HTMLAudioElement'.
+          // @ts-ignore
           await element.setSinkId(speaker.deviceId);
           element.play();
           setElem(element);
