@@ -4,7 +4,6 @@ import useGlobalStore from '@/context/global-context';
 import SettingPanel from '@/pages/setting/setting-panel';
 import { MeetingContextType } from '@/types/meeting';
 import useMediaStream from '@/utils/use-media-stream';
-import useSpeakerStream from '@/utils/use-speaker-stream';
 import { Dialog } from '@headlessui/react';
 import { Cog8ToothIcon } from '@heroicons/react/24/solid';
 import { ReactNode, useState } from 'react';
@@ -33,10 +32,10 @@ const MeetConfigLayout = ({
   );
 
   // never need audio stream (because it just a testing stream, not a real stream)
-  useSpeakerStream(
-    meetingContext.meetingDeviceState.speakerLabel,
-    meetingContext.setMeetingDeviceState.setSpeakerLabel
-  );
+  // useSpeakerStream(
+  //   meetingContext.meetingDeviceState.speakerLabel,
+  //   meetingContext.setMeetingDeviceState.setSpeakerLabel
+  // );
 
   const [videoStream] = useMediaStream(
     meetingContext.meetingDeviceState.cameraLabel,

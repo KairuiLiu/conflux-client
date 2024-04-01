@@ -3,10 +3,10 @@ import { useVideoPanelSize } from '@/utils/use-panel-size';
 import { useEffect, useMemo, useState } from 'react';
 import useMediaStream from '@/utils/use-media-stream';
 import useGlobalStore from '@/context/global-context';
-import useSpeakerStream from '@/utils/use-speaker-stream';
 import useScreenshareStream from '@/utils/use-screenshare-stream';
 import MeetingControlBar from './meeting-control-bar';
 import useMeetingStore from '@/context/meeting-context';
+import { ScreenShareControlPanel } from '@/components/screen-share-control-panel';
 
 const MeetingPanel: React.FC<{
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,18 +23,18 @@ const MeetingPanel: React.FC<{
     'microphone'
   );
 
-  useSpeakerStream(
-    meetingContext.meetingDeviceState.speakerLabel,
-    meetingContext.setMeetingDeviceState.setSpeakerLabel
-  );
+  // useSpeakerStream(
+  //   meetingContext.meetingDeviceState.speakerLabel,
+  //   meetingContext.setMeetingDeviceState.setSpeakerLabel
+  // );
 
   // Video
   const [
     screenShareStream,
     enableScreenShareStream,
     setEnableScreenShareStream,
-    // enableScreenShareAudio,
-    // setEnableScreenShareAudio,
+    enableScreenShareAudio,
+    setEnableScreenShareAudio,
   ] = useScreenshareStream();
 
   const [videoStream] = useMediaStream(
@@ -49,17 +49,18 @@ const MeetingPanel: React.FC<{
   const itemCount = useMemo(
     () =>
       meetingContext.meetingState.participants.length +
-      (enableScreenShareStream ? 1 : 0),
+      (enableScreenShareStream ? 2 : 0),
     [meetingContext.meetingState.participants, enableScreenShareStream]
   );
   const [videoPanelRef, videoPanelSize] = useVideoPanelSize(itemCount);
   const [userPanelConfigArr, setUsePanelConfigArr] = useState<
     {
-      user: Pick<UserInfo, 'name' | 'avatar'>;
-      camStream: MediaStream | null;
-      screenStream: MediaStream | null;
-      mirrroCamera: boolean;
-      expandCamera: boolean;
+      user?: Pick<UserInfo, 'name' | 'avatar'>;
+      camStream?: MediaStream | null;
+      screenStream?: MediaStream | null;
+      mirrroCamera?: boolean;
+      expandCamera?: boolean;
+      isScreenShareControlPanel?: boolean;
     }[]
   >([]);
 
@@ -86,6 +87,9 @@ const MeetingPanel: React.FC<{
         mirrroCamera: state.user.mirrorCamera,
         expandCamera: state.user.expandCamera,
       });
+      res.push({
+        isScreenShareControlPanel: true,
+      });
     }
     meetingContext.meetingState.participants.forEach((participant, i) => {
       if (i === 0) return;
@@ -100,7 +104,6 @@ const MeetingPanel: React.FC<{
         expandCamera: state.user.expandCamera,
       });
     });
-    console.log(JSON.stringify(res, null, 2));
     setUsePanelConfigArr(res);
   }, [
     itemCount,
@@ -126,8 +129,6 @@ const MeetingPanel: React.FC<{
               if (panelIndex >= userPanelConfigArr.length) return null;
               const panelConfig = userPanelConfigArr[panelIndex];
 
-              console.log('renderiong panel', panelIndex, panelConfig);
-
               return (
                 <div
                   key={`${rowIndex} ${colIndex}`}
@@ -141,17 +142,27 @@ const MeetingPanel: React.FC<{
                   }}
                   className="flex-shrink-0 overflow-hidden rounded-lg"
                 >
-                  <VideoPanel
-                    user={panelConfig.user}
-                    camStream={panelConfig.camStream}
-                    screenStream={panelConfig.screenStream}
-                    fixAvatarSize={
-                      Math.min(videoPanelSize.width, videoPanelSize.height) /
-                        2 || 32
-                    }
-                    mirrroCamera={panelConfig.mirrroCamera}
-                    expandCamera={panelConfig.expandCamera}
-                  />
+                  {panelConfig.isScreenShareControlPanel ? (
+                    <ScreenShareControlPanel
+                      handleStopSharing={() =>
+                        setEnableScreenShareStream(false)
+                      }
+                      enableAudio={enableScreenShareAudio}
+                      setEnableAudio={setEnableScreenShareAudio}
+                    />
+                  ) : (
+                    <VideoPanel
+                      user={panelConfig.user!}
+                      camStream={panelConfig.camStream!}
+                      screenStream={panelConfig.screenStream!}
+                      fixAvatarSize={
+                        Math.min(videoPanelSize.width, videoPanelSize.height) /
+                          2 || 32
+                      }
+                      mirrroCamera={panelConfig.mirrroCamera!}
+                      expandCamera={panelConfig.expandCamera!}
+                    />
+                  )}
                 </div>
               );
             })}

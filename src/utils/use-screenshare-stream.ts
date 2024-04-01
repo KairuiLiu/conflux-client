@@ -44,9 +44,14 @@ const useScreenshareStream = (): [
       });
 
     return () => {
-      stopStream(stream);
-      setStream(null);
-      setEnableAudio(false);
+      if(!enableStream){
+        stopStream(stream);
+        setStream(null);
+        setEnableAudio(false);
+      }else{
+        stopStream(stream);
+        setStream(null);
+      }
     };
   }, [enableStream, enableAudio]);
 

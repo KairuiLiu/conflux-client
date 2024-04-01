@@ -47,14 +47,16 @@ const MeetingControlBar: React.FC<{
             meetingContext={meetingContext}
             optionsAside={false}
           />
-          <button
-            className="btn btn-gray-glass flex-shrink-0"
-            onClick={() => {
-              setEnableScreenShareStream((d) => !d);
-            }}
-          >
-            <WindowIcon className="h-4 w-4 text-gray-600" />
-          </button>
+          {navigator.mediaDevices.getDisplayMedia instanceof Function && (
+            <button
+              className="btn btn-gray-glass flex-shrink-0"
+              onClick={() => {
+                setEnableScreenShareStream((d) => !d);
+              }}
+            >
+              <WindowIcon className="h-4 w-4 text-gray-600" />
+            </button>
+          )}
           <button
             className="btn btn-gray-glass flex-shrink-0"
             onClick={() => {

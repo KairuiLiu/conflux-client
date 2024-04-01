@@ -1,6 +1,6 @@
 import useGlobalStore from '@/context/global-context';
 import { Listbox, Switch, Transition } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/solid';
 import MicrophoneVolume from '@/components/microphone-volume';
 import { VideoPanel } from '@/components/video-panel';
@@ -11,6 +11,10 @@ import useSpeakerStream from '@/utils/use-speaker-stream';
 export default function MeetSetting() {
   const state = useGlobalStore((d) => d);
   const setState = useGlobalStore.setState;
+  const supportSetSinkId = useMemo(
+    () => !!(HTMLAudioElement.prototype.setSinkId instanceof Function),
+    []
+  );
 
   const [musicLover, setMusicLover] = useState(false);
 
@@ -160,88 +164,92 @@ export default function MeetSetting() {
           <span>Fill container with video</span>
         </div>
         <div className="grid flex-grow grid-cols-[min-content_minmax(0px,_1fr)_min-content] items-center gap-3 p-2">
-          <p className="flex items-center">Speaker</p>
-          <div className="flex">
-            <Listbox
-              value={selectedSpeakerLabel}
-              onChange={(d) => {
-                setSelectedSpeakerLabel(d);
-              }}
-            >
-              <div className="w-full flex-shrink flex-grow">
-                <Listbox.Button className="list-button">
-                  <span className="block truncate">
-                    {state.mediaDiveces.speaker.find(
-                      (speaker) => speaker.label === selectedSpeakerLabel
-                    )?.label ||
-                      (state.mediaDiveces.speaker.length
-                        ? 'Select a speaker'
-                        : 'No permission / no speaker found')}
-                  </span>
-                  <span className="list-tailing-icon">
-                    <ChevronUpDownIcon
-                      className="h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </Listbox.Button>
-
-                <Transition
-                  as={Fragment}
-                  leave="transition ease-in duration-100"
-                  leaveFrom="opacity-100"
-                  leaveTo="opacity-0"
+          {supportSetSinkId && (
+            <>
+              <p className="flex items-center">Speaker</p>
+              <div className="flex">
+                <Listbox
+                  value={selectedSpeakerLabel}
+                  onChange={(d) => {
+                    setSelectedSpeakerLabel(d);
+                  }}
                 >
-                  <Listbox.Options className="list-options">
-                    {state.mediaDiveces.speaker.map((speaker) => (
-                      <Listbox.Option
-                        key={speaker.label}
-                        value={speaker.label}
-                        className={({ active }) =>
-                          `list-item ${active ? 'list-item-active' : ''}`
-                        }
-                      >
-                        {({ selected }) => (
-                          <>
-                            <span
-                              className={`block truncate ${
-                                selected ? 'font-medium' : 'font-normal'
-                              }`}
-                            >
-                              {speaker.label}
-                            </span>
-                            {selected ? (
-                              <span className="list-prefix-icon">
-                                <CheckIcon
-                                  className="h-5 w-5"
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            ) : null}
-                          </>
-                        )}
-                      </Listbox.Option>
-                    ))}
-                  </Listbox.Options>
-                </Transition>
+                  <div className="w-full flex-shrink flex-grow">
+                    <Listbox.Button className="list-button">
+                      <span className="block truncate">
+                        {state.mediaDiveces.speaker.find(
+                          (speaker) => speaker.label === selectedSpeakerLabel
+                        )?.label ||
+                          (state.mediaDiveces.speaker.length
+                            ? 'Select a speaker'
+                            : 'No permission / no speaker found')}
+                      </span>
+                      <span className="list-tailing-icon">
+                        <ChevronUpDownIcon
+                          className="h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </Listbox.Button>
+
+                    <Transition
+                      as={Fragment}
+                      leave="transition ease-in duration-100"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                    >
+                      <Listbox.Options className="list-options">
+                        {state.mediaDiveces.speaker.map((speaker) => (
+                          <Listbox.Option
+                            key={speaker.label}
+                            value={speaker.label}
+                            className={({ active }) =>
+                              `list-item ${active ? 'list-item-active' : ''}`
+                            }
+                          >
+                            {({ selected }) => (
+                              <>
+                                <span
+                                  className={`block truncate ${
+                                    selected ? 'font-medium' : 'font-normal'
+                                  }`}
+                                >
+                                  {speaker.label}
+                                </span>
+                                {selected ? (
+                                  <span className="list-prefix-icon">
+                                    <CheckIcon
+                                      className="h-5 w-5"
+                                      aria-hidden="true"
+                                    />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </Transition>
+                  </div>
+                </Listbox>
               </div>
-            </Listbox>
-          </div>
-          <button
-            className="btn btn-primary-outline flex-shrink-0 flex-grow-0 px-4 py-1"
-            onClick={() => {
-              handleSpeakerTest();
-            }}
-            onDoubleClick={() => {
-              setMusicLover(true);
-              handleSpeakerTest(true);
-            }}
-          >
-            {musicLover ? 'Enjoy!' : 'Test'}
-          </button>
-          <div />
-          <SpeakerVolume element={audioElementAnylist} relitive />
-          <div />
+              <button
+                className="btn btn-primary-outline flex-shrink-0 flex-grow-0 px-4 py-1"
+                onClick={() => {
+                  handleSpeakerTest();
+                }}
+                onDoubleClick={() => {
+                  setMusicLover(true);
+                  handleSpeakerTest(true);
+                }}
+              >
+                {musicLover ? 'Enjoy!' : 'Test'}
+              </button>
+              <div />
+              <SpeakerVolume element={audioElementAnylist} relitive />
+              <div />
+            </>
+          )}
 
           <p className="flex items-center">Microphone</p>
           <div className="flex">

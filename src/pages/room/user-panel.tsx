@@ -1,5 +1,5 @@
 import { Square2StackIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import UserItemCard from '../../components/user-item-card';
+import UserItemCard from '@/components/user-item-card';
 import useMeetingStore from '@/context/meeting-context';
 import { writeClipboard } from '@/utils/write-clipboard';
 import { genJoinInfo } from '@/utils/gen-join-info';
