@@ -13,8 +13,7 @@ function checkPermission(name: 'audio' | 'video') {
     return navigator.permissions
       .query({ name: permissionName as unknown as PermissionName })
       .then((permissionStatus) => permissionStatus.state === 'granted')
-      .catch((error) => {
-        console.error('An error occurred:', error);
+      .catch(() => {
         return navigator.mediaDevices
           .enumerateDevices()
           .then((devices) =>
@@ -47,7 +46,7 @@ function isDeviceChanged(
 export async function fetchMediaDevice(
   type: 'audio' | 'video',
   setState: (v: (state: StateType) => StateType) => void
-  ) {
+) {
   const newDevices = await navigator.mediaDevices.enumerateDevices();
   const newDevicesInfo: DevicesList = {
     camera: newDevices.filter(
@@ -61,7 +60,7 @@ export async function fetchMediaDevice(
     ),
   };
 
-  setState((prevState:StateType) => {
+  setState((prevState: StateType) => {
     if (
       type === 'video' &&
       isDeviceChanged(prevState.mediaDiveces.camera, newDevicesInfo.camera)

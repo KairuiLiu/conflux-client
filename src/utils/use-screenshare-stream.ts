@@ -37,18 +37,17 @@ const useScreenshareStream = (): [
           };
         });
       })
-      .catch((error) => {
-        console.error('Error getting screen sharing stream:', error);
+      .catch(() => {
         setEnableStream(false);
         setEnableAudio(false);
       });
 
     return () => {
-      if(!enableStream){
+      if (!enableStream) {
         stopStream(stream);
         setStream(null);
         setEnableAudio(false);
-      }else{
+      } else {
         stopStream(stream);
         setStream(null);
       }
