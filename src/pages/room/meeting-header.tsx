@@ -16,12 +16,12 @@ const MeetingHeader: React.FC = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
+      const timePast = meetingContext?.meetingState?.meetingStartTime
+        ? Date.now() - meetingContext?.meetingState?.meetingStartTime
+        : 0;
       setPastTime(
-        `${fillLeft(
-          `${Math.floor((Date.now() - meetingContext.meetingState.meetingStartTime) / 1000 / 60)}`,
-          2
-        )}:${fillLeft(
-          `${Math.floor(((Date.now() - meetingContext.meetingState.meetingStartTime) / 1000) % 60)}`,
+        `${fillLeft(`${Math.floor(timePast / 1000 / 60)}`, 2)}:${fillLeft(
+          `${Math.floor((timePast / 1000) % 60)}`,
           2
         )}`
       );
@@ -37,7 +37,7 @@ const MeetingHeader: React.FC = () => {
       <Menu as="div" className="relative inline-block text-left">
         <div>
           <Menu.Button className="btn btn-text flex items-center gap-1 px-1 py-0 font-normal ">
-            {meetingContext.meetingState.title}
+            {meetingContext?.meetingState?.title}
             <EllipsisHorizontalCircleIcon className="h-4 w-4" />
           </Menu.Button>
         </div>
@@ -53,15 +53,17 @@ const MeetingHeader: React.FC = () => {
           <Menu.Items className="l-0 felx absolute z-10 mt-2 w-min flex-col rounded-md bg-white text-base shadow-panel">
             <section className="p-4">
               <h3 className="pb-3 text-lg font-semibold">
-                {meetingContext.meetingState.title}
+                {meetingContext?.meetingState?.title || ''}
               </h3>
               <div className="grid grid-cols-[min-content_1fr] gap-3 whitespace-nowrap">
-                <div>Meeting ID</div>
+                <div className="flex  items-center">
+                  <span>Meeting ID</span>
+                </div>
                 <div className="flex  items-center gap-1">
                   <span>
-                    {meetingContext.meetingState.id
-                      .replace(/(.{1,3})/g, '$1 ')
-                      .trim()}
+                    {meetingContext?.meetingState?.id
+                      ?.replace(/(.{1,3})/g, '$1 ')
+                      ?.trim() || ''}
                   </span>
                   <button
                     className="btn btn-text -scale-x-100 p-1"
@@ -72,18 +74,23 @@ const MeetingHeader: React.FC = () => {
                     <Square2StackIcon className="h-4 w-4" />
                   </button>
                 </div>
-                <div>Organizer</div>
+                <div className="flex  items-center">
+                  <span>Organizer</span>
+                </div>
                 <div>{meetingContext.meetingState.organizer.name}</div>
-                <div>Meeting Link</div>
+                <div className="flex  items-center">
+                  <span>Meeting Link</span>
+                </div>
                 <div className="flex  items-center gap-1">
                   <span>
-                    conflux.liukairui.me/meet/{meetingContext.meetingState.id}
+                    {window.location.origin}/meet/
+                    {meetingContext.meetingState.id}
                   </span>
                   <button
                     className="btn btn-text -scale-x-100 p-1"
                     onClick={() => {
                       writeClipboard(
-                        `conflux.liukairui.me/meet/${meetingContext.meetingState.id}`
+                        `${window.location.origin}/meet/${meetingContext.meetingState.id}`
                       );
                     }}
                   >
@@ -98,8 +105,8 @@ const MeetingHeader: React.FC = () => {
                 onClick={() => {
                   writeClipboard(
                     genJoinInfo(
-                      meetingContext.meetingState.organizer.name,
-                      meetingContext.meetingState.title,
+                      meetingContext?.meetingState?.organizer?.name,
+                      meetingContext?.meetingState?.title || '',
                       meetingContext.meetingState.id
                     )
                   );

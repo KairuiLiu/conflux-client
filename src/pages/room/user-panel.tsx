@@ -29,9 +29,9 @@ const UserPanle: React.FC<{
         onClick={() => {
           writeClipboard(
             genJoinInfo(
-              meetingContext.meetingState.title,
-              meetingContext.meetingState.id,
-              meetingContext.meetingState.organizer.name
+              meetingContext.meetingState.organizer?.name,
+              meetingContext.meetingState.title || '',
+              meetingContext.meetingState.id
             )
           );
         }}

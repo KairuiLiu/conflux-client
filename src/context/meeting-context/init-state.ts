@@ -8,19 +8,28 @@ function initState(): MeetingContextState {
       id: '',
       title: `${globalState.user.name}'s Meeting`,
       meetingStartTime: 0,
-      organizer: null,
+      organizer: {
+        muid: '',
+        name: '',
+      },
       participants: [],
     },
     meetingDeviceState: {
-      enableCamera:
-        globalState.user.autoEnableCamera && !!globalState.user.defaultCamera,
-      cameraLabel: globalState.user.defaultCamera || '',
-      enableMic:
-        globalState.user.autoEnableMic && !!globalState.user.defaultMic,
-      micLabel: globalState.user.defaultMic || '',
-      enableSpeaker:
-        globalState.user.autoEnableSpeaker && !!globalState.user.defaultSpeaker,
-      speakerLabel: globalState.user.defaultSpeaker || '',
+      enableCamera: globalState.user.autoEnableCamera,
+      cameraLabel:
+        globalState.user.defaultCamera ||
+        globalState.mediaDiveces.camera?.[0]?.label ||
+        '',
+      enableMic: globalState.user.autoEnableMic,
+      micLabel:
+        globalState.user.defaultMic ||
+        globalState.mediaDiveces.microphone?.[0]?.label ||
+        '',
+      enableSpeaker: globalState.user.autoEnableSpeaker,
+      speakerLabel:
+        globalState.user.defaultSpeaker ||
+        globalState.mediaDiveces.speaker?.[0]?.label ||
+        '',
     },
     meeetingUserName: globalState.user.name,
   };

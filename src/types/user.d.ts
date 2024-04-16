@@ -1,7 +1,4 @@
-enum UserRole {
-  Host,
-  Participant,
-}
+type UserRole = 'HOST' | 'PARTICIPANT';
 
 interface UserInfoExchange {
   uuid: string;
@@ -25,4 +22,12 @@ interface UserInfo extends MeetingConfig {
   uuid: string;
   avatar: string?;
   name: string;
+}
+
+interface SiteConfig {
+  token: string;
+  COTURN_PASSWORD: string;
+  COTURN_PATH: string;
+  COTURN_USERNAME: string;
+  PEER_SERVER_PATH: string;
 }

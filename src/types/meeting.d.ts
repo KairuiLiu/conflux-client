@@ -2,9 +2,12 @@ import { UserInfo } from './user';
 
 interface MeetingState {
   id: string;
-  title: string;
-  meetingStartTime: number;
-  organizer: UserInfo;
+  title?: string;
+  meetingStartTime?: number;
+  organizer: {
+    muid: string;
+    name: string;
+  };
   participants: UserInfo[];
 }
 
@@ -12,7 +15,7 @@ interface SetMeetingState {
   setId: (id: string) => void;
   setTitle: (title: string) => void;
   setMeetingStartTime: (meetingStartTime: number) => void;
-  setOrganizer: (organizer: UserInfo) => void;
+  setOrganizer: (organizer: { muid: string; name: string }) => void;
   setParticipants: (participants: UserInfo[]) => void;
 }
 

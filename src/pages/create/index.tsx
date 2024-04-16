@@ -14,40 +14,33 @@ export default function Create() {
     meetingContext.resetMeetingContext();
   }, []);
 
-  function onCreate() {
-    /* TODO mock logic & toast */
-    meetingContext.setMeetingState.setId('123456789');
-    meetingContext.setMeetingState.setOrganizer({
-      id: state.user.uuid,
-      name: meetingContext.meeetingUserName,
-      avatar: state.user.avatar,
-    });
-    meetingContext.setMeetingState.setMeetingStartTime(Date.now());
-    meetingContext.setMeetingState.setParticipants([
-      {
-        id: state.user.uuid,
-        name: meetingContext.meeetingUserName,
-        avatar: state.user.avatar,
+  async function onCreate() {
+    fetch('/api/meeting', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${state.siteConfig.token}`,
       },
-    ]);
-    meetingContext.setMeetingState.setParticipants([
-      {
-        id: state.user.uuid,
-        name: state.user.name,
-        avatar: state.user.avatar,
-      },
-      {
-        id: '123456',
-        name: 'Mock Participant 1',
-        avatar: null,
-      },
-      {
-        id: '1234567',
-        name: 'Mock Participant 2',
-        avatar: null,
-      },
-    ]);
-    navigate(`/room/${123456789}`);
+      body: JSON.stringify({
+        organizer_name: meetingContext.meeetingUserName,
+        title: meetingContext.meetingState.title,
+      }),
+    })
+      .then((d) => d.json())
+      .then(({ code, data, msg }) => {
+        if (code) console.error('fetch token error', msg);
+        else {
+          meetingContext.setMeetingState.setOrganizer({
+            ...meetingContext.meetingState.organizer,
+            name: meetingContext.meeetingUserName,
+          });
+          meetingContext.setMeetingState.setId(`${data.id}`);
+          meetingContext.setMeetingState.setMeetingStartTime(Date.now());
+          // TODO init participants
+          navigate(`/room/${data.id}`);
+        }
+      })
+      .catch((e) => console.error(e));
   }
 
   useEffect(() => {

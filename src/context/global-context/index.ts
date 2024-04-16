@@ -6,7 +6,7 @@ import { initListener } from './init-listener';
 const useGlobalStore = create<StateType>()(
   persist(
     (set) => ({
-      ...initState(),
+      ...initState(set),
       setGlobalStore: set,
     }),
     {

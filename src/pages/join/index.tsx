@@ -16,37 +16,27 @@ export default function Join() {
   }, []);
 
   function onJoin() {
-    /* TODO mock logic & toast */
-    meetingContext.setMeetingState.setTitle(
-      `ID ${meetingContext.meetingState.id}'s Meeting`
-    );
-    meetingContext.setMeetingState.setOrganizer({
-      id: '123456',
-      name: 'Mock Organizer',
-      avatar: null,
-    });
-    meetingContext.setMeetingState.setParticipants([
-      {
-        id: state.user.uuid,
-        name: state.user.name,
-        avatar: state.user.avatar,
+    fetch(`/api/meeting?id=${meetingContext.meetingState.id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${state.siteConfig.token}`,
       },
-      {
-        id: '123456',
-        name: 'Mock Organizer',
-        avatar: null,
-      },
-      {
-        id: '1234567',
-        name: 'Mock Participant',
-        avatar: null,
-      },
-    ]);
-    meetingContext.setMeetingState.setMeetingStartTime(
-      Date.now() - 1000 * 5 * 60
-    );
-
-    navigate(`/room/${meetingContext.meetingState.id}`);
+    })
+      .then((d) => d.json())
+      .then(({ code, data, msg }) => {
+        if (code) console.error('error', msg);
+        else {
+          meetingContext.setMeetingState.setTitle(data.title);
+          meetingContext.setMeetingState.setOrganizer({
+            muid: data.organizer.muid,
+            name: data.organizer.name,
+          });
+          meetingContext.setMeetingState.setMeetingStartTime(data.start_time);
+          meetingContext.setMeetingState.setParticipants(data.participants); // todo
+          navigate(`/room/${data.id}`);
+        }
+      })
+      .catch((e) => console.error(e));
   }
 
   useEffect(() => {

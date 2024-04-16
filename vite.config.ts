@@ -8,7 +8,18 @@ export default defineConfig({
   plugins: [react(), svgr()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'), // 将 '@' 设置为 src 目录的别名
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:9000',
+        changeOrigin: true,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      // TODO coturn
     },
   },
 });

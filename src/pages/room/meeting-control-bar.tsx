@@ -29,7 +29,7 @@ const MeetingControlBar: React.FC<{
             onClick={() => {
               const uuid = v4();
               meetingContext.setMeetingState.setParticipants([
-                ...meetingContext.meetingState.participants,
+                ...(meetingContext?.meetingState?.participants || []),
                 {
                   id: uuid,
                   name: 'User_' + uuid.slice(0, 5),
@@ -98,8 +98,8 @@ const MeetingControlBar: React.FC<{
                     Leave Meeting
                   </button>
                 </Menu.Item>
-                {meetingContext.meeetingUserName ===
-                  meetingContext.meetingState.organizer.name && (
+                {meetingContext?.meeetingUserName ===
+                  meetingContext?.meetingState?.organizer?.name && (
                   <Menu.Item>
                     <button
                       className={'btn btn-danger-secondary-outline w-full'}

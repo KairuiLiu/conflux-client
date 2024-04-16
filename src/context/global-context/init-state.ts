@@ -1,18 +1,20 @@
 import { v4 as uuidv4 } from 'uuid';
 
-export function initState(): StateType {
+export function initState(
+  setState: (v: (state: StateType) => StateType) => void
+): StateType {
   const localStorageState = localStorage.getItem('state');
   const localStorageStateParsed =
-    localStorageState && JSON.parse(localStorageState);
+    localStorageState && JSON.parse(localStorageState)?.state;
   const uuid = uuidv4();
-  return {
+  const res = {
     user: localStorageStateParsed?.user || {
       uuid: uuid,
       avatar: null,
       name: `User_${uuid.slice(0, 8)}`,
-      autoEnableCamera: false,
+      autoEnableCamera: true,
       defaultCamera: null,
-      autoEnableMic: false,
+      autoEnableMic: true,
       defaultMic: null,
       autoEnableSpeaker: true,
       defaultSpeaker: null,
@@ -83,5 +85,30 @@ export function initState(): StateType {
         },
       },
     ],
-  };
+    siteConfig: {
+      token: '',
+      COTURN_PASSWORD: '',
+      COTURN_PATH: '',
+      COTURN_USERNAME: '',
+      PEER_SERVER_PATH: '',
+    },
+  } as StateType;
+  fetchConfig(res.user.uuid, setState);
+  return res;
+}
+
+function fetchConfig(
+  uuid: string,
+  setState: (v: (state: StateType) => StateType) => void
+) {
+  fetch(`/api/config?uuid=${uuid}`)
+    .then((d) => d.json())
+    .then((res) => {
+      if (res.code) console.error('fetch token error', res.msg);
+      else
+        setState((state) => ({
+          ...state,
+          siteConfig: res.data,
+        }));
+    });
 }

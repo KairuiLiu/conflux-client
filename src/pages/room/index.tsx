@@ -18,6 +18,7 @@ export default function Room() {
   }, [id, meetingContext.meetingState.id, navigator]);
 
   return (
+    // todo remove test
     meetingContext.meetingState.id === id && (
       <div className="flex h-dvh max-h-dvh flex-grow flex-col">
         <MeetingHeader />
