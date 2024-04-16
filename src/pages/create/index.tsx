@@ -46,7 +46,7 @@ export default function Create() {
   useEffect(() => {
     setCanCreate(
       meetingContext.meeetingUserName.length > 0 &&
-        meetingContext.meetingState.title.length > 0
+        meetingContext.meetingState.title!.length > 0
     );
   }, [meetingContext.meeetingUserName, meetingContext.meetingState.title]);
 
