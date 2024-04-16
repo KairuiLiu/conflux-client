@@ -1,12 +1,5 @@
 type UserRole = 'HOST' | 'PARTICIPANT';
 
-interface UserInfoExchange {
-  uuid: string;
-  avatar: string?;
-  name: string;
-  roll: UserRole;
-}
-
 interface MeetingConfig {
   autoEnableCamera: boolean;
   defaultCamera: string?;
@@ -22,6 +15,20 @@ interface UserInfo extends MeetingConfig {
   uuid: string;
   avatar: string?;
   name: string;
+}
+
+type ParticipantState = {
+  mic: boolean;
+  camera: boolean;
+  screen: boolean;
+};
+
+interface Participant {
+  muid?: string;
+  name: string;
+  role: 'HOST' | 'PARTICIPANT';
+  state: ParticipantState;
+  avatar: string;
 }
 
 interface SiteConfig {

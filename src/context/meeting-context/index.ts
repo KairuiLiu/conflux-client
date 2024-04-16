@@ -49,8 +49,12 @@ const useMeetingStore = create<MeetingContextType>((set) => {
         set((state) => ({
           meetingDeviceState: { ...state.meetingDeviceState, speakerLabel },
         })),
+      setEnableShare: (enableShare: boolean) =>
+        set((state) => ({
+          meetingDeviceState: { ...state.meetingDeviceState, enableShare },
+        })),
     },
-    setMeetingUserName: (meeetingUserName: string) => set({ meeetingUserName }),
+    setSelfMuid: (selfMuid: string) => set({ selfMuid }),
     resetMeetingContext: () =>
       set((pre) => ({
         ...pre,

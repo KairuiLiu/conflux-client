@@ -21,7 +21,7 @@ const UserPanle: React.FC<{
       </div>
       <div className="flex h-full flex-shrink flex-col gap-3 overflow-auto overflow-x-hidden p-4">
         {meetingContext.meetingState.participants.map((user) => (
-          <UserItemCard user={user} key={user.id} />
+          <UserItemCard user={user} key={user.muid} />
         ))}
       </div>
       <button

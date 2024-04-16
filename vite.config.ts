@@ -13,13 +13,17 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      host: '0.0.0.0',
       '/api': {
-        target: 'http://127.0.0.1:9000',
+        target: 'http://127.0.0.1:9876',
         changeOrigin: true,
         ws: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
-      // TODO coturn
+      '/socket.io': {
+        target: 'ws://127.0.0.1:9876',
+        ws: true,
+      },
     },
   },
 });

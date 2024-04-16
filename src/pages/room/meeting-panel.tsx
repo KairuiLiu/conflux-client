@@ -29,13 +29,11 @@ const MeetingPanel: React.FC<{
   // );
 
   // Video
-  const [
-    screenShareStream,
-    enableScreenShareStream,
-    setEnableScreenShareStream,
-    enableScreenShareAudio,
-    setEnableScreenShareAudio,
-  ] = useScreenshareStream();
+  const [screenShareStream, enableScreenShareAudio, setEnableScreenShareAudio] =
+    useScreenshareStream(
+      meetingContext.meetingDeviceState.enableShare,
+      meetingContext.setMeetingDeviceState.setEnableShare
+    );
 
   const [videoStream] = useMediaStream(
     meetingContext.meetingDeviceState.cameraLabel,
@@ -49,8 +47,11 @@ const MeetingPanel: React.FC<{
   const itemCount = useMemo(
     () =>
       meetingContext.meetingState.participants.length +
-      (enableScreenShareStream ? 2 : 0),
-    [meetingContext.meetingState.participants, enableScreenShareStream]
+      (meetingContext.meetingDeviceState.enableShare ? 2 : 0),
+    [
+      meetingContext.meetingState.participants,
+      meetingContext.meetingDeviceState.enableShare,
+    ]
   );
   const [videoPanelRef, videoPanelSize] = useVideoPanelSize(itemCount);
   const [userPanelConfigArr, setUsePanelConfigArr] = useState<
@@ -66,9 +67,12 @@ const MeetingPanel: React.FC<{
 
   useEffect(() => {
     const res = [];
+    const userSelf = meetingContext.meetingState.participants.find(
+      (d) => d.muid === meetingContext.selfMuid
+    )!;
     res.push({
       user: {
-        name: meetingContext.meeetingUserName,
+        name: userSelf?.name || state.user.name,
         avatar: state.user.avatar,
       },
       camStream: videoStream,
@@ -76,10 +80,10 @@ const MeetingPanel: React.FC<{
       mirrroCamera: state.user.mirrorCamera,
       expandCamera: state.user.expandCamera,
     });
-    if (enableScreenShareStream) {
+    if (meetingContext.meetingDeviceState.enableShare) {
       res.push({
         user: {
-          name: meetingContext.meeetingUserName,
+          name: userSelf?.name || state.user.name,
           avatar: state.user.avatar,
         },
         camStream: null,
@@ -145,7 +149,9 @@ const MeetingPanel: React.FC<{
                   {panelConfig.isScreenShareControlPanel ? (
                     <ScreenShareControlPanel
                       handleStopSharing={() =>
-                        setEnableScreenShareStream(false)
+                        meetingContext.setMeetingDeviceState.setEnableShare(
+                          false
+                        )
                       }
                       enableAudio={enableScreenShareAudio}
                       setEnableAudio={setEnableScreenShareAudio}
@@ -170,7 +176,9 @@ const MeetingPanel: React.FC<{
         ))}
       </section>
       <MeetingControlBar
-        setEnableScreenShareStream={setEnableScreenShareStream}
+        setEnableScreenShareStream={
+          meetingContext.setMeetingDeviceState.setEnableShare
+        }
         setShowUserPanel={setShowUserPanel}
       ></MeetingControlBar>
     </>

@@ -11,14 +11,20 @@ import SettingPanel from '../setting/setting-panel';
 import { useNavigate } from 'react-router-dom';
 import useMeetingStore from '@/context/meeting-context';
 import { v4 } from 'uuid';
+import { emitSocket } from '@/utils/use-socket';
 
 const MeetingControlBar: React.FC<{
-  setEnableScreenShareStream: React.Dispatch<React.SetStateAction<boolean>>;
+  setEnableScreenShareStream: (enableShare: boolean) => void;
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
 }> = ({ setEnableScreenShareStream, setShowUserPanel }) => {
   const [showSetting, setShowSetting] = useState(false);
   const navigate = useNavigate();
   const meetingContext = useMeetingStore((d) => d);
+  const userSelf = meetingContext.meetingState.participants.find(
+    (d) => d.muid === meetingContext.selfMuid
+  )!;
+  const isOrganizer =
+    meetingContext.meetingState.organizer.muid === userSelf?.muid;
 
   return (
     <>
@@ -31,9 +37,15 @@ const MeetingControlBar: React.FC<{
               meetingContext.setMeetingState.setParticipants([
                 ...(meetingContext?.meetingState?.participants || []),
                 {
-                  id: uuid,
+                  muid: uuid,
                   name: 'User_' + uuid.slice(0, 5),
                   avatar: null,
+                  role: 'HOST',
+                  state: {
+                    mic: true,
+                    cam: true,
+                    share: false,
+                  },
                 },
               ]);
             }}
@@ -51,7 +63,9 @@ const MeetingControlBar: React.FC<{
             <button
               className="btn btn-gray-glass flex-shrink-0"
               onClick={() => {
-                setEnableScreenShareStream((d) => !d);
+                setEnableScreenShareStream(
+                  !meetingContext.meetingDeviceState.enableShare
+                );
               }}
             >
               <WindowIcon className="h-4 w-4 text-gray-600" />
@@ -86,11 +100,13 @@ const MeetingControlBar: React.FC<{
                   <button
                     className={'btn btn-danger-secondary-outline w-full'}
                     onClick={() => {
+                      emitSocket('LEAVE_MEETING', {});
+
                       navigate('/exit', {
                         state: {
                           reason: 'exit',
                           roomId: meetingContext.meetingState.id,
-                          userName: meetingContext.meeetingUserName,
+                          userName: userSelf?.name,
                         } as ExitInfo,
                       });
                     }}
@@ -98,17 +114,17 @@ const MeetingControlBar: React.FC<{
                     Leave Meeting
                   </button>
                 </Menu.Item>
-                {meetingContext?.meeetingUserName ===
-                  meetingContext?.meetingState?.organizer?.name && (
+                {isOrganizer && (
                   <Menu.Item>
                     <button
                       className={'btn btn-danger-secondary-outline w-full'}
                       onClick={() => {
+                        emitSocket('FINISH_MEETING', {});
                         navigate('/exit', {
                           state: {
                             reason: 'finish',
                             roomId: meetingContext.meetingState.id,
-                            userName: meetingContext.meeetingUserName,
+                            userName: userSelf?.name,
                           } as ExitInfo,
                         });
                       }}

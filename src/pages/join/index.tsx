@@ -10,6 +10,7 @@ export default function Join() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [canJoin, setCanJoin] = useState(false);
+  const [meetingUserName, setMeetingUserName] = useState(state.user.name);
 
   useEffect(() => {
     meetingContext.resetMeetingContext();
@@ -32,8 +33,12 @@ export default function Join() {
             name: data.organizer.name,
           });
           meetingContext.setMeetingState.setMeetingStartTime(data.start_time);
-          meetingContext.setMeetingState.setParticipants(data.participants); // todo
-          navigate(`/room/${data.id}`);
+          meetingContext.setMeetingState.setParticipants(data.participants);
+          navigate(`/room/${data.id}`, {
+            state: {
+              name: meetingUserName,
+            },
+          });
         }
       })
       .catch((e) => console.error(e));
@@ -47,10 +52,9 @@ export default function Join() {
 
   useEffect(() => {
     setCanJoin(
-      meetingContext.meetingState.id.length === 9 &&
-        meetingContext.meeetingUserName.length > 0
+      meetingContext.meetingState.id.length === 9 && meetingUserName.length > 0
     );
-  }, [meetingContext.meetingState.id, meetingContext.meeetingUserName]);
+  }, [meetingContext.meetingState.id, meetingUserName]);
 
   return (
     <MeetConfigLayout
@@ -78,9 +82,9 @@ export default function Join() {
               <input
                 className="input"
                 placeholder="Your Name"
-                value={meetingContext.meeetingUserName}
+                value={meetingUserName}
                 onChange={(e) => {
-                  meetingContext.setMeetingUserName(e.target.value.trim());
+                  setMeetingUserName(e.target.value.trim());
                 }}
                 required
               ></input>

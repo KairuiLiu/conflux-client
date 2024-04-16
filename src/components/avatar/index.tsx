@@ -8,7 +8,10 @@ function getUserShortName(name: string) {
 }
 
 const Avatar: React.FC<{
-  user: Pick<UserInfoExchange, 'avatar' | 'name'>;
+  user: {
+    avatar?: string | null;
+    name: string;
+  };
   size?: number;
 }> = ({ user, size = 32 }) => {
   const username = user.name.replace(/^User_([a-zA-Z0-9]{8})$/, '$1');
@@ -19,7 +22,7 @@ const Avatar: React.FC<{
   return (
     size > 0 && (
       <div
-        className="flex select-none items-center justify-center overflow-hidden rounded-full flex-shrink-0"
+        className="flex flex-shrink-0 select-none items-center justify-center overflow-hidden rounded-full"
         style={{ width: size, height: size }}
       >
         {user.avatar ? (

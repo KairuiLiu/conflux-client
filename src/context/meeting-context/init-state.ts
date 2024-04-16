@@ -30,8 +30,9 @@ function initState(): MeetingContextState {
         globalState.user.defaultSpeaker ||
         globalState.mediaDiveces.speaker?.[0]?.label ||
         '',
+      enableShare: false,
     },
-    meeetingUserName: globalState.user.name,
+    selfMuid: '',
   };
 }
 

@@ -9,6 +9,7 @@ export default function Create() {
   const meetingContext = useMeetingContext((d) => d);
   const [canCreate, setCanCreate] = useState(false);
   const navigate = useNavigate();
+  const [meetingUserName, setMeetingUserName] = useState(state.user.name);
 
   useEffect(() => {
     meetingContext.resetMeetingContext();
@@ -22,7 +23,7 @@ export default function Create() {
         authorization: `Bearer ${state.siteConfig.token}`,
       },
       body: JSON.stringify({
-        organizer_name: meetingContext.meeetingUserName,
+        organizer_name: meetingUserName,
         title: meetingContext.meetingState.title,
       }),
     })
@@ -32,12 +33,15 @@ export default function Create() {
         else {
           meetingContext.setMeetingState.setOrganizer({
             ...meetingContext.meetingState.organizer,
-            name: meetingContext.meeetingUserName,
+            name: meetingUserName,
           });
           meetingContext.setMeetingState.setId(`${data.id}`);
           meetingContext.setMeetingState.setMeetingStartTime(Date.now());
-          // TODO init participants
-          navigate(`/room/${data.id}`);
+          navigate(`/room/${data.id}`, {
+            state: {
+              name: meetingUserName,
+            },
+          });
         }
       })
       .catch((e) => console.error(e));
@@ -45,10 +49,10 @@ export default function Create() {
 
   useEffect(() => {
     setCanCreate(
-      meetingContext.meeetingUserName.length > 0 &&
+      meetingUserName.length > 0 &&
         meetingContext.meetingState.title!.length > 0
     );
-  }, [meetingContext.meeetingUserName, meetingContext.meetingState.title]);
+  }, [meetingUserName, meetingContext.meetingState.title]);
 
   return (
     <MeetConfigLayout
@@ -74,9 +78,9 @@ export default function Create() {
               <input
                 className="input"
                 placeholder="Your Name"
-                value={meetingContext.meeetingUserName}
+                value={meetingUserName}
                 onChange={(e) => {
-                  meetingContext.setMeetingUserName(e.target.value.trim());
+                  setMeetingUserName(e.target.value.trim());
                 }}
                 required
               ></input>

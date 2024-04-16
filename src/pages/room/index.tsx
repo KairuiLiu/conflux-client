@@ -2,14 +2,19 @@ import { useEffect, useState } from 'react';
 import MeetingHeader from './meeting-header';
 import UserPanle from './user-panel';
 import MeetingPanel from './meeting-panel';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import useMeetingStore from '@/context/meeting-context';
+import { emitSocket, socket } from '@/utils/use-socket';
+import { v4 } from 'uuid';
+import useHandleSocketEvents from '../../utils/socket_events';
 
 export default function Room() {
   const [showUserPanel, setShowUserPanel] = useState(false);
   const { id } = useParams();
   const meetingContext = useMeetingStore((d) => d);
   const navigator = useNavigate();
+  const location = useLocation();
+  const { name: joinerName } = location.state;
 
   useEffect(() => {
     if (id !== meetingContext.meetingState.id) {
@@ -17,6 +22,26 @@ export default function Room() {
     }
   }, [id, meetingContext.meetingState.id, navigator]);
 
+  useEffect(() => {
+    // TODO: Replace with peerjs muid
+    const muid = v4();
+    meetingContext.setSelfMuid(muid);
+    emitSocket('JOIN_MEETING', {
+      muid,
+      user_name: joinerName,
+    });
+    return () => {
+      emitSocket('LEAVE_MEETING', {
+        muid,
+      });
+      socket.connected && socket.disconnect();
+      console.log('disconnect');
+    };
+  }, []);
+
+  useHandleSocketEvents(meetingContext, joinerName);
+
+  // TODO INTERVAL OF UPDATE USER STATE
   return (
     // todo remove test
     meetingContext.meetingState.id === id && (

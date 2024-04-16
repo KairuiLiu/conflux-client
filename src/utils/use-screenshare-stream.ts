@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { stopStream } from './media-stream';
 
-const useScreenshareStream = (): [
+const useScreenshareStream = (
+  enableShare: boolean,
+  setEnableShare: (enableShare: boolean) => void
+): [
   MediaStream | null,
-  boolean,
-  React.Dispatch<React.SetStateAction<boolean>>,
   boolean,
   React.Dispatch<React.SetStateAction<boolean>>,
 ] => {
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [enableStream, setEnableStream] = useState(false);
   const [enableAudio, setEnableAudio] = useState(false);
 
   useEffect(() => {
-    if (!enableStream) {
+    if (!enableShare) {
       stopStream(stream);
       setStream(null);
       setEnableAudio(false);
@@ -32,18 +32,18 @@ const useScreenshareStream = (): [
           track.onended = () => {
             stopStream(newStream);
             setStream(null);
-            setEnableStream(false);
+            setEnableShare(false);
             setEnableAudio(false);
           };
         });
       })
       .catch(() => {
-        setEnableStream(false);
+        setEnableShare(false);
         setEnableAudio(false);
       });
 
     return () => {
-      if (!enableStream) {
+      if (!enableShare) {
         stopStream(stream);
         setStream(null);
         setEnableAudio(false);
@@ -52,7 +52,7 @@ const useScreenshareStream = (): [
         setStream(null);
       }
     };
-  }, [enableStream, enableAudio]);
+  }, [enableShare, enableAudio]);
 
   useEffect(() => {
     return () => {
@@ -60,7 +60,7 @@ const useScreenshareStream = (): [
     };
   }, [stream]);
 
-  return [stream, enableStream, setEnableStream, enableAudio, setEnableAudio];
+  return [stream, enableAudio, setEnableAudio];
 };
 
 export default useScreenshareStream;

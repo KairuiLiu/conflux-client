@@ -9,11 +9,28 @@ import MicroPhoneMuteIcon from '@/assets/MicrophoneMuteIcon.svg?react';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react/jsx-runtime';
 import { useState } from 'react';
+import { emitSocket } from '@/utils/use-socket';
+import useMeetingStore from '@/context/meeting-context';
 
 const UserItemCard: React.FC<{
-  user: UserInfo;
+  user: Participant;
 }> = ({ user }) => {
+  const meetingContext = useMeetingStore((s) => s);
   const [isOpen, setIsOpen] = useState(false);
+  const [newName, setNewName] = useState(user.name);
+
+  console.log(meetingContext.meetingState.participants);
+
+  const isHost =
+    meetingContext.meetingState.participants.find((d) => d.muid === user.muid)
+      ?.role === 'HOST';
+  const canOperate = meetingContext.selfMuid === user.muid || isHost;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updateMidaState = (v: any) => {
+    emitSocket('UPDATE_USER_STATE', { muid: user.muid, state: v });
+  };
+
   return (
     <div>
       <Transition appear show={isOpen} as={Fragment}>
@@ -57,6 +74,8 @@ const UserItemCard: React.FC<{
                       type="text"
                       className="input "
                       placeholder="Enter your new username"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
                     />
                   </div>
 
@@ -64,14 +83,23 @@ const UserItemCard: React.FC<{
                     <button
                       type="button"
                       className="btn btn-primary-outline py-1"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => {
+                        setNewName(user.name);
+                        setIsOpen(false);
+                      }}
                     >
                       Cancel
                     </button>
                     <button
                       type="button"
                       className="btn btn-primary py-1"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => {
+                        emitSocket('UPDATE_USER_STATE', {
+                          muid: user.muid,
+                          name: newName,
+                        });
+                        setIsOpen(false);
+                      }}
                     >
                       Save
                     </button>
@@ -91,73 +119,128 @@ const UserItemCard: React.FC<{
               {user.name}
             </h4>
             <span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
-              Host
+              {user.role}
             </span>
           </div>
         </div>
         <div className="flex-shrink-0 whitespace-nowrap">
-          <button className="btn btn-remove-focus btn-text p-1">
-            <MicrophoneIcon className="h-4 w-4 " />
-          </button>
-          <button className="btn btn-remove-focus btn-text p-1">
-            <MicroPhoneMuteIcon className="h-4 w-4 text-red-500" />
-          </button>
-          <button className="btn btn-remove-focus btn-text p-1">
-            <VideoCameraIcon className="h-4 w-4 " />
-          </button>
-          <button className="btn btn-remove-focus btn-text p-1">
-            <WindowIcon className="h-4 w-4" />
-          </button>
-
-          <Menu as="div" className="relative inline-block text-left">
-            <div>
-              <Menu.Button className="btn btn-remove-focus btn-text p-1">
-                <EllipsisHorizontalCircleIcon className="h-4 w-4" />
-              </Menu.Button>
-            </div>
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
+          {
+            <button
+              className="btn btn-remove-focus btn-text p-1"
+              disabled={!user.state.mic || !canOperate}
+              onClick={() => updateMidaState({ mic: false })}
             >
-              <Menu.Items className=" felx absolute right-0 z-10 mt-2 w-min flex-col rounded-md bg-white text-base shadow-panel">
-                <section className="flex flex-col whitespace-nowrap p-1 text-sm ">
-                  <Menu.Item>
-                    <button className={'px-2 py-2 text-left'}>
-                      Enable Microphone
-                    </button>
-                  </Menu.Item>
-                  <Menu.Item>
-                    <button className={'px-2 py-2 text-left'}>
-                      Disable Camera
-                    </button>
-                  </Menu.Item>
-                  <Menu.Item>
-                    <button className={'px-2 py-2 text-left'}>
-                      Disable Screensharing
-                    </button>
-                  </Menu.Item>
-                  <Menu.Item>
-                    <button
-                      className={'px-2 py-2 text-left'}
-                      onClick={() => setIsOpen(true)}
-                    >
-                      Change Username
-                    </button>
-                  </Menu.Item>
-                  <Menu.Item>
-                    <button className={'px-2 py-2 text-left'}>
-                      Remove from Meeting
-                    </button>
-                  </Menu.Item>
-                </section>
-              </Menu.Items>
-            </Transition>
-          </Menu>
+              {user.state.mic ? (
+                <MicrophoneIcon className="h-4 w-4 " />
+              ) : (
+                <MicroPhoneMuteIcon className="h-4 w-4 text-red-500" />
+              )}
+            </button>
+          }
+          {user.state.camera && (
+            <button
+              className="btn btn-remove-focus btn-text p-1"
+              disabled={!user.state.camera || !canOperate}
+              onClick={() => updateMidaState({ camera: false })}
+            >
+              <VideoCameraIcon className="h-4 w-4 " />
+            </button>
+          )}
+          {user.state.screen && (
+            <button
+              className="btn btn-remove-focus btn-text p-1"
+              disabled={!user.state.screen || !canOperate}
+              onClick={() => updateMidaState({ screen: false })}
+            >
+              <WindowIcon className="h-4 w-4" />
+            </button>
+          )}
+          {canOperate && (
+            <Menu as="div" className="relative inline-block text-left">
+              <div>
+                <Menu.Button className="btn btn-remove-focus btn-text p-1">
+                  <EllipsisHorizontalCircleIcon className="h-4 w-4" />
+                </Menu.Button>
+              </div>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <Menu.Items className=" felx absolute right-0 z-10 mt-2 w-min flex-col rounded-md bg-white text-base shadow-panel">
+                  <section className="flex flex-col whitespace-nowrap p-1 text-sm ">
+                    {user.state.mic && (
+                      <Menu.Item>
+                        <button
+                          className={'px-2 py-2 text-left'}
+                          onClick={() => updateMidaState({ mic: false })}
+                        >
+                          Disable Microphone
+                        </button>
+                      </Menu.Item>
+                    )}
+                    {user.state.camera && (
+                      <Menu.Item>
+                        <button
+                          className={'px-2 py-2 text-left'}
+                          onClick={() => updateMidaState({ camera: false })}
+                        >
+                          Disable Camera
+                        </button>
+                      </Menu.Item>
+                    )}
+                    {user.state.screen && (
+                      <Menu.Item>
+                        <button
+                          className={'px-2 py-2 text-left'}
+                          onClick={() => updateMidaState({ screen: false })}
+                        >
+                          Disable Screensharing
+                        </button>
+                      </Menu.Item>
+                    )}
+                    {isHost && (
+                      <Menu.Item>
+                        <button
+                          className={'px-2 py-2 text-left'}
+                          onClick={() =>
+                            emitSocket('UPDATE_USER_STATE', {
+                              muid: user.muid,
+                              role: isHost ? 'PARTICIPANT' : 'HOST',
+                            })
+                          }
+                        >
+                          {isHost ? 'Remove Host' : 'Make Host'}
+                        </button>
+                      </Menu.Item>
+                    )}
+                    <Menu.Item>
+                      <button
+                        className={'px-2 py-2 text-left'}
+                        onClick={() => setIsOpen(true)}
+                      >
+                        Change Username
+                      </button>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <button
+                        className={'px-2 py-2 text-left'}
+                        onClick={() =>
+                          emitSocket('REMOVE_USER', { muid: user.muid })
+                        }
+                      >
+                        Remove from Meeting
+                      </button>
+                    </Menu.Item>
+                  </section>
+                </Menu.Items>
+              </Transition>
+            </Menu>
+          )}
         </div>
       </div>
     </div>

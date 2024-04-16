@@ -8,7 +8,7 @@ interface MeetingState {
     muid: string;
     name: string;
   };
-  participants: UserInfo[];
+  participants: Participant[];
 }
 
 interface SetMeetingState {
@@ -26,6 +26,7 @@ interface MeetingDeviceState {
   micLabel: string;
   enableSpeaker: boolean;
   speakerLabel: string;
+  enableShare: boolean;
 }
 
 interface SetMeetingDeviceState {
@@ -35,18 +36,19 @@ interface SetMeetingDeviceState {
   setMicLabel: (micLabel: string) => void;
   setEnableSpeaker: (enableSpeaker: boolean) => void;
   setSpeakerLabel: (speakerLabel: string) => void;
+  setEnableShare: (enableShare: boolean) => void;
 }
 
 interface MeetingContextState {
   meetingState: MeetingState;
   meetingDeviceState: MeetingDeviceState;
-  meeetingUserName: string;
+  selfMuid: string;
 }
 
 interface SetMeetingContext {
   setMeetingState: SetMeetingState;
   setMeetingDeviceState: SetMeetingDeviceState;
-  setMeetingUserName: (meeetingUserName: string) => void;
+  setSelfMuid: (selfMuid: string) => void;
 }
 
 type MeetingContextType = MeetingContextState &

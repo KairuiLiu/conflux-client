@@ -8,7 +8,10 @@ export const VideoPanel: React.FC<{
   limitHeight?: boolean;
   camStream: MediaStream | null;
   screenStream: MediaStream | null;
-  user: Pick<UserInfo, 'avatar' | 'name'>;
+  user: {
+    name: string;
+    avatar?: string | null;
+  };
   mirrroCamera?: boolean;
   fixAsp?: number;
   className?: string;
