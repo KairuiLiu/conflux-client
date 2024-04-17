@@ -15,17 +15,35 @@ export default defineConfig({
     'process.env.MODE': JSON.stringify(process.env.MODE),
   },
   server: {
+    host: '0.0.0.0',
     proxy: {
-      host: '0.0.0.0',
+      '/socket.io': {
+        target: 'http://127.0.0.1:9876/',
+        ws: true,
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://127.0.0.1:9876',
         changeOrigin: true,
         ws: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
-      '/socket.io': {
-        target: 'ws://127.0.0.1:9876',
-        ws: true,
+    },
+  },
+  build: {
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+    minify: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        chunkFileNames: 'js/[name]-[hash].js',
+        entryFileNames: 'js/[name]-[hash].js',
+        assetFileNames: '[ext]/[name]-[hash].[ext]',
       },
     },
   },

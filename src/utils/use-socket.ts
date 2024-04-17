@@ -5,11 +5,9 @@ import useMeetingStore from '@/context/meeting-context';
 import { useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client';
 
-export const socket = io('127.0.0.1:9876', {
+export const socket = io('', {
   autoConnect: false,
 });
-
-const dev = process.env.MODE === 'DEV';
 
 export function useSocketListener<Msg extends ServerKeys>(
   msg: Msg,
@@ -20,7 +18,7 @@ export function useSocketListener<Msg extends ServerKeys>(
   useEffect(() => {
     socket.disconnected && socket.connect();
     const cb = (data: any) => {
-      dev && console.log(`REV [${msg}]`, data);
+      console.log(`REV [${msg}]`, data);
       return stableCallback(data);
     };
     socket.on(msg, cb as any);
@@ -51,12 +49,11 @@ export function emitSocket<Msg extends ClientKeys>(
   const globalContext = useGlobalStore.getState();
   const meetingContext = useMeetingStore.getState();
 
-  dev &&
-    console.log(`SEND [${msg}]`, {
-      ...data,
-      token: globalContext.siteConfig.token,
-      room_id: meetingContext.meetingState.id,
-    });
+  console.log(`SEND [${msg}]`, {
+    ...data,
+    token: globalContext.siteConfig.token,
+    room_id: meetingContext.meetingState.id,
+  });
 
   socket.disconnected && socket.connect();
   socket.emit(msg, {
