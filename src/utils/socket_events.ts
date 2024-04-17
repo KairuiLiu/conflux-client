@@ -79,11 +79,12 @@ function useHandleSocketEvents(meetingContext: MeetingContextType) {
       (p: Participant) => p.muid === curMeetingContext.selfMuid
     );
     if (curMeetingContext.selfMuid && !selfInfo) {
+      meetingContext.setExiting(true);
       navigate('/exit', {
         state: {
           reason: 'kicked',
           roomId: curMeetingContext.meetingState.id,
-          userName: meetingContext.unactiveUserName,
+          userName: selfInfo.name || meetingContext.unactiveUserName,
         } as ExitInfo,
       });
     } else {
@@ -101,11 +102,28 @@ function useHandleSocketEvents(meetingContext: MeetingContextType) {
   });
 
   useSocketListener('FINISH_MEETING', () => {
+    meetingContext.setExiting(true);
     navigate('/exit', {
       state: {
         reason: 'finish',
         roomId: meetingContext.meetingState.id,
         userName: meetingContext.unactiveUserName,
+      } as ExitInfo,
+    });
+  });
+
+  useSocketListener('disconnect', () => {
+    const curMeetingContext = useMeetingStore.getState();
+    const selfInfo = curMeetingContext.meetingState.participants.find(
+      (p: Participant) => p.muid === curMeetingContext.selfMuid
+    );
+
+    meetingContext.setExiting(true);
+    navigate('/exit', {
+      state: {
+        reason: 'network',
+        roomId: meetingContext.meetingState.id,
+        userName: selfInfo?.name || meetingContext.unactiveUserName,
       } as ExitInfo,
     });
   });

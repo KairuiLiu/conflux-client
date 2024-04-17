@@ -24,7 +24,9 @@ declare type ClientEventListenersCb<T, D> = (
   args: ClientDataType<T, D & SocketBase>
 ) => void;
 
-declare type ExtractCbDataType<F> = F extends (args: infer A) => void ? A : never;
+declare type ExtractCbDataType<F> = F extends (args: infer A) => void
+  ? A
+  : never;
 
 declare interface ClientToServerEvents {
   JOIN_MEETING: ClientEventListenersCb<
@@ -32,6 +34,8 @@ declare interface ClientToServerEvents {
     {
       user_name: string;
       muid: string;
+      avatar: string;
+      state: ParticipantState;
     }
   >;
   LEAVE_MEETING: ClientEventListenersCb<'LEAVE_MEETING', {}>;
@@ -45,21 +49,13 @@ declare interface ServerToClientEvents {
   RES_JOIN_MEETING: ServerEventListenersCb<'RES_JOIN_MEETING', MeetingState>;
   RES_LEAVE_MEETING: ServerEventListenersCb<'RES_LEAVE_MEETING', null>;
   RES_FINISH_MEETING: ServerEventListenersCb<'RES_FINISH_MEETING', null>;
-  RES_UPDATE_USER_STATE: ServerEventListenersCb<
-    'RES_UPDATE_USER_STATE',
-    {
-      code?: number;
-      message?: string;
-    }
-  >;
+  RES_UPDATE_USER_STATE: ServerEventListenersCb<'RES_UPDATE_USER_STATE', null>;
   RES_REMOVE_USER: ServerEventListenersCb<'RES_REMOVE_USER', null>;
 
-  USER_STATE_UPDATE: ServerEventListenersCb<
-    'USER_STATE_UPDATE',
-    Participant
-  >;
+  USER_STATE_UPDATE: ServerEventListenersCb<'USER_STATE_UPDATE', Participant>;
   USER_UPDATE: ServerEventListenersCb<'USER_UPDATE', MeetingState>;
   FINISH_MEETING: ServerEventListenersCb<'FINISH_MEETING', null>;
+  disconnect: ServerEventListenersCb<'disconnect', null>;
 }
 
 type ClientKeys = keyof ClientToServerEvents;

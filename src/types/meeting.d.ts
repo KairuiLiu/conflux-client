@@ -44,6 +44,7 @@ interface MeetingContextState {
   meetingDeviceState: MeetingDeviceState;
   selfMuid: string;
   unactiveUserName: string;
+  exiting: boolean;
 }
 
 interface SetMeetingContext {
@@ -51,6 +52,7 @@ interface SetMeetingContext {
   setMeetingDeviceState: SetMeetingDeviceState;
   setSelfMuid: (selfMuid: string) => void;
   setUnactiveUserName: (unAtiveUserName: string) => void;
+  setExiting: (exiting: boolean) => void;
 }
 
 type MeetingContextType = MeetingContextState &

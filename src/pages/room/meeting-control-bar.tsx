@@ -100,7 +100,7 @@ const MeetingControlBar: React.FC<{
                     className={'btn btn-danger-secondary-outline w-full'}
                     onClick={() => {
                       emitSocket('LEAVE_MEETING', {});
-
+                      meetingContext.setExiting(true);
                       navigate('/exit', {
                         state: {
                           reason: 'exit',
@@ -119,6 +119,7 @@ const MeetingControlBar: React.FC<{
                       className={'btn btn-danger-secondary-outline w-full'}
                       onClick={() => {
                         emitSocket('FINISH_MEETING', {});
+                        meetingContext.setExiting(true);
                         navigate('/exit', {
                           state: {
                             reason: 'finish',

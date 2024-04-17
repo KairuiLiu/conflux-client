@@ -47,12 +47,12 @@
     @apply cursor-not-allowed bg-gray-400 text-white hover:bg-gray-400  active:bg-gray-400;
   }
 
-  .btn-disabled-icon-user-management {
-    @apply cursor-default bg-none hover:bg-none  active:bg-none;
-  }
-
   .btn-text {
     @apply bg-transparent hover:bg-gray-100 active:bg-gray-200;
+  }
+
+  .btn-disabled-icon-user-management {
+    @apply cursor-default !bg-transparent hover:!bg-transparent  active:!bg-transparent;
   }
 
   .btn-remove-focus {

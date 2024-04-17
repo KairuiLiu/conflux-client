@@ -34,6 +34,7 @@ function initState(): MeetingContextState {
     },
     selfMuid: '',
     unactiveUserName: globalState.user.name,
+    exiting: false,
   };
 }
 
