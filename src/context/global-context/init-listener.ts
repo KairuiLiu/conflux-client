@@ -33,7 +33,7 @@ function addMediaPermissionListener(
       })
       .catch(() => {});
   } catch (error) {
-    console.error(error);
+    console.info(error);
   }
 }
 

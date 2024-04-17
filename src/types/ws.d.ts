@@ -24,7 +24,7 @@ declare type ClientEventListenersCb<T, D> = (
   args: ClientDataType<T, D & SocketBase>
 ) => void;
 
-type ExtractCbDataType<F> = F extends (args: infer A) => void ? A : never;
+declare type ExtractCbDataType<F> = F extends (args: infer A) => void ? A : never;
 
 declare interface ClientToServerEvents {
   JOIN_MEETING: ClientEventListenersCb<
@@ -42,7 +42,7 @@ declare interface ClientToServerEvents {
 }
 
 declare interface ServerToClientEvents {
-  RES_JOIN_MEETING: ServerEventListenersCb<'RES_JOIN_MEETING', MeetingInfo>;
+  RES_JOIN_MEETING: ServerEventListenersCb<'RES_JOIN_MEETING', MeetingState>;
   RES_LEAVE_MEETING: ServerEventListenersCb<'RES_LEAVE_MEETING', null>;
   RES_FINISH_MEETING: ServerEventListenersCb<'RES_FINISH_MEETING', null>;
   RES_UPDATE_USER_STATE: ServerEventListenersCb<

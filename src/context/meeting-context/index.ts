@@ -55,6 +55,7 @@ const useMeetingStore = create<MeetingContextType>((set) => {
         })),
     },
     setSelfMuid: (selfMuid: string) => set({ selfMuid }),
+    setUnactiveUserName: (unactiveUserName: string) => set({ unactiveUserName }),
     resetMeetingContext: () =>
       set((pre) => ({
         ...pre,

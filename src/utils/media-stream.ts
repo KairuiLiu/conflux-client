@@ -11,7 +11,7 @@ export async function getStream(type: 'audio' | 'video') {
     const stream = await navigator.mediaDevices.getUserMedia({ [type]: true });
     return stream;
   } catch (error) {
-    console.error(`Error on create ${type} stream: `, error);
+    console.info(`Error on create ${type} stream: `, error);
   }
 }
 
@@ -29,6 +29,6 @@ export async function setStreamWithId(
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     setStream(stream);
   } catch (error) {
-    console.error(`Error on create ${type} stream: `, error);
+    console.info(`Error on create ${type} stream: `, error);
   }
 }

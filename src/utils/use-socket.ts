@@ -9,6 +9,8 @@ export const socket = io('127.0.0.1:9876', {
   autoConnect: false,
 });
 
+const dev = process.env.MODE === 'DEV';
+
 export function useSocketListener<Msg extends ServerKeys>(
   msg: Msg,
   callback: (data: ExtractCbDataType<ServerToClientEvents[Msg]>) => void
@@ -18,7 +20,7 @@ export function useSocketListener<Msg extends ServerKeys>(
   useEffect(() => {
     socket.disconnected && socket.connect();
     const cb = (data: any) => {
-      console.log(`REV [${msg}]`, data);
+      dev && console.log(`REV [${msg}]`, data);
       return stableCallback(data);
     };
     socket.on(msg, cb as any);
@@ -49,11 +51,12 @@ export function emitSocket<Msg extends ClientKeys>(
   const globalContext = useGlobalStore.getState();
   const meetingContext = useMeetingStore.getState();
 
-  console.log(`SEND [${msg}]`, {
-    ...data,
-    token: globalContext.siteConfig.token,
-    room_id: meetingContext.meetingState.id,
-  });
+  dev &&
+    console.log(`SEND [${msg}]`, {
+      ...data,
+      token: globalContext.siteConfig.token,
+      room_id: meetingContext.meetingState.id,
+    });
 
   socket.disconnected && socket.connect();
   socket.emit(msg, {

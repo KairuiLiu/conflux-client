@@ -11,6 +11,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    'process.env.MODE': JSON.stringify(process.env.MODE),
+  },
   server: {
     proxy: {
       host: '0.0.0.0',

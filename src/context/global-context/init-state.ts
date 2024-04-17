@@ -102,13 +102,16 @@ function fetchConfig(
   setState: (v: (state: StateType) => StateType) => void
 ) {
   fetch(`/api/config?uuid=${uuid}`)
+    // on cannet failed
+
     .then((d) => d.json())
     .then((res) => {
-      if (res.code) console.error('fetch token error', res.msg);
+      if (res.code) console.info('fetch token error', res.msg);
       else
         setState((state) => ({
           ...state,
           siteConfig: res.data,
         }));
-    });
+    })
+    .catch((e) => console.info('fetch error', e));
 }

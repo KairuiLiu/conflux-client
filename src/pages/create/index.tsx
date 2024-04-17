@@ -9,7 +9,6 @@ export default function Create() {
   const meetingContext = useMeetingContext((d) => d);
   const [canCreate, setCanCreate] = useState(false);
   const navigate = useNavigate();
-  const [meetingUserName, setMeetingUserName] = useState(state.user.name);
 
   useEffect(() => {
     meetingContext.resetMeetingContext();
@@ -23,36 +22,32 @@ export default function Create() {
         authorization: `Bearer ${state.siteConfig.token}`,
       },
       body: JSON.stringify({
-        organizer_name: meetingUserName,
+        organizer_name: meetingContext.unactiveUserName,
         title: meetingContext.meetingState.title,
       }),
     })
       .then((d) => d.json())
       .then(({ code, data, msg }) => {
-        if (code) console.error('fetch token error', msg);
+        if (code) console.info('fetch token error', msg);
         else {
           meetingContext.setMeetingState.setOrganizer({
             ...meetingContext.meetingState.organizer,
-            name: meetingUserName,
+            name: meetingContext.unactiveUserName,
           });
           meetingContext.setMeetingState.setId(`${data.id}`);
           meetingContext.setMeetingState.setMeetingStartTime(Date.now());
-          navigate(`/room/${data.id}`, {
-            state: {
-              name: meetingUserName,
-            },
-          });
+          navigate(`/room/${data.id}`);
         }
       })
-      .catch((e) => console.error(e));
+      .catch((e) => console.info(e));
   }
 
   useEffect(() => {
     setCanCreate(
-      meetingUserName.length > 0 &&
+      meetingContext.unactiveUserName.length > 0 &&
         meetingContext.meetingState.title!.length > 0
     );
-  }, [meetingUserName, meetingContext.meetingState.title]);
+  }, [meetingContext.unactiveUserName, meetingContext.meetingState.title]);
 
   return (
     <MeetConfigLayout
@@ -78,9 +73,9 @@ export default function Create() {
               <input
                 className="input"
                 placeholder="Your Name"
-                value={meetingUserName}
+                value={meetingContext.unactiveUserName}
                 onChange={(e) => {
-                  setMeetingUserName(e.target.value.trim());
+                  meetingContext.setUnactiveUserName(e.target.value.trim());
                 }}
                 required
               ></input>

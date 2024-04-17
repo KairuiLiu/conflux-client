@@ -45,6 +45,11 @@ const MeetConfigLayout = ({
     'camera'
   );
 
+  const user = {
+    name: meetingContext.unactiveUserName,
+    avatar: state.user.avatar,
+  };
+
   return (
     <main className="flex flex-grow -translate-y-8 flex-col items-center justify-center gap-6 px-4">
       {titleBar}
@@ -62,7 +67,7 @@ const MeetConfigLayout = ({
           }
         >
           <VideoPanel
-            user={state.user}
+            user={user}
             mirrroCamera={state.user.mirrorCamera}
             camStream={
               meetingContext.meetingDeviceState.enableCamera

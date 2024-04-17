@@ -19,12 +19,11 @@ const UserItemCard: React.FC<{
   const [isOpen, setIsOpen] = useState(false);
   const [newName, setNewName] = useState(user.name);
 
-  console.log(meetingContext.meetingState.participants);
-
-  const isHost =
-    meetingContext.meetingState.participants.find((d) => d.muid === user.muid)
-      ?.role === 'HOST';
-  const canOperate = meetingContext.selfMuid === user.muid || isHost;
+  const isSelfHost =
+    meetingContext.meetingState.participants.find(
+      (d) => d.muid === meetingContext.selfMuid
+    )?.role === 'HOST';
+  const canOperate = meetingContext.selfMuid === user.muid || isSelfHost;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateMidaState = (v: any) => {
@@ -126,7 +125,10 @@ const UserItemCard: React.FC<{
         <div className="flex-shrink-0 whitespace-nowrap">
           {
             <button
-              className="btn btn-remove-focus btn-text p-1"
+              className={
+                'btn btn-remove-focus btn-text p-1 ' +
+                (!user.state.mic || !canOperate ? 'btn-disabled-icon-user-management' : '')
+              }
               disabled={!user.state.mic || !canOperate}
               onClick={() => updateMidaState({ mic: false })}
             >
@@ -139,7 +141,10 @@ const UserItemCard: React.FC<{
           }
           {user.state.camera && (
             <button
-              className="btn btn-remove-focus btn-text p-1"
+              className={
+                'btn btn-remove-focus btn-text p-1 ' +
+                (!user.state.camera || !canOperate ? 'btn-disabled-icon-user-management' : '')
+              }
               disabled={!user.state.camera || !canOperate}
               onClick={() => updateMidaState({ camera: false })}
             >
@@ -148,7 +153,10 @@ const UserItemCard: React.FC<{
           )}
           {user.state.screen && (
             <button
-              className="btn btn-remove-focus btn-text p-1"
+              className={
+                'btn btn-remove-focus btn-text p-1 ' +
+                (!user.state.screen || !canOperate ? 'btn-disabled-icon-user-management' : '')
+              }
               disabled={!user.state.screen || !canOperate}
               onClick={() => updateMidaState({ screen: false })}
             >
@@ -203,18 +211,19 @@ const UserItemCard: React.FC<{
                         </button>
                       </Menu.Item>
                     )}
-                    {isHost && (
+                    {isSelfHost && (
                       <Menu.Item>
                         <button
                           className={'px-2 py-2 text-left'}
                           onClick={() =>
                             emitSocket('UPDATE_USER_STATE', {
                               muid: user.muid,
-                              role: isHost ? 'PARTICIPANT' : 'HOST',
+                              role:
+                                user.role === 'HOST' ? 'PARTICIPANT' : 'HOST',
                             })
                           }
                         >
-                          {isHost ? 'Remove Host' : 'Make Host'}
+                          {user.role === 'HOST' ? 'Remove Host' : 'Make Host'}
                         </button>
                       </Menu.Item>
                     )}

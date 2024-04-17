@@ -1,5 +1,5 @@
 interface ExitInfo {
-  reason: 'exit' | 'finish';
+  reason: 'exit' | 'finish' | 'kicked';
   roomId: string;
   userName: string;
 }

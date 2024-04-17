@@ -43,7 +43,7 @@ const useSpeakerStream = (
           element.play();
           setElem(element);
         } catch (error) {
-          console.error('Audio playback error:', error);
+          console.info('Audio playback error:', error);
         }
       }
     }

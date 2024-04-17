@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import MeetingHeader from './meeting-header';
 import UserPanle from './user-panel';
 import MeetingPanel from './meeting-panel';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import useMeetingStore from '@/context/meeting-context';
 import { emitSocket, socket } from '@/utils/use-socket';
 import { v4 } from 'uuid';
@@ -13,8 +13,6 @@ export default function Room() {
   const { id } = useParams();
   const meetingContext = useMeetingStore((d) => d);
   const navigator = useNavigate();
-  const location = useLocation();
-  const { name: joinerName } = location.state;
 
   useEffect(() => {
     if (id !== meetingContext.meetingState.id) {
@@ -28,7 +26,12 @@ export default function Room() {
     meetingContext.setSelfMuid(muid);
     emitSocket('JOIN_MEETING', {
       muid,
-      user_name: joinerName,
+      user_name: meetingContext.unactiveUserName,
+      state: {
+        mic: meetingContext.meetingDeviceState.enableMic,
+        camera: meetingContext.meetingDeviceState.enableCamera,
+        screen: meetingContext.meetingDeviceState.enableShare,
+      },
     });
     return () => {
       emitSocket('LEAVE_MEETING', {
@@ -39,7 +42,7 @@ export default function Room() {
     };
   }, []);
 
-  useHandleSocketEvents(meetingContext, joinerName);
+  useHandleSocketEvents(meetingContext);
 
   // TODO INTERVAL OF UPDATE USER STATE
   return (

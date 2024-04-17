@@ -43,9 +43,12 @@
     @apply border-red-400 text-red-400 hover:bg-red-50 focus:bg-red-50 focus:ring-red-400 active:bg-red-100;
   }
 
-
   .btn-disabled {
     @apply cursor-not-allowed bg-gray-400 text-white hover:bg-gray-400  active:bg-gray-400;
+  }
+
+  .btn-disabled-icon-user-management {
+    @apply cursor-default bg-none hover:bg-none  active:bg-none;
   }
 
   .btn-text {

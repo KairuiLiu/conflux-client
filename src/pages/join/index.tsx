@@ -10,7 +10,6 @@ export default function Join() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [canJoin, setCanJoin] = useState(false);
-  const [meetingUserName, setMeetingUserName] = useState(state.user.name);
 
   useEffect(() => {
     meetingContext.resetMeetingContext();
@@ -25,7 +24,7 @@ export default function Join() {
     })
       .then((d) => d.json())
       .then(({ code, data, msg }) => {
-        if (code) console.error('error', msg);
+        if (code) console.info('error', msg);
         else {
           meetingContext.setMeetingState.setTitle(data.title);
           meetingContext.setMeetingState.setOrganizer({
@@ -34,14 +33,10 @@ export default function Join() {
           });
           meetingContext.setMeetingState.setMeetingStartTime(data.start_time);
           meetingContext.setMeetingState.setParticipants(data.participants);
-          navigate(`/room/${data.id}`, {
-            state: {
-              name: meetingUserName,
-            },
-          });
+          navigate(`/room/${data.id}`);
         }
       })
-      .catch((e) => console.error(e));
+      .catch((e) => console.info(e));
   }
 
   useEffect(() => {
@@ -52,9 +47,10 @@ export default function Join() {
 
   useEffect(() => {
     setCanJoin(
-      meetingContext.meetingState.id.length === 9 && meetingUserName.length > 0
+      meetingContext.meetingState.id.length === 9 &&
+        meetingContext.unactiveUserName.length > 0
     );
-  }, [meetingContext.meetingState.id, meetingUserName]);
+  }, [meetingContext.meetingState.id, meetingContext.unactiveUserName]);
 
   return (
     <MeetConfigLayout
@@ -82,9 +78,9 @@ export default function Join() {
               <input
                 className="input"
                 placeholder="Your Name"
-                value={meetingUserName}
+                value={meetingContext.unactiveUserName}
                 onChange={(e) => {
-                  setMeetingUserName(e.target.value.trim());
+                  meetingContext.setUnactiveUserName(e.target.value.trim());
                 }}
                 required
               ></input>

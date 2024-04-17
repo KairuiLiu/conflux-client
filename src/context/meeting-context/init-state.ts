@@ -33,6 +33,7 @@ function initState(): MeetingContextState {
       enableShare: false,
     },
     selfMuid: '',
+    unactiveUserName: globalState.user.name,
   };
 }
 
