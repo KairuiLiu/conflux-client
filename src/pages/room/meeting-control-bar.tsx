@@ -23,8 +23,7 @@ const MeetingControlBar: React.FC<{
   const userSelf = meetingContext.meetingState.participants.find(
     (d) => d.muid === meetingContext.selfMuid
   )!;
-  const isOrganizer =
-    meetingContext.meetingState.organizer.muid === userSelf?.muid;
+  const isHost = userSelf?.role === 'HOST';
 
   return (
     <>
@@ -114,7 +113,7 @@ const MeetingControlBar: React.FC<{
                     Leave Meeting
                   </button>
                 </Menu.Item>
-                {isOrganizer && (
+                {isHost && (
                   <Menu.Item>
                     <button
                       className={'btn btn-danger-secondary-outline w-full'}

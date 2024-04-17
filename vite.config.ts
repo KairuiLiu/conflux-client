@@ -22,6 +22,12 @@ export default defineConfig({
         ws: true,
         changeOrigin: true,
       },
+      '/api/peer_signal': {
+        target: 'http://127.0.0.1:9877',
+        changeOrigin: true,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
       '/api': {
         target: 'http://127.0.0.1:9876',
         changeOrigin: true,
@@ -30,13 +36,10 @@ export default defineConfig({
       },
     },
   },
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
   build: {
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
     minify: true,
     sourcemap: false,
     rollupOptions: {
