@@ -13,6 +13,15 @@ export const socket = io('', {
   autoConnect: false,
 });
 
+// debug
+socket.on('connect', () => {
+  console.log('[WS-CONNECTED]');
+  setInterval(() => {
+    console.log('[WS-PING]')
+    socket.emit('PING-AND-FUCK-CHROME');
+  }, 1000);
+});
+
 export function useSocketListener<Msg extends ServerKeys>(
   msg: Msg,
   callback: (data: ExtractCbDataType<ServerToClientEvents[Msg]>) => void,

@@ -39,9 +39,10 @@ export default function Room() {
       },
     });
     return () => {
-      emitSocket('LEAVE_MEETING', {
-        muid,
-      });
+      socket.connected && !meetingContext.selfState.exiting &&
+        emitSocket('LEAVE_MEETING', {
+          muid,
+        });
       const context = useMeetingStore.getState();
       socket.connected && !context.selfState.exiting && socket.disconnect();
       console.log('disconnect');
