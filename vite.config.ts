@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import svgr from 'vite-plugin-svgr';
+import packageJson from './package.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,6 +14,8 @@ export default defineConfig({
   },
   define: {
     'process.env.MODE': JSON.stringify(process.env.MODE),
+    'process.env.BUILDTIME': JSON.stringify(new Date().toISOString()),
+    'process.env.VERSION': JSON.stringify(packageJson.version),
   },
   server: {
     host: '0.0.0.0',

@@ -9,6 +9,9 @@ export default function MeetSystemInfo() {
       {state.rtcStatus.map((data) => (
         <RTCPanel key={data.title} data={data} />
       ))}
+      <mark>VERSION: {process.env.VERSION}</mark>
+      <mark>BUILDTIME: {process.env.BUILDTIME}</mark>
+      <mark>MODE: {process.env.MODE}</mark>
       <mark>TODO Reactivity Component</mark>
     </div>
   );
