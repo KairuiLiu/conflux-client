@@ -22,10 +22,7 @@ const MeetingControlBar: React.FC<{
   const [showSetting, setShowSetting] = useState(false);
   const navigate = useNavigate();
   const meetingContext = useMeetingStore((d) => d);
-  const userSelf = meetingContext.meetingState.participants.find(
-    (d) => d.muid === meetingContext.selfMuid
-  )!;
-  const isHost = userSelf?.role === 'HOST';
+  const isHost = meetingContext.selfState?.role === 'HOST';
 
   return (
     <>
@@ -65,6 +62,7 @@ const MeetingControlBar: React.FC<{
               className="btn btn-gray-glass flex-shrink-0"
               onClick={() => {
                 if (
+                  !meetingContext.meetingDeviceState.enableShare &&
                   meetingContext.meetingState.participants.find(
                     (d) => d.state.screen
                   )
@@ -109,12 +107,12 @@ const MeetingControlBar: React.FC<{
                     className={'btn btn-danger-secondary-outline w-full'}
                     onClick={() => {
                       emitSocket('LEAVE_MEETING', {});
-                      meetingContext.setExiting(true);
+                      meetingContext.setSelfState.setExiting(true);
                       navigate('/exit', {
                         state: {
                           reason: 'exit',
                           roomId: meetingContext.meetingState.id,
-                          userName: userSelf?.name,
+                          userName: meetingContext.selfState?.name,
                         } as ExitInfo,
                       });
                     }}
@@ -128,12 +126,12 @@ const MeetingControlBar: React.FC<{
                       className={'btn btn-danger-secondary-outline w-full'}
                       onClick={() => {
                         emitSocket('FINISH_MEETING', {});
-                        meetingContext.setExiting(true);
+                        meetingContext.setSelfState.setExiting(true);
                         navigate('/exit', {
                           state: {
                             reason: 'finish',
                             roomId: meetingContext.meetingState.id,
-                            userName: userSelf?.name,
+                            userName: meetingContext.selfState?.name,
                           } as ExitInfo,
                         });
                       }}

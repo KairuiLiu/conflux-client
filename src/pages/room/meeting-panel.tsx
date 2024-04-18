@@ -67,12 +67,9 @@ const MeetingPanel: React.FC<{
 
   useEffect(() => {
     const res = [];
-    const userSelf = meetingContext.meetingState.participants.find(
-      (d) => d.muid === meetingContext.selfMuid
-    )!;
     res.push({
       user: {
-        name: userSelf?.name || state.user.name,
+        name: meetingContext.selfState.name,
         avatar: state.user.avatar,
       },
       camStream: videoStream,
@@ -83,7 +80,7 @@ const MeetingPanel: React.FC<{
     if (meetingContext.meetingDeviceState.enableShare) {
       res.push({
         user: {
-          name: userSelf?.name || state.user.name,
+          name: meetingContext.selfState.name,
           avatar: state.user.avatar,
         },
         camStream: null,

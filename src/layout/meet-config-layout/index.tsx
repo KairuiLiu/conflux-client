@@ -46,7 +46,7 @@ const MeetConfigLayout = ({
   );
 
   const user = {
-    name: meetingContext.unactiveUserName,
+    name: meetingContext.selfState.name,
     avatar: state.user.avatar,
   };
 

@@ -39,20 +39,43 @@ interface SetMeetingDeviceState {
   setEnableShare: (enableShare: boolean) => void;
 }
 
+interface SelfState {
+  muid: string;
+  camStream: MediaStream | null;
+  screenStream: MediaStream | null;
+  name: string;
+  exiting: boolean;
+  role: 'HOST' | 'PARTICIPANT';
+  participantSelf?: Participant;
+}
+
+interface SetSelfState {
+  setMuid: (muid: string) => void;
+  setCamStream: (camStream: MediaStream) => void;
+  setScreenStream: (screenStream: MediaStream) => void;
+  setName: (name: string) => void;
+  setExiting: (exiting: boolean) => void;
+  setParticipantSelf: (participantSelf: Participant) => void;
+  setRole: (role: 'HOST' | 'PARTICIPANT') => void;
+}
+
+interface PeerStream {
+  active: boolean;
+  stream: MediaStream;
+}
+
 interface MeetingContextState {
   meetingState: MeetingState;
   meetingDeviceState: MeetingDeviceState;
-  selfMuid: string;
-  unactiveUserName: string;
-  exiting: boolean;
+  selfState: SelfState;
+  meetingStream: Map<string, PeerStream>;
 }
 
 interface SetMeetingContext {
   setMeetingState: SetMeetingState;
   setMeetingDeviceState: SetMeetingDeviceState;
-  setSelfMuid: (selfMuid: string) => void;
-  setUnactiveUserName: (unAtiveUserName: string) => void;
-  setExiting: (exiting: boolean) => void;
+  setMeetingStream: (meetingStream: Map<string, PeerStream>) => void;
+  setSelfState: SetSelfState;
 }
 
 type MeetingContextType = MeetingContextState &

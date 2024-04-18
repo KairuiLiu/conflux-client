@@ -1,10 +1,10 @@
-import { MeetingContextType } from '@/types/meeting';
+import { MeetingContextType, PeerStream } from '@/types/meeting';
 import { create } from 'zustand';
 import initState from './init-state';
 import useGlobalStore from '../global-context';
 
-const useMeetingStore = create<MeetingContextType>((set) => {
-  return {
+const useMeetingStore = create<MeetingContextType>((set, get) => {
+  const res = {
     ...initState(),
     setMeetingState: {
       setId: (id: string) =>
@@ -15,14 +15,40 @@ const useMeetingStore = create<MeetingContextType>((set) => {
         set((state) => ({
           meetingState: { ...state.meetingState, meetingStartTime },
         })),
-      setOrganizer: (organizer) =>
+      setOrganizer: (organizer: { muid: string; name: string }) =>
         set((state) => ({
           meetingState: { ...state.meetingState, organizer },
         })),
-      setParticipants: (participants) =>
+      setParticipants: (participants: Participant[]) => {
+        const { muid } = get().selfState;
+        const newSelf = participants.find((p) => p.muid === muid);
+        res.setSelfState.setParticipantSelf(newSelf);
         set((state) => ({
           meetingState: { ...state.meetingState, participants },
-        })),
+        }));
+      },
+    },
+    setSelfState: {
+      setRole: (role: 'HOST' | 'PARTICIPANT') =>
+        set((state) => ({ selfState: { ...state.selfState, role } })),
+      setMuid: (muid: string) =>
+        set((state) => ({ selfState: { ...state.selfState, muid } })),
+      setCamStream: (cameraStream: MediaStream) =>
+        set((state) => ({ selfState: { ...state.selfState, cameraStream } })),
+      setScreenStream: (screenStream: MediaStream) =>
+        set((state) => ({ selfState: { ...state.selfState, screenStream } })),
+      setName: (name: string) =>
+        set((state) => ({ selfState: { ...state.selfState, name } })),
+      setExiting: (exiting: boolean) =>
+        set((state) => ({ selfState: { ...state.selfState, exiting } })),
+      setParticipantSelf: (participantSelf: Participant | undefined) => {
+        const { setRole, setName } = res.setSelfState;
+        participantSelf?.name && setName(participantSelf?.name || '');
+        participantSelf?.role && setRole(participantSelf?.role);
+        set((state) => ({
+          selfState: { ...state.selfState, participantSelf },
+        }));
+      },
     },
     setMeetingDeviceState: {
       setEnableCamera: (enableCamera: boolean) =>
@@ -54,16 +80,15 @@ const useMeetingStore = create<MeetingContextType>((set) => {
           meetingDeviceState: { ...state.meetingDeviceState, enableShare },
         })),
     },
-    setSelfMuid: (selfMuid: string) => set({ selfMuid }),
-    setUnactiveUserName: (unactiveUserName: string) =>
-      set({ unactiveUserName }),
-    setExiting: (exiting: boolean) => set({ exiting }),
+    setMeetingStream: (meetingStream: Map<string, PeerStream>) =>
+      set({ meetingStream }),
     resetMeetingContext: () =>
       set((pre) => ({
         ...pre,
         ...initState(),
       })),
   };
+  return res;
 });
 
 useGlobalStore.subscribe((cur, pre) => {

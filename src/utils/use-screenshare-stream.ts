@@ -26,7 +26,6 @@ const useScreenshareStream = (
         audio: enableAudio,
       })
       .then((newStream) => {
-        if (!enableShare) return Promise.reject();
         setStream(newStream);
 
         newStream.getTracks().forEach((track) => {
@@ -53,6 +52,10 @@ const useScreenshareStream = (
         setStream(null);
       }
     };
+  }, [enableShare, enableAudio]);
+
+  useEffect(() => {
+    if (!enableShare && stream) stopStream(stream);
   }, [enableShare, enableAudio, stream]);
 
   useEffect(() => {

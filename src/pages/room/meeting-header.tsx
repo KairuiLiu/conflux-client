@@ -83,14 +83,14 @@ const MeetingHeader: React.FC = () => {
                 </div>
                 <div className="flex  items-center gap-1">
                   <span>
-                    {window.location.origin}/meet/
+                    {window.location.origin}/room/
                     {meetingContext.meetingState.id}
                   </span>
                   <button
                     className="btn btn-text -scale-x-100 p-1"
                     onClick={() => {
                       writeClipboard(
-                        `${window.location.origin}/meet/${meetingContext.meetingState.id}`
+                        `${window.location.origin}/room/${meetingContext.meetingState.id}`
                       );
                     }}
                   >

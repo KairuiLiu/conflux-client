@@ -1,5 +1,5 @@
 import useGlobalStore from '@/context/global-context';
-import useMeetingContext from '@/context/meeting-context';
+import useMeetingStore from '@/context/meeting-context';
 import MeetConfigLayout from '@/layout/meet-config-layout';
 import toastConfig from '@/utils/toast-config';
 import { useEffect, useState } from 'react';
@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 export default function Join() {
-  const meetingContext = useMeetingContext((d) => d);
+  const meetingContext = useMeetingStore((d) => d);
   const state = useGlobalStore((d) => d);
   const { id } = useParams();
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function Join() {
 
   function onJoin() {
     const joinFetch = fetch(
-      `/api/meeting?id=${meetingContext.meetingState.id}&name=${meetingContext.unactiveUserName}`,
+      `/api/meeting?id=${meetingContext.meetingState.id}&name=${meetingContext.selfState.name}`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -30,9 +30,8 @@ export default function Join() {
       .then((d) => d.json())
       .then(({ code, data, msg }) => {
         if (code) {
-          toast.error(msg, toastConfig)
-        }
-        else {
+          toast.error(msg, toastConfig);
+        } else {
           meetingContext.setMeetingState.setTitle(data.title);
           meetingContext.setMeetingState.setOrganizer({
             muid: data.organizer.muid,
@@ -62,9 +61,9 @@ export default function Join() {
   useEffect(() => {
     setCanJoin(
       meetingContext.meetingState.id.length === 9 &&
-        meetingContext.unactiveUserName.length > 0
+        meetingContext.selfState.name.length > 0
     );
-  }, [meetingContext.meetingState.id, meetingContext.unactiveUserName]);
+  }, [meetingContext.meetingState.id, meetingContext.selfState.name]);
 
   return (
     <MeetConfigLayout
@@ -92,9 +91,9 @@ export default function Join() {
               <input
                 className="input"
                 placeholder="Your Name"
-                value={meetingContext.unactiveUserName}
+                value={meetingContext.selfState.name}
                 onChange={(e) => {
-                  meetingContext.setUnactiveUserName(e.target.value.trim());
+                  meetingContext.setSelfState.setName(e.target.value.trim());
                 }}
                 required
               ></input>

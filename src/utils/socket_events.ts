@@ -31,7 +31,7 @@ function useHandleSocketEvents(initMeetingContext: MeetingContextType) {
   useSyncSocket(
     'UPDATE_USER_STATE',
     {
-      muid: initMeetingContext.selfMuid,
+      muid: initMeetingContext.selfState.muid,
       state: getSt(initMeetingContext),
     },
     getSt(initMeetingContext),
@@ -47,7 +47,7 @@ function useHandleSocketEvents(initMeetingContext: MeetingContextType) {
   useSocketListener('USER_STATE_UPDATE', ({ data }) => {
     const curMeetingContext = useMeetingStore.getState();
     const user = curMeetingContext.meetingState.participants.find(
-      (user) => user.muid === data.muid
+      (p) => p.muid === data.muid
     );
     if (user) {
       user.state = data.state;
@@ -55,13 +55,17 @@ function useHandleSocketEvents(initMeetingContext: MeetingContextType) {
         ...curMeetingContext.meetingState.participants,
       ]);
     }
-    if (user?.muid === curMeetingContext.selfMuid) {
+    if (user?.muid === curMeetingContext.selfState.muid) {
       data.state.mic !== undefined &&
         initMeetingContext.setMeetingDeviceState.setEnableMic(data.state.mic);
       data.state.camera !== undefined &&
-        initMeetingContext.setMeetingDeviceState.setEnableCamera(data.state.camera);
+        initMeetingContext.setMeetingDeviceState.setEnableCamera(
+          data.state.camera
+        );
       data.state.screen !== undefined &&
-        initMeetingContext.setMeetingDeviceState.setEnableShare(data.state.screen);
+        initMeetingContext.setMeetingDeviceState.setEnableShare(
+          data.state.screen
+        );
     }
   });
 
@@ -70,25 +74,34 @@ function useHandleSocketEvents(initMeetingContext: MeetingContextType) {
     ({ data }) => {
       const curMeetingContext = useMeetingStore.getState();
       initMeetingContext.setMeetingState.setParticipants(data.participants);
-      initMeetingContext.setMeetingState.setOrganizer(data.organizer);
+      const organizerName =
+        data.participants.find(
+          (d: Participant) => d.muid === data.organizer.muid
+        )?.name || data.organizer.name;
+      initMeetingContext.setMeetingState.setOrganizer({
+        muid: data.organizer.muid,
+        name: organizerName,
+      });
       initMeetingContext.setMeetingState.setTitle(data.title!);
       initMeetingContext.setMeetingState.setMeetingStartTime(data.start_time);
 
       const selfInfo = data.participants.find(
-        (p: Participant) => p.muid === curMeetingContext.selfMuid
+        (p: Participant) => p.muid === curMeetingContext.selfState.muid
       );
-      if (curMeetingContext.selfMuid && !selfInfo) {
-        initMeetingContext.setExiting(true);
+      if (curMeetingContext.selfState.muid && !selfInfo) {
+        initMeetingContext.setSelfState.setExiting(true);
         navigate('/exit', {
           state: {
             reason: 'kicked',
             roomId: curMeetingContext.meetingState.id,
-            userName: selfInfo.name || initMeetingContext.unactiveUserName,
+            userName: curMeetingContext.selfState.name,
           } as ExitInfo,
         });
       } else {
         selfInfo?.state?.mic !== undefined &&
-          initMeetingContext.setMeetingDeviceState.setEnableMic(selfInfo.state.mic);
+          initMeetingContext.setMeetingDeviceState.setEnableMic(
+            selfInfo.state.mic
+          );
         selfInfo?.state?.camera !== undefined &&
           initMeetingContext.setMeetingDeviceState.setEnableCamera(
             selfInfo.state.camera
@@ -103,28 +116,25 @@ function useHandleSocketEvents(initMeetingContext: MeetingContextType) {
   );
 
   useSocketListener('FINISH_MEETING', () => {
-    initMeetingContext.setExiting(true);
+    initMeetingContext.setSelfState.setExiting(true);
     navigate('/exit', {
       state: {
         reason: 'finish',
         roomId: initMeetingContext.meetingState.id,
-        userName: initMeetingContext.unactiveUserName,
+        userName: initMeetingContext.selfState.name,
       } as ExitInfo,
     });
   });
 
   useSocketListener('disconnect', () => {
     const curMeetingContext = useMeetingStore.getState();
-    const selfInfo = curMeetingContext.meetingState.participants.find(
-      (p: Participant) => p.muid === curMeetingContext.selfMuid
-    );
 
-    initMeetingContext.setExiting(true);
+    initMeetingContext.setSelfState.setExiting(true);
     navigate('/exit', {
       state: {
         reason: 'network',
         roomId: initMeetingContext.meetingState.id,
-        userName: selfInfo?.name || initMeetingContext.unactiveUserName,
+        userName: curMeetingContext.selfState.name,
       } as ExitInfo,
     });
   });

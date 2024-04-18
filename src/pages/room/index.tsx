@@ -16,7 +16,7 @@ export default function Room() {
   const navigator = useNavigate();
 
   useEffect(() => {
-    meetingContext.setExiting(true);
+    meetingContext.setSelfState.setExiting(true);
     if (id !== meetingContext.meetingState.id) {
       navigator('/join/' + id);
     }
@@ -27,10 +27,10 @@ export default function Room() {
 
     // TODO: Replace with peerjs muid
     const muid = v4();
-    meetingContext.setSelfMuid(muid);
+    meetingContext.setSelfState.setMuid(muid);
     emitSocket('JOIN_MEETING', {
       muid,
-      user_name: meetingContext.unactiveUserName,
+      user_name: meetingContext.selfState.name,
       avatar: '' && useGlobalStore.getState().user.avatar, // TODO: Next version
       state: {
         mic: meetingContext.meetingDeviceState.enableMic,
@@ -43,7 +43,7 @@ export default function Room() {
         muid,
       });
       const context = useMeetingStore.getState();
-      socket.connected && !context.exiting && socket.disconnect();
+      socket.connected && !context.selfState.exiting && socket.disconnect();
       console.log('disconnect');
     };
   }, [meetingContext.meetingState.id]);

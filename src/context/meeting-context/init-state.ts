@@ -32,9 +32,16 @@ function initState(): MeetingContextState {
         '',
       enableShare: false,
     },
-    selfMuid: '',
-    unactiveUserName: globalState.user.name,
-    exiting: false,
+    selfState: {
+      muid: '',
+      camStream: null,
+      screenStream: null,
+      name: globalState.user.name,
+      exiting: false,
+      participantSelf: undefined,
+      role: 'PARTICIPANT',
+    },
+    meetingStream: new Map(),
   };
 }
 

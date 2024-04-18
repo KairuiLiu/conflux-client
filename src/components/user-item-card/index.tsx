@@ -8,7 +8,7 @@ import { EllipsisHorizontalCircleIcon } from '@heroicons/react/24/outline';
 import MicroPhoneMuteIcon from '@/assets/MicrophoneMuteIcon.svg?react';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react/jsx-runtime';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { emitSocket } from '@/utils/use-socket';
 import useMeetingStore from '@/context/meeting-context';
 
@@ -19,11 +19,12 @@ const UserItemCard: React.FC<{
   const [isOpen, setIsOpen] = useState(false);
   const [newName, setNewName] = useState(user.name);
 
-  const isSelfHost =
-    meetingContext.meetingState.participants.find(
-      (d) => d.muid === meetingContext.selfMuid
-    )?.role === 'HOST';
-  const canOperate = meetingContext.selfMuid === user.muid || isSelfHost;
+  const isSelfHost = meetingContext.selfState?.role === 'HOST';
+  const canOperate = meetingContext.selfState.muid === user.muid || isSelfHost;
+
+  useEffect(() => {
+    setNewName(user.name);
+  }, [user.name]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateMidaState = (v: any) => {
@@ -127,7 +128,9 @@ const UserItemCard: React.FC<{
             <button
               className={
                 'btn btn-remove-focus btn-text p-1 ' +
-                (!user.state.mic || !canOperate ? 'btn-disabled-icon-user-management' : '')
+                (!user.state.mic || !canOperate
+                  ? 'btn-disabled-icon-user-management'
+                  : '')
               }
               disabled={!user.state.mic || !canOperate}
               onClick={() => updateMidaState({ mic: false })}
@@ -143,7 +146,9 @@ const UserItemCard: React.FC<{
             <button
               className={
                 'btn btn-remove-focus btn-text p-1 ' +
-                (!user.state.camera || !canOperate ? 'btn-disabled-icon-user-management' : '')
+                (!user.state.camera || !canOperate
+                  ? 'btn-disabled-icon-user-management'
+                  : '')
               }
               disabled={!user.state.camera || !canOperate}
               onClick={() => updateMidaState({ camera: false })}
@@ -155,7 +160,9 @@ const UserItemCard: React.FC<{
             <button
               className={
                 'btn btn-remove-focus btn-text p-1 ' +
-                (!user.state.screen || !canOperate ? 'btn-disabled-icon-user-management' : '')
+                (!user.state.screen || !canOperate
+                  ? 'btn-disabled-icon-user-management'
+                  : '')
               }
               disabled={!user.state.screen || !canOperate}
               onClick={() => updateMidaState({ screen: false })}

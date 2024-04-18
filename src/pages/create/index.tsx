@@ -1,5 +1,5 @@
 import useGlobalStore from '@/context/global-context';
-import useMeetingContext from '@/context/meeting-context';
+import useMeetingStore from '@/context/meeting-context';
 import MeetConfigLayout from '@/layout/meet-config-layout';
 import toastConfig from '@/utils/toast-config';
 import { useEffect, useState } from 'react';
@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 
 export default function Create() {
   const state = useGlobalStore((d) => d);
-  const meetingContext = useMeetingContext((d) => d);
+  const meetingContext = useMeetingStore((d) => d);
   const [canCreate, setCanCreate] = useState(false);
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ export default function Create() {
         authorization: `Bearer ${state.siteConfig.token}`,
       },
       body: JSON.stringify({
-        organizer_name: meetingContext.unactiveUserName,
+        organizer_name: meetingContext.selfState.name,
         title: meetingContext.meetingState.title,
       }),
     })
@@ -34,7 +34,7 @@ export default function Create() {
         else {
           meetingContext.setMeetingState.setOrganizer({
             ...meetingContext.meetingState.organizer,
-            name: meetingContext.unactiveUserName,
+            name: meetingContext.selfState.name,
           });
           meetingContext.setMeetingState.setId(`${data.id}`);
           meetingContext.setMeetingState.setMeetingStartTime(Date.now());
@@ -53,10 +53,10 @@ export default function Create() {
 
   useEffect(() => {
     setCanCreate(
-      meetingContext.unactiveUserName.length > 0 &&
+      meetingContext.selfState.name.length > 0 &&
         meetingContext.meetingState.title!.length > 0
     );
-  }, [meetingContext.unactiveUserName, meetingContext.meetingState.title]);
+  }, [meetingContext.selfState.name, meetingContext.meetingState.title]);
 
   return (
     <MeetConfigLayout
@@ -82,9 +82,9 @@ export default function Create() {
               <input
                 className="input"
                 placeholder="Your Name"
-                value={meetingContext.unactiveUserName}
+                value={meetingContext.selfState.name}
                 onChange={(e) => {
-                  meetingContext.setUnactiveUserName(e.target.value.trim());
+                  meetingContext.setSelfState.setName(e.target.value.trim());
                 }}
                 required
               ></input>
