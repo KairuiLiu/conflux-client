@@ -3,7 +3,7 @@
 import useGlobalStore from '@/context/global-context';
 import useMeetingStore from '@/context/meeting-context';
 import { useEffect, useCallback } from 'react';
-import { Slide, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import toastConfig from './toast-config';
 

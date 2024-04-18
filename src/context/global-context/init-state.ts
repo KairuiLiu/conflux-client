@@ -1,5 +1,5 @@
 import toastConfig from '@/utils/toast-config';
-import { Slide, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
 
 export function initState(
