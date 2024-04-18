@@ -8,6 +8,7 @@ interface SocketBase {
 declare interface ClientDataType<T, D> {
   type: T;
   data: D;
+  time: number;
   message?: string;
 }
 

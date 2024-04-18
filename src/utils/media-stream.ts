@@ -1,5 +1,8 @@
 // setoutput
 
+import { toast } from 'react-toastify';
+import toastConfig from './toast-config';
+
 export async function stopStream(stream: MediaStream | null) {
   if (stream) {
     stream.getTracks().forEach((track) => track.stop());
@@ -11,7 +14,8 @@ export async function getStream(type: 'audio' | 'video') {
     const stream = await navigator.mediaDevices.getUserMedia({ [type]: true });
     return stream;
   } catch (error) {
-    console.info(`Error on create ${type} stream: `, error);
+    console.info(`[ERROR] on create ${type} stream `, error);
+    toast.error(`Error on get media stream`, toastConfig);
   }
 }
 
@@ -29,6 +33,7 @@ export async function setStreamWithId(
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     setStream(stream);
   } catch (error) {
-    console.info(`Error on create ${type} stream: `, error);
+    console.info(`[ERROR] on create ${type} stream `, error);
+    toast.error(`Error on get media stream`, toastConfig);
   }
 }

@@ -1,8 +1,10 @@
 import useGlobalStore from '@/context/global-context';
 import useMeetingContext from '@/context/meeting-context';
 import MeetConfigLayout from '@/layout/meet-config-layout';
+import toastConfig from '@/utils/toast-config';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function Create() {
   const state = useGlobalStore((d) => d);
@@ -15,7 +17,7 @@ export default function Create() {
   }, []);
 
   async function onCreate() {
-    fetch('/api/meeting', {
+    const createFetch = fetch('/api/meeting', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,7 +30,7 @@ export default function Create() {
     })
       .then((d) => d.json())
       .then(({ code, data, msg }) => {
-        if (code) console.info('fetch token error', msg);
+        if (code) throw msg;
         else {
           meetingContext.setMeetingState.setOrganizer({
             ...meetingContext.meetingState.organizer,
@@ -38,8 +40,15 @@ export default function Create() {
           meetingContext.setMeetingState.setMeetingStartTime(Date.now());
           navigate(`/room/${data.id}`);
         }
-      })
-      .catch((e) => console.info(e));
+      });
+    toast.promise(
+      createFetch,
+      {
+        pending: 'Creating the meeting',
+        error: 'Create Failed.',
+      },
+      toastConfig
+    );
   }
 
   useEffect(() => {

@@ -1,8 +1,10 @@
 import useGlobalStore from '@/context/global-context';
 import useMeetingContext from '@/context/meeting-context';
 import MeetConfigLayout from '@/layout/meet-config-layout';
+import toastConfig from '@/utils/toast-config';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function Join() {
   const meetingContext = useMeetingContext((d) => d);
@@ -16,15 +18,20 @@ export default function Join() {
   }, []);
 
   function onJoin() {
-    fetch(`/api/meeting?id=${meetingContext.meetingState.id}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        authorization: `Bearer ${state.siteConfig.token}`,
-      },
-    })
+    const joinFetch = fetch(
+      `/api/meeting?id=${meetingContext.meetingState.id}&name=${meetingContext.unactiveUserName}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${state.siteConfig.token}`,
+        },
+      }
+    )
       .then((d) => d.json())
       .then(({ code, data, msg }) => {
-        if (code) console.info('error', msg);
+        if (code) {
+          toast.error(msg, toastConfig)
+        }
         else {
           meetingContext.setMeetingState.setTitle(data.title);
           meetingContext.setMeetingState.setOrganizer({
@@ -35,8 +42,15 @@ export default function Join() {
           meetingContext.setMeetingState.setParticipants(data.participants);
           navigate(`/room/${data.id}`);
         }
-      })
-      .catch((e) => console.info(e));
+      });
+    toast.promise(
+      joinFetch,
+      {
+        pending: 'Joining the meeting',
+        error: 'Meeting not found.',
+      },
+      toastConfig
+    );
   }
 
   useEffect(() => {

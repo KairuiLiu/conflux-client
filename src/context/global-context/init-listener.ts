@@ -1,4 +1,6 @@
 import { refreshMediaDevice } from '@/utils/media-devices';
+import toastConfig from '@/utils/toast-config';
+import { toast } from 'react-toastify';
 
 let registeredMeidaChange = false;
 let registeredPermissionChange = false;
@@ -33,7 +35,11 @@ function addMediaPermissionListener(
       })
       .catch(() => {});
   } catch (error) {
-    console.info(error);
+    console.info('[ERROR] on getting permission ', error);
+    toast.error(
+      'Camera access denied. Please check settings and try again.',
+      toastConfig
+    );
   }
 }
 

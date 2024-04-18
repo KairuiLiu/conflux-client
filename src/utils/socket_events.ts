@@ -11,39 +11,36 @@ function getSt(meetingContext: MeetingContextType) {
   };
 }
 
-function useHandleSocketEvents(meetingContext: MeetingContextType) {
+function useHandleSocketEvents(initMeetingContext: MeetingContextType) {
   const navigate = useNavigate();
 
-  useSocketListener('RES_JOIN_MEETING', ({ data, message }) => {
-    // const curMeetingContext = useMeetingStore.getState();
-    if (message !== 'JOIN_SUCCESS') {
-      console.info('join meeting failed');
-      return;
-    }
-    meetingContext.setMeetingState.setTitle(data.title);
-    meetingContext.setMeetingState.setMeetingStartTime(data.start_time);
-    meetingContext.setMeetingState.setOrganizer(data.organizer);
-    meetingContext.setMeetingState.setParticipants(data.participants);
-    // emitSocket('UPDATE_USER_STATE', {
-    //   muid: curMeetingContext.selfMuid,
-    //   state: getSt(meetingContext),
-    // });
-  });
+  useSocketListener(
+    'RES_JOIN_MEETING',
+    ({ data, message }) => {
+      if (message !== 'SUCCESS') return;
+
+      initMeetingContext.setMeetingState.setTitle(data.title);
+      initMeetingContext.setMeetingState.setMeetingStartTime(data.start_time);
+      initMeetingContext.setMeetingState.setOrganizer(data.organizer);
+      initMeetingContext.setMeetingState.setParticipants(data.participants);
+    },
+    true,
+    'UPDATE_USER_STATE'
+  );
 
   useSyncSocket(
     'UPDATE_USER_STATE',
     {
-      muid: meetingContext.selfMuid,
-      state: getSt(meetingContext),
+      muid: initMeetingContext.selfMuid,
+      state: getSt(initMeetingContext),
     },
-    getSt(meetingContext),
+    getSt(initMeetingContext),
     (d) => !!(d as { muid: string }).muid
   );
 
   useSocketListener('RES_UPDATE_USER_STATE', ({ message }) => {
-    if (message === 'MULTI_SCREEN_SHARE') {
-      console.info('Other user is screen sharing');
-      meetingContext.setMeetingDeviceState.setEnableShare(false);
+    if (message !== 'SUCCESS') {
+      initMeetingContext.setMeetingDeviceState.setEnableShare(false);
     }
   });
 
@@ -54,60 +51,64 @@ function useHandleSocketEvents(meetingContext: MeetingContextType) {
     );
     if (user) {
       user.state = data.state;
-      meetingContext.setMeetingState.setParticipants([
+      initMeetingContext.setMeetingState.setParticipants([
         ...curMeetingContext.meetingState.participants,
       ]);
     }
     if (user?.muid === curMeetingContext.selfMuid) {
       data.state.mic !== undefined &&
-        meetingContext.setMeetingDeviceState.setEnableMic(data.state.mic);
+        initMeetingContext.setMeetingDeviceState.setEnableMic(data.state.mic);
       data.state.camera !== undefined &&
-        meetingContext.setMeetingDeviceState.setEnableCamera(data.state.camera);
+        initMeetingContext.setMeetingDeviceState.setEnableCamera(data.state.camera);
       data.state.screen !== undefined &&
-        meetingContext.setMeetingDeviceState.setEnableShare(data.state.screen);
+        initMeetingContext.setMeetingDeviceState.setEnableShare(data.state.screen);
     }
   });
 
-  useSocketListener('USER_UPDATE', ({ data }) => {
-    const curMeetingContext = useMeetingStore.getState();
-    meetingContext.setMeetingState.setParticipants(data.participants);
-    meetingContext.setMeetingState.setOrganizer(data.organizer);
-    meetingContext.setMeetingState.setTitle(data.title!);
-    meetingContext.setMeetingState.setMeetingStartTime(data.start_time);
+  useSocketListener(
+    'USER_UPDATE',
+    ({ data }) => {
+      const curMeetingContext = useMeetingStore.getState();
+      initMeetingContext.setMeetingState.setParticipants(data.participants);
+      initMeetingContext.setMeetingState.setOrganizer(data.organizer);
+      initMeetingContext.setMeetingState.setTitle(data.title!);
+      initMeetingContext.setMeetingState.setMeetingStartTime(data.start_time);
 
-    const selfInfo = data.participants.find(
-      (p: Participant) => p.muid === curMeetingContext.selfMuid
-    );
-    if (curMeetingContext.selfMuid && !selfInfo) {
-      meetingContext.setExiting(true);
-      navigate('/exit', {
-        state: {
-          reason: 'kicked',
-          roomId: curMeetingContext.meetingState.id,
-          userName: selfInfo.name || meetingContext.unactiveUserName,
-        } as ExitInfo,
-      });
-    } else {
-      selfInfo?.state?.mic !== undefined &&
-        meetingContext.setMeetingDeviceState.setEnableMic(selfInfo.state.mic);
-      selfInfo?.state?.camera !== undefined &&
-        meetingContext.setMeetingDeviceState.setEnableCamera(
-          selfInfo.state.camera
-        );
-      selfInfo?.state?.screen !== undefined &&
-        meetingContext.setMeetingDeviceState.setEnableShare(
-          selfInfo.state.screen
-        );
-    }
-  });
+      const selfInfo = data.participants.find(
+        (p: Participant) => p.muid === curMeetingContext.selfMuid
+      );
+      if (curMeetingContext.selfMuid && !selfInfo) {
+        initMeetingContext.setExiting(true);
+        navigate('/exit', {
+          state: {
+            reason: 'kicked',
+            roomId: curMeetingContext.meetingState.id,
+            userName: selfInfo.name || initMeetingContext.unactiveUserName,
+          } as ExitInfo,
+        });
+      } else {
+        selfInfo?.state?.mic !== undefined &&
+          initMeetingContext.setMeetingDeviceState.setEnableMic(selfInfo.state.mic);
+        selfInfo?.state?.camera !== undefined &&
+          initMeetingContext.setMeetingDeviceState.setEnableCamera(
+            selfInfo.state.camera
+          );
+        selfInfo?.state?.screen !== undefined &&
+          initMeetingContext.setMeetingDeviceState.setEnableShare(
+            selfInfo.state.screen
+          );
+      }
+    },
+    true
+  );
 
   useSocketListener('FINISH_MEETING', () => {
-    meetingContext.setExiting(true);
+    initMeetingContext.setExiting(true);
     navigate('/exit', {
       state: {
         reason: 'finish',
-        roomId: meetingContext.meetingState.id,
-        userName: meetingContext.unactiveUserName,
+        roomId: initMeetingContext.meetingState.id,
+        userName: initMeetingContext.unactiveUserName,
       } as ExitInfo,
     });
   });
@@ -118,12 +119,12 @@ function useHandleSocketEvents(meetingContext: MeetingContextType) {
       (p: Participant) => p.muid === curMeetingContext.selfMuid
     );
 
-    meetingContext.setExiting(true);
+    initMeetingContext.setExiting(true);
     navigate('/exit', {
       state: {
         reason: 'network',
-        roomId: meetingContext.meetingState.id,
-        userName: selfInfo?.name || meetingContext.unactiveUserName,
+        roomId: initMeetingContext.meetingState.id,
+        userName: selfInfo?.name || initMeetingContext.unactiveUserName,
       } as ExitInfo,
     });
   });

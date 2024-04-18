@@ -3,6 +3,8 @@ import { refreshMediaDevice } from '@/utils/media-devices';
 import { useEffect, useState } from 'react';
 import testSound from '@/assets/Bluestone_Alley_clip.mp3';
 import testSoundFull from '@/assets/Bluestone_Alley.mp3';
+import { toast } from 'react-toastify';
+import toastConfig from './toast-config';
 
 const useSpeakerStream = (
   speakerLabel: string,
@@ -43,7 +45,8 @@ const useSpeakerStream = (
           element.play();
           setElem(element);
         } catch (error) {
-          console.info('Audio playback error:', error);
+          console.info('[ERROR] Audio playback error:', error);
+          toast.info('Audio playback error', toastConfig);
         }
       }
     }

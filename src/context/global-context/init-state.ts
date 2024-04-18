@@ -1,3 +1,5 @@
+import toastConfig from '@/utils/toast-config';
+import { Slide, toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
 
 export function initState(
@@ -106,12 +108,15 @@ function fetchConfig(
 
     .then((d) => d.json())
     .then((res) => {
-      if (res.code) console.info('fetch token error', res.msg);
+      if (res.code) throw res.msg;
       else
         setState((state) => ({
           ...state,
           siteConfig: res.data,
         }));
     })
-    .catch((e) => console.info('fetch error', e));
+    .catch((e) => {
+      console.info('[ERROR] Fetch config failed ', e);
+      toast.error('Network error, try again later.', toastConfig);
+    });
 }

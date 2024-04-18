@@ -12,6 +12,8 @@ import { useNavigate } from 'react-router-dom';
 import useMeetingStore from '@/context/meeting-context';
 import { v4 } from 'uuid';
 import { emitSocket } from '@/utils/use-socket';
+import { toast } from 'react-toastify';
+import toastConfig from '@/utils/toast-config';
 
 const MeetingControlBar: React.FC<{
   setEnableScreenShareStream: (enableShare: boolean) => void;
@@ -62,9 +64,16 @@ const MeetingControlBar: React.FC<{
             <button
               className="btn btn-gray-glass flex-shrink-0"
               onClick={() => {
-                setEnableScreenShareStream(
-                  !meetingContext.meetingDeviceState.enableShare
-                );
+                if (
+                  meetingContext.meetingState.participants.find(
+                    (d) => d.state.screen
+                  )
+                )
+                  toast.error('Other user is screen sharing', toastConfig);
+                else
+                  setEnableScreenShareStream(
+                    !meetingContext.meetingDeviceState.enableShare
+                  );
               }}
             >
               <WindowIcon className="h-4 w-4 text-gray-600" />

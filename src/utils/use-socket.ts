@@ -3,7 +3,11 @@
 import useGlobalStore from '@/context/global-context';
 import useMeetingStore from '@/context/meeting-context';
 import { useEffect, useCallback } from 'react';
+import { Slide, toast } from 'react-toastify';
 import { io } from 'socket.io-client';
+import toastConfig from './toast-config';
+
+const timeStampPool = new Map<string, number>();
 
 export const socket = io('', {
   autoConnect: false,
@@ -11,22 +15,34 @@ export const socket = io('', {
 
 export function useSocketListener<Msg extends ServerKeys>(
   msg: Msg,
-  callback: (data: ExtractCbDataType<ServerToClientEvents[Msg]>) => void
+  callback: (data: ExtractCbDataType<ServerToClientEvents[Msg]>) => void,
+  totalOrder: boolean = false,
+  k: string = msg
 ) {
   const stableCallback = useCallback(callback, []);
 
   useEffect(() => {
     socket.disconnected && socket.connect();
+    console.log(`[WS-LISTENING] ${msg}}`);
     const cb = (data: any) => {
-      console.log(`REV [${msg}]`, data);
+      console.log(`[WS-REV] ${msg}`, data);
+      const { time, message } = data;
+      if (totalOrder) {
+        if (timeStampPool.has(k) && timeStampPool.get(k)! > time) {
+          console.log(`[WS-PASS] ${k} ${data}`);
+        }
+        timeStampPool.set(k, time);
+      }
+      if (message && message !== 'SUCCESS') toast.info(message, toastConfig);
       return stableCallback(data);
     };
     socket.on(msg, cb as any);
 
     return () => {
-      socket.off(msg, stableCallback as any);
+      console.log(`[WS-STOPING] ${msg}`);
+      socket.off(msg, cb as any);
     };
-  }, [msg, stableCallback]);
+  }, [msg, stableCallback, totalOrder]);
 }
 
 export function useSyncSocket<Msg extends ClientKeys>(
