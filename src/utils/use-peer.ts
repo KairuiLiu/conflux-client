@@ -1,56 +1,87 @@
-import useMeetingStore from '@/context/meeting-context';
+import { useRef, useEffect, useState } from 'react';
 import Peer from 'peerjs';
-import { useEffect } from 'react';
+import useMeetingStore from '@/context/meeting-context';
 
-const usePeerConnections = () => {
-  const meetingContext = useMeetingStore((d) => d);
+const usePeer = () => {
+  const {
+    meetingState,
+    selfState,
+    meetingStream,
+    setMeetingStream,
+    setSelfState,
+  } = useMeetingStore();
+  const [peer, setPeer] = useState<Peer | null>(null);
+
+  const selfStateRef = useRef(selfState);
+  const meetingStreamRef = useRef(meetingStream);
+
+  // 更新 ref 以确保它们总是指向最新的 state
+  useEffect(() => {
+    selfStateRef.current = selfState;
+    meetingStreamRef.current = meetingStream;
+  }, [selfState, meetingStream]);
 
   useEffect(() => {
-    const peer = new Peer();
-    peer.on('open', (id) => {
-      meetingContext.setSelfState.setMuid(id);
+    const newPeer = new Peer();
+    setPeer(newPeer);
+
+    newPeer.on('open', (id) => {
+      console.log('peer open', id);
+      setSelfState.setMuid(id);
     });
 
-    peer.on('call', (call) => {
-      // navigator.mediaDevices
-      //   .getUserMedia({ video: true, audio: true })
-      //   .then((stream) => {
-      //     call.answer(stream);
-      //     handleStream(call, stream);
-      //   })
-      //   .catch((err) => {
-      //     console.error('Failed to get local stream', err);
-      //   });
-
-      if (!meetingContext.meetingStream.has('TODO')) {
-        console.error('Stream not found');
-        return;
-      }
-      const stream = meetingContext.meetingStream.get('TODO');
-      if (stream) call.answer(stream.stream);
-
-      call.on('stream', (remoteStream) => {
-        console.log('stream', remoteStream);
+    newPeer.on('call', (call) => {
+      console.log('on call', call);
+      const localStream = selfStateRef.current.camStream;
+      call.answer(localStream ? localStream : undefined);
+      call.on('stream', (stream) => {
+        console.log('stream', stream);
+        const newMeetingStream = new Map(meetingStreamRef.current);
+        newMeetingStream.set(call.peer, { active: true, stream });
+        setMeetingStream(newMeetingStream);
       });
     });
 
-    return () => peer.destroy();
-  }, []);
+    return () => newPeer.destroy();
+  }, [setMeetingStream, setSelfState]);
 
   useEffect(() => {
-    // muid in steamMap
-    const streamMuid = [...meetingContext.meetingStream]
-      .map((d) => d[0])
-      .sort();
-    const particapantsMuid = meetingContext.meetingState.participants.map(
-      (d) => d.muid
-    );
-    console.log(streamMuid);
-    console.log(particapantsMuid);
-    // find muid in particapants but not in map -> connect peer
+    if (!peer) return;
 
-    // find muid in map but not in particapants -> disconnect
-  }, [meetingContext.meetingState.participants, meetingContext.meetingStream]);
+    const streamMuids = new Set(meetingStreamRef.current.keys());
+    const participantMuids = new Set(
+      meetingState.participants.map((p) => p.muid)
+    );
+
+    participantMuids.forEach((muid) => {
+      if (
+        muid &&
+        !streamMuids.has(muid) &&
+        muid !== selfStateRef.current.muid &&
+        selfStateRef.current.camStream
+      ) {
+        console.log('find new participant', muid);
+        const call = peer.call(muid, selfStateRef.current.camStream);
+        call.on('stream', (stream) => {
+          console.log('new stream', stream);
+          const newMeetingStream = new Map(meetingStreamRef.current);
+          newMeetingStream.set(muid, { active: true, stream });
+          setMeetingStream(newMeetingStream);
+        });
+      }
+    });
+
+    streamMuids.forEach((muid) => {
+      console.log('lost connection', muid);
+      if (!participantMuids.has(muid)) {
+        const newMeetingStream = new Map(meetingStreamRef.current);
+        newMeetingStream.delete(muid);
+        setMeetingStream(newMeetingStream);
+      }
+    });
+  }, [peer, meetingState.participants, setMeetingStream]);
+
+  return peer;
 };
 
-export default usePeerConnections;
+export default usePeer;

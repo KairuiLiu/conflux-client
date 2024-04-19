@@ -51,8 +51,8 @@ interface SelfState {
 
 interface SetSelfState {
   setMuid: (muid: string) => void;
-  setCamStream: (camStream: MediaStream) => void;
-  setScreenStream: (screenStream: MediaStream) => void;
+  setCamStream: (camStream: MediaStream | null) => void;
+  setScreenStream: (screenStream: MediaStream | null) => void;
   setName: (name: string) => void;
   setExiting: (exiting: boolean) => void;
   setParticipantSelf: (participantSelf: Participant) => void;
@@ -82,3 +82,12 @@ type MeetingContextType = MeetingContextState &
   SetMeetingContext & {
     resetMeetingContext: () => void;
   };
+
+type UserPanelConfig = {
+  user?: Pick<UserInfo, 'name' | 'avatar'>;
+  camStream?: MediaStream | null;
+  screenStream?: MediaStream | null;
+  mirrroCamera?: boolean;
+  expandCamera?: boolean;
+  isScreenShareControlPanel?: boolean;
+};

@@ -37,17 +37,24 @@ export default function MeetSetting() {
   const [mirrorCamera, setMirrorCamera] = useState(state.user.mirrorCamera);
   const [expandCamera, setExpandCamera] = useState(state.user.expandCamera);
 
-  const [videoStream] = useMediaStream(
+  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  useMediaStream(
     selectedCameraLabel,
     setSelectedCameraLabel,
     true,
+    videoStream,
+    setVideoStream,
     'video',
     'camera'
   );
-  const [audioStream] = useMediaStream(
+
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
+  useMediaStream(
     selectedMicrophoneLabel,
     setSelectedMicrophoneLabel,
     true,
+    audioStream,
+    setAudioStream,
     'audio',
     'microphone'
   );

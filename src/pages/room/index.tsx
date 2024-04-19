@@ -5,15 +5,17 @@ import MeetingPanel from './meeting-panel';
 import { useNavigate, useParams } from 'react-router-dom';
 import useMeetingStore from '@/context/meeting-context';
 import { emitSocket, socket } from '@/utils/use-socket';
-import { v4 } from 'uuid';
 import useHandleSocketEvents from '../../utils/socket_events';
 import useGlobalStore from '@/context/global-context';
+import usePeer from '@/utils/use-peer';
 
 export default function Room() {
   const [showUserPanel, setShowUserPanel] = useState(false);
   const { id } = useParams();
   const meetingContext = useMeetingStore((d) => d);
   const navigator = useNavigate();
+
+  usePeer();
 
   useEffect(() => {
     meetingContext.setSelfState.setExiting(true);
@@ -23,11 +25,9 @@ export default function Room() {
   }, [id, meetingContext.meetingState.id, navigator]);
 
   useEffect(() => {
-    if (!meetingContext.meetingState.id) return;
-
-    // TODO: Replace with peerjs muid
-    const muid = v4();
-    meetingContext.setSelfState.setMuid(muid);
+    const { id } = meetingContext.meetingState;
+    const { muid } = meetingContext.selfState;
+    if (!id || !muid) return;
     emitSocket('JOIN_MEETING', {
       muid,
       user_name: meetingContext.selfState.name,
@@ -39,7 +39,7 @@ export default function Room() {
       },
     });
     return () => {
-      socket.connected && !meetingContext.selfState.exiting &&
+      socket.connected &&
         emitSocket('LEAVE_MEETING', {
           muid,
         });
@@ -47,11 +47,10 @@ export default function Room() {
       socket.connected && !context.selfState.exiting && socket.disconnect();
       console.log('disconnect');
     };
-  }, [meetingContext.meetingState.id]);
+  }, [meetingContext.meetingState.id, meetingContext.selfState.muid]);
 
   useHandleSocketEvents(meetingContext);
 
-  // TODO INTERVAL OF UPDATE USER STATE
   return (
     <div className="flex h-dvh max-h-dvh flex-grow flex-col">
       <MeetingHeader />

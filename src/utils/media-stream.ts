@@ -21,7 +21,7 @@ export async function getStream(type: 'audio' | 'video') {
 
 export async function setStreamWithId(
   stream: MediaStream | null,
-  setStream: React.Dispatch<React.SetStateAction<MediaStream | null>>,
+  setStream: (stream: MediaStream | null) => void,
   deviceId: string,
   type: 'audio' | 'video'
 ) {

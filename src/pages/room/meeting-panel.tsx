@@ -7,6 +7,7 @@ import useScreenshareStream from '@/utils/use-screenshare-stream';
 import MeetingControlBar from './meeting-control-bar';
 import useMeetingStore from '@/context/meeting-context';
 import { ScreenShareControlPanel } from '@/components/screen-share-control-panel';
+import { UserPanelConfig } from '@/types/meeting';
 
 const MeetingPanel: React.FC<{
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,35 +16,39 @@ const MeetingPanel: React.FC<{
   const meetingContext = useMeetingStore((d) => d);
 
   // Audio
+  // TODO Audio Process
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
   useMediaStream(
     meetingContext.meetingDeviceState.micLabel,
     meetingContext.setMeetingDeviceState.setMicLabel,
     meetingContext.meetingDeviceState.enableMic,
+    audioStream,
+    setAudioStream,
     'audio',
     'microphone'
   );
 
-  // useSpeakerStream(
-  //   meetingContext.meetingDeviceState.speakerLabel,
-  //   meetingContext.setMeetingDeviceState.setSpeakerLabel
-  // );
-
   // Video
-  const [screenShareStream, enableScreenShareAudio, setEnableScreenShareAudio] =
+  // TODO AUDIO PROCESS
+  const [enableScreenShareAudio, setEnableScreenShareAudio] =
     useScreenshareStream(
       meetingContext.meetingDeviceState.enableShare,
-      meetingContext.setMeetingDeviceState.setEnableShare
+      meetingContext.setMeetingDeviceState.setEnableShare,
+      meetingContext.selfState.screenStream,
+      meetingContext.setSelfState.setScreenStream
     );
 
-  const [videoStream] = useMediaStream(
+  useMediaStream(
     meetingContext.meetingDeviceState.cameraLabel,
     meetingContext.setMeetingDeviceState.setCameraLabel,
     meetingContext.meetingDeviceState.enableCamera,
+    meetingContext.selfState.camStream,
+    meetingContext.setSelfState.setCamStream,
     'video',
     'camera'
   );
 
-  // participant
+  // todo share participant
   const itemCount = useMemo(
     () =>
       meetingContext.meetingState.participants.length +
@@ -53,65 +58,61 @@ const MeetingPanel: React.FC<{
       meetingContext.meetingDeviceState.enableShare,
     ]
   );
+
   const [videoPanelRef, videoPanelSize] = useVideoPanelSize(itemCount);
   const [userPanelConfigArr, setUsePanelConfigArr] = useState<
-    {
-      user?: Pick<UserInfo, 'name' | 'avatar'>;
-      camStream?: MediaStream | null;
-      screenStream?: MediaStream | null;
-      mirrroCamera?: boolean;
-      expandCamera?: boolean;
-      isScreenShareControlPanel?: boolean;
-    }[]
+    UserPanelConfig[]
   >([]);
 
   useEffect(() => {
-    const res = [];
-    res.push({
-      user: {
-        name: meetingContext.selfState.name,
-        avatar: state.user.avatar,
-      },
-      camStream: videoStream,
-      screenStream: null,
-      mirrroCamera: state.user.mirrorCamera,
-      expandCamera: state.user.expandCamera,
-    });
+    const newConfig: UserPanelConfig[] =
+      meetingContext.meetingState.participants.map((participant) =>
+        participant.muid === meetingContext.selfState.muid
+          ? {
+              user: {
+                name: participant.name,
+                avatar: participant.avatar,
+              },
+              camStream: meetingContext.selfState.camStream,
+              screenStream: null,
+              mirrroCamera: state.user.mirrorCamera,
+              expandCamera: state.user.expandCamera,
+            }
+          : {
+              user: {
+                name: participant.name,
+                avatar: participant.avatar,
+              },
+              camStream: meetingContext.meetingStream.get(participant.muid!)
+                ?.stream,
+              screenStream: null,
+              mirrroCamera: false,
+              expandCamera: state.user.expandCamera,
+            }
+      );
+
     if (meetingContext.meetingDeviceState.enableShare) {
-      res.push({
+      newConfig.push({
         user: {
           name: meetingContext.selfState.name,
-          avatar: state.user.avatar,
+          avatar: state.user.avatar || '',
         },
         camStream: null,
-        screenStream: screenShareStream,
+        screenStream: meetingContext.selfState.screenStream,
         mirrroCamera: state.user.mirrorCamera,
         expandCamera: state.user.expandCamera,
       });
-      res.push({
+      newConfig.push({
         isScreenShareControlPanel: true,
       });
     }
-    meetingContext.meetingState.participants.forEach((participant, i) => {
-      if (i === 0) return;
-      res.push({
-        user: {
-          name: participant.name,
-          avatar: participant.avatar,
-        },
-        camStream: null,
-        screenStream: null,
-        mirrroCamera: state.user.mirrorCamera,
-        expandCamera: state.user.expandCamera,
-      });
-    });
-    setUsePanelConfigArr(res);
+
+    setUsePanelConfigArr(newConfig);
   }, [
-    itemCount,
-    state.user,
-    meetingContext.meetingDeviceState.enableCamera,
-    screenShareStream,
-    videoStream,
+    meetingContext.meetingState.participants,
+    state.user.expandCamera,
+    meetingContext.meetingStream,
+    meetingContext.meetingDeviceState.enableShare,
   ]);
 
   return (

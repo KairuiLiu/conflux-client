@@ -1,18 +1,19 @@
 import useGlobalStore from '@/context/global-context';
 import { refreshMediaDevice } from '@/utils/media-devices';
 import { setStreamWithId, stopStream } from '@/utils/media-stream';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 const useMediaStream = (
   selectedDeviceLabel: string,
   setSelectedDeviceLabel: (prevState: string) => void,
   enableStream: boolean,
+  stream: MediaStream | null,
+  setStream: (stream: MediaStream | null) => void,
   mediaType: 'video' | 'audio',
   deviceKey: 'camera' | 'microphone'
-): [MediaStream | null] => {
+): void => {
   const state = useGlobalStore((d) => d);
   const setState = useGlobalStore.setState;
-  const [stream, setStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
     refreshMediaDevice(mediaType, setState);
@@ -49,8 +50,6 @@ const useMediaStream = (
       stopStream(stream);
     };
   }, [stream]);
-
-  return [stream];
 };
 
 export default useMediaStream;

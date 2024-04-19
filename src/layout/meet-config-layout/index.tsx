@@ -23,10 +23,13 @@ const MeetConfigLayout = ({
   const state = useGlobalStore((d) => d);
   const [showSetting, setShowSetting] = useState(false);
 
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
   useMediaStream(
     meetingContext.meetingDeviceState.micLabel,
     meetingContext.setMeetingDeviceState.setMicLabel,
     meetingContext.meetingDeviceState.enableMic,
+    audioStream,
+    setAudioStream,
     'audio',
     'microphone'
   );
@@ -37,10 +40,13 @@ const MeetConfigLayout = ({
   //   meetingContext.setMeetingDeviceState.setSpeakerLabel
   // );
 
-  const [videoStream] = useMediaStream(
+  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  useMediaStream(
     meetingContext.meetingDeviceState.cameraLabel,
     meetingContext.setMeetingDeviceState.setCameraLabel,
     meetingContext.meetingDeviceState.enableCamera,
+    videoStream,
+    setVideoStream,
     'video',
     'camera'
   );

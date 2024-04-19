@@ -3,13 +3,10 @@ import { stopStream } from './media-stream';
 
 const useScreenshareStream = (
   enableShare: boolean,
-  setEnableShare: (enableShare: boolean) => void
-): [
-  MediaStream | null,
-  boolean,
-  React.Dispatch<React.SetStateAction<boolean>>,
-] => {
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  setEnableShare: (enableShare: boolean) => void,
+  stream: MediaStream | null,
+  setStream: (stream: MediaStream | null) => void
+): [boolean, React.Dispatch<React.SetStateAction<boolean>>] => {
   const [enableAudio, setEnableAudio] = useState(false);
 
   useEffect(() => {
@@ -64,7 +61,7 @@ const useScreenshareStream = (
     };
   }, [stream]);
 
-  return [stream, enableAudio, setEnableAudio];
+  return [enableAudio, setEnableAudio];
 };
 
 export default useScreenshareStream;
