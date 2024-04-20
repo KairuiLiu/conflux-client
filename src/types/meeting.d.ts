@@ -43,6 +43,7 @@ interface SelfState {
   muid: string;
   camStream: MediaStream | null;
   screenStream: MediaStream | null;
+  audioStream: MediaStream | null;
   name: string;
   exiting: boolean;
   role: 'HOST' | 'PARTICIPANT';
@@ -53,15 +54,27 @@ interface SetSelfState {
   setMuid: (muid: string) => void;
   setCamStream: (camStream: MediaStream | null) => void;
   setScreenStream: (screenStream: MediaStream | null) => void;
+  setAudioStream: (audioStream: MediaStream | null) => void;
   setName: (name: string) => void;
   setExiting: (exiting: boolean) => void;
   setParticipantSelf: (participantSelf: Participant) => void;
   setRole: (role: 'HOST' | 'PARTICIPANT') => void;
 }
 
+interface PeerStreamMetadata {
+  camStream: string[];
+  audioStream: string[];
+  screenStream: string[];
+}
+
+interface PeerStreamMetadataExchange {
+  id: string;
+  metadata: PeerStreamMetadata;
+}
+
 interface PeerStream {
-  active: boolean;
-  stream: MediaStream;
+  metadata?: PeerStreamMetadata;
+  stream?: MediaStream;
 }
 
 interface MeetingContextState {

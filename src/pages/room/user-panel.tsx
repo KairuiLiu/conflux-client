@@ -3,11 +3,22 @@ import UserItemCard from '@/components/user-item-card';
 import useMeetingStore from '@/context/meeting-context';
 import { writeClipboard } from '@/utils/write-clipboard';
 import { genJoinInfo } from '@/utils/gen-join-info';
+import { useMemo } from 'react';
+import sortParticipants from '@/utils/sort-participants';
 
 const UserPanle: React.FC<{
   handleClose: () => void;
 }> = ({ handleClose }) => {
   const meetingContext = useMeetingStore((d) => d);
+
+  const participants = useMemo(
+    () =>
+      sortParticipants(
+        meetingContext.meetingState.participants,
+        meetingContext.selfState.muid
+      ),
+    [meetingContext.meetingState.participants]
+  );
 
   return (
     <>
@@ -20,7 +31,7 @@ const UserPanle: React.FC<{
         </button>
       </div>
       <div className="flex h-full flex-shrink flex-col gap-3 overflow-auto overflow-x-hidden p-4">
-        {meetingContext.meetingState.participants.map((user) => (
+        {participants.map((user) => (
           <UserItemCard user={user} key={user.muid} />
         ))}
       </div>

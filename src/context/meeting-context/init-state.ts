@@ -36,6 +36,7 @@ function initState(): MeetingContextState {
       muid: '',
       camStream: null,
       screenStream: null,
+      audioStream: null,
       name: globalState.user.name,
       exiting: false,
       participantSelf: undefined,

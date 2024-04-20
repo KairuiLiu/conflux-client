@@ -8,6 +8,8 @@ import MeetingControlBar from './meeting-control-bar';
 import useMeetingStore from '@/context/meeting-context';
 import { ScreenShareControlPanel } from '@/components/screen-share-control-panel';
 import { UserPanelConfig } from '@/types/meeting';
+import sortParticipants from '@/utils/sort-participants';
+import getUserPanelConfig from '@/utils/get-user-panel-config';
 
 const MeetingPanel: React.FC<{
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,14 +18,12 @@ const MeetingPanel: React.FC<{
   const meetingContext = useMeetingStore((d) => d);
 
   // Audio
-  // TODO Audio Process
-  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
   useMediaStream(
     meetingContext.meetingDeviceState.micLabel,
     meetingContext.setMeetingDeviceState.setMicLabel,
     meetingContext.meetingDeviceState.enableMic,
-    audioStream,
-    setAudioStream,
+    meetingContext.selfState.audioStream,
+    meetingContext.setSelfState.setAudioStream,
     'audio',
     'microphone'
   );
@@ -48,15 +48,13 @@ const MeetingPanel: React.FC<{
     'camera'
   );
 
-  // todo share participant
   const itemCount = useMemo(
     () =>
       meetingContext.meetingState.participants.length +
-      (meetingContext.meetingDeviceState.enableShare ? 2 : 0),
-    [
-      meetingContext.meetingState.participants,
-      meetingContext.meetingDeviceState.enableShare,
-    ]
+      (meetingContext.meetingState.participants.find((d) => d.state.screen)
+        ? 1
+        : 0),
+    [meetingContext.meetingState.participants]
   );
 
   const [videoPanelRef, videoPanelSize] = useVideoPanelSize(itemCount);
@@ -65,61 +63,15 @@ const MeetingPanel: React.FC<{
   >([]);
 
   useEffect(() => {
-    const newConfig: UserPanelConfig[] =
-      meetingContext.meetingState.participants.map((participant) =>
-        participant.muid === meetingContext.selfState.muid
-          ? {
-              user: {
-                name: participant.name,
-                avatar: participant.avatar,
-              },
-              camStream: meetingContext.selfState.camStream,
-              screenStream: null,
-              mirrroCamera: state.user.mirrorCamera,
-              expandCamera: state.user.expandCamera,
-            }
-          : {
-              user: {
-                name: participant.name,
-                avatar: participant.avatar,
-              },
-              camStream: meetingContext.meetingStream.get(participant.muid!)
-                ?.stream,
-              screenStream: null,
-              mirrroCamera: participant.mirrorCamera,
-              expandCamera: participant.expandCamera,
-            }
-      );
-
-    if (meetingContext.meetingDeviceState.enableShare) {
-      newConfig.push({
-        user: {
-          name: meetingContext.selfState.name,
-          avatar: state.user.avatar || '',
-        },
-        camStream: null,
-        screenStream: meetingContext.selfState.screenStream,
-        mirrroCamera: state.user.mirrorCamera,
-        expandCamera: state.user.expandCamera,
-      });
-      newConfig.push({
-        isScreenShareControlPanel: true,
-      });
-    }
-
-    setUsePanelConfigArr(newConfig);
-  }, [
-    meetingContext.meetingState.participants,
-    state.user.expandCamera,
-    state.user.mirrorCamera,
-    meetingContext.meetingStream,
-    meetingContext.meetingDeviceState.enableShare,
-    meetingContext.selfState.camStream,
-    meetingContext.selfState.screenStream,
-    meetingContext.selfState.muid,
-    meetingContext.selfState.name,
-    state.user.avatar,
-  ]);
+    const participant = sortParticipants(
+      meetingContext.meetingState.participants,
+      meetingContext.selfState.muid,
+      true
+    );
+    setUsePanelConfigArr(
+      getUserPanelConfig(participant, meetingContext, state)
+    );
+  }, [meetingContext, state]);
 
   return (
     <>
@@ -159,6 +111,7 @@ const MeetingPanel: React.FC<{
                       }
                       enableAudio={enableScreenShareAudio}
                       setEnableAudio={setEnableScreenShareAudio}
+                      screenStream={panelConfig.screenStream!}
                     />
                   ) : (
                     <VideoPanel

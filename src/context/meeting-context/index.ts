@@ -37,6 +37,8 @@ const useMeetingStore = create<MeetingContextType>((set, get) => {
         set((state) => ({ selfState: { ...state.selfState, camStream } })),
       setScreenStream: (screenStream: MediaStream | null) =>
         set((state) => ({ selfState: { ...state.selfState, screenStream } })),
+      setAudioStream: (audioStream: MediaStream | null) =>
+        set((state) => ({ selfState: { ...state.selfState, audioStream } })),
       setName: (name: string) =>
         set((state) => ({ selfState: { ...state.selfState, name } })),
       setExiting: (exiting: boolean) =>
