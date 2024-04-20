@@ -14,6 +14,7 @@ export default function Room() {
   const { id } = useParams();
   const meetingContext = useMeetingStore((d) => d);
   const navigator = useNavigate();
+  const globalState = useGlobalStore((s) => s);
 
   usePeer();
 
@@ -37,6 +38,8 @@ export default function Room() {
         camera: meetingContext.meetingDeviceState.enableCamera,
         screen: meetingContext.meetingDeviceState.enableShare,
       },
+      expandCamera: globalState.user.expandCamera,
+      mirrorCamera: globalState.user.mirrorCamera,
     });
     return () => {
       socket.connected &&
@@ -49,7 +52,7 @@ export default function Room() {
     };
   }, [meetingContext.meetingState.id, meetingContext.selfState.muid]);
 
-  useHandleSocketEvents(meetingContext);
+  useHandleSocketEvents(meetingContext, globalState);
 
   return (
     <div className="flex h-dvh max-h-dvh flex-grow flex-col">

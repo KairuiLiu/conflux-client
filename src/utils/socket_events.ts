@@ -11,7 +11,17 @@ function getSt(meetingContext: MeetingContextType) {
   };
 }
 
-function useHandleSocketEvents(initMeetingContext: MeetingContextType) {
+function getGSt(globalContext: StateType) {
+  return {
+    mirrorCamera: globalContext.user.mirrorCamera,
+    expandCamera: globalContext.user.expandCamera,
+  };
+}
+
+function useHandleSocketEvents(
+  initMeetingContext: MeetingContextType,
+  initGlobalContext: StateType
+) {
   const navigate = useNavigate();
 
   useSocketListener(
@@ -38,6 +48,16 @@ function useHandleSocketEvents(initMeetingContext: MeetingContextType) {
     (d) => !!(d as { muid: string }).muid
   );
 
+  useSyncSocket(
+    'UPDATE_USER_STATE',
+    {
+      muid: initMeetingContext.selfState.muid,
+      ...getGSt(initGlobalContext),
+    },
+    getGSt(initGlobalContext),
+    (d) => !!(d as { muid: string }).muid
+  );
+
   useSocketListener('RES_UPDATE_USER_STATE', ({ message }) => {
     if (message !== 'SUCCESS') {
       initMeetingContext.setMeetingDeviceState.setEnableShare(false);
@@ -50,7 +70,11 @@ function useHandleSocketEvents(initMeetingContext: MeetingContextType) {
       (p) => p.muid === data.muid
     );
     if (user) {
-      user.state = data.state;
+      if (data.state) user.state = data.state;
+      if (data.expandCamera !== undefined)
+        user.expandCamera = data.expandCamera;
+      if (data.mirrorCamera !== undefined)
+        user.mirrorCamera = data.mirrorCamera;
       initMeetingContext.setMeetingState.setParticipants([
         ...curMeetingContext.meetingState.participants,
       ]);

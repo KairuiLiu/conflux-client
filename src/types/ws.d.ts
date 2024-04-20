@@ -37,6 +37,8 @@ declare interface ClientToServerEvents {
       muid: string;
       avatar: string;
       state: ParticipantState;
+      expandCamera: boolean;
+      mirrorCamera: boolean;
     }
   >;
   LEAVE_MEETING: ClientEventListenersCb<'LEAVE_MEETING', {}>;

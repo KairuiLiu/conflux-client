@@ -90,7 +90,7 @@ export function initState(
     siteConfig: {
       token: '',
       COTURN_PASSWORD: '',
-      COTURN_PATH: '',
+      COTURN_PREFIX: '',
       COTURN_USERNAME: '',
       PEER_SERVER_PATH: '',
     },

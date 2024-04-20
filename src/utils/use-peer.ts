@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import Peer from 'peerjs';
 import useMeetingStore from '@/context/meeting-context';
+import { v4 } from 'uuid';
+import useGlobalStore from '@/context/global-context';
 
 const usePeer = () => {
   const {
@@ -11,23 +13,41 @@ const usePeer = () => {
     setSelfState,
   } = useMeetingStore();
   const [peer, setPeer] = useState<Peer | null>(null);
-
+  const globalState = useGlobalStore();
   const selfStateRef = useRef(selfState);
   const meetingStreamRef = useRef(meetingStream);
 
-  // 更新 ref 以确保它们总是指向最新的 state
   useEffect(() => {
     selfStateRef.current = selfState;
     meetingStreamRef.current = meetingStream;
   }, [selfState, meetingStream]);
 
   useEffect(() => {
-    const newPeer = new Peer();
+    const muid = v4();
+    setSelfState.setMuid(muid);
+
+    const newPeer = new Peer(muid, {
+      host: window.location.hostname,
+      port: +window.location.port || undefined,
+      path: '/api' + globalState.siteConfig.PEER_SERVER_PATH,
+      config: {
+        iceServers: [
+          {
+            url: `stun:${window.location.hostname}`,
+          },
+          {
+            url: `turn:${globalState.siteConfig.COTURN_PREFIX?globalState.siteConfig.COTURN_PREFIX+'.':''}${window.location.hostname}`,
+            username: globalState.siteConfig.COTURN_USERNAME,
+            credential: globalState.siteConfig.COTURN_PASSWORD,
+          },
+        ],
+      },
+      debug: 3,
+    });
     setPeer(newPeer);
 
     newPeer.on('open', (id) => {
       console.log('peer open', id);
-      setSelfState.setMuid(id);
     });
 
     newPeer.on('call', (call) => {

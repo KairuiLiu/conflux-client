@@ -29,12 +29,14 @@ interface Participant {
   role: 'HOST' | 'PARTICIPANT';
   state: ParticipantState;
   avatar: string;
+  expandCamera: boolean;
+  mirrorCamera: boolean;
 }
 
 interface SiteConfig {
   token: string;
   COTURN_PASSWORD: string;
-  COTURN_PATH: string;
+  COTURN_PREFIX: string;
   COTURN_USERNAME: string;
   PEER_SERVER_PATH: string;
 }

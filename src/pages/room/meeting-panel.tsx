@@ -86,8 +86,8 @@ const MeetingPanel: React.FC<{
               camStream: meetingContext.meetingStream.get(participant.muid!)
                 ?.stream,
               screenStream: null,
-              mirrroCamera: false,
-              expandCamera: state.user.expandCamera,
+              mirrroCamera: participant.mirrorCamera,
+              expandCamera: participant.expandCamera,
             }
       );
 
@@ -111,8 +111,14 @@ const MeetingPanel: React.FC<{
   }, [
     meetingContext.meetingState.participants,
     state.user.expandCamera,
+    state.user.mirrorCamera,
     meetingContext.meetingStream,
     meetingContext.meetingDeviceState.enableShare,
+    meetingContext.selfState.camStream,
+    meetingContext.selfState.screenStream,
+    meetingContext.selfState.muid,
+    meetingContext.selfState.name,
+    state.user.avatar,
   ]);
 
   return (
