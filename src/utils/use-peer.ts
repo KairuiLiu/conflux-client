@@ -1,8 +1,34 @@
 import { useRef, useEffect, useState } from 'react';
-import Peer from 'peerjs';
+import Peer, { PeerOptions } from 'peerjs';
 import useMeetingStore from '@/context/meeting-context';
 import { v4 } from 'uuid';
 import useGlobalStore from '@/context/global-context';
+
+function getPeerConfig(globalState: StateType): PeerOptions {
+  const port = +window.location.port;
+
+  const config = {
+    host: window.location.hostname,
+    path: '/api' + globalState.siteConfig.PEER_SERVER_PATH,
+    config: {
+      iceServers: [
+        {
+          url: `stun:${window.location.hostname}`,
+        },
+        {
+          url: `turn:${globalState.siteConfig.COTURN_PREFIX ? globalState.siteConfig.COTURN_PREFIX + '.' : ''}${window.location.hostname}`,
+          username: globalState.siteConfig.COTURN_USERNAME,
+          credential: globalState.siteConfig.COTURN_PASSWORD,
+        },
+      ],
+    },
+    debug: 3,
+  } as PeerOptions;
+
+  if (port) config.port = +window.location.port;
+
+  return config;
+}
 
 const usePeer = () => {
   const {
@@ -26,24 +52,7 @@ const usePeer = () => {
     const muid = v4();
     setSelfState.setMuid(muid);
 
-    const newPeer = new Peer(muid, {
-      host: window.location.hostname,
-      port: +window.location.port || undefined,
-      path: '/api' + globalState.siteConfig.PEER_SERVER_PATH,
-      config: {
-        iceServers: [
-          {
-            url: `stun:${window.location.hostname}`,
-          },
-          {
-            url: `turn:${globalState.siteConfig.COTURN_PREFIX?globalState.siteConfig.COTURN_PREFIX+'.':''}${window.location.hostname}`,
-            username: globalState.siteConfig.COTURN_USERNAME,
-            credential: globalState.siteConfig.COTURN_PASSWORD,
-          },
-        ],
-      },
-      debug: 3,
-    });
+    const newPeer = new Peer(muid, getPeerConfig(globalState));
     setPeer(newPeer);
 
     newPeer.on('open', (id) => {
