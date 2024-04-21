@@ -7,6 +7,7 @@ const useMediaStream = (
   selectedDeviceLabel: string,
   setSelectedDeviceLabel: (prevState: string) => void,
   enableStream: boolean,
+  setEnableStream: (prevState: boolean) => void,
   stream: MediaStream | null,
   setStream: (stream: MediaStream | null) => void,
   mediaType: 'video' | 'audio',
@@ -32,7 +33,9 @@ const useMediaStream = (
     );
 
     if (device) {
-      setStreamWithId(stream, setStream, device.deviceId, mediaType);
+      setStreamWithId(stream, setStream, device.deviceId, mediaType).then(
+        (d) => !d && setEnableStream(false)
+      );
     } else if (state.mediaDiveces[deviceKey]?.[0]) {
       setSelectedDeviceLabel(state.mediaDiveces[deviceKey][0].label);
     } else {

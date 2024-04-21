@@ -16,6 +16,7 @@ export async function getStream(type: 'audio' | 'video') {
   } catch (error) {
     console.info(`[ERROR] on create ${type} stream `, error);
     toast.error(`Error on get media stream`, toastConfig);
+    return false;
   }
 }
 
@@ -32,8 +33,10 @@ export async function setStreamWithId(
     };
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     setStream(stream);
+    return true;
   } catch (error) {
     console.info(`[ERROR] on create ${type} stream `, error);
     toast.error(`Error on get media stream`, toastConfig);
+    return false;
   }
 }

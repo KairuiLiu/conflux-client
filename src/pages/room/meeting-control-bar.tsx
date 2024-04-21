@@ -10,7 +10,6 @@ import React, { Fragment, useState } from 'react';
 import SettingPanel from '../setting/setting-panel';
 import { useNavigate } from 'react-router-dom';
 import useMeetingStore from '@/context/meeting-context';
-import { v4 } from 'uuid';
 import { emitSocket } from '@/utils/use-socket';
 import { toast } from 'react-toastify';
 import toastConfig from '@/utils/toast-config';
@@ -27,30 +26,7 @@ const MeetingControlBar: React.FC<{
   return (
     <>
       <section className="flex items-center justify-between gap-4 px-3 py-2">
-        <div>
-          <button
-            className="btn btn-primary p-0"
-            onClick={() => {
-              const uuid = v4();
-              meetingContext.setMeetingState.setParticipants([
-                ...(meetingContext?.meetingState?.participants || []),
-                {
-                  muid: uuid,
-                  name: 'User_' + uuid.slice(0, 5),
-                  avatar: null,
-                  role: 'HOST',
-                  state: {
-                    mic: true,
-                    cam: true,
-                    share: false,
-                  },
-                },
-              ]);
-            }}
-          >
-            Add Mock User
-          </button>
-        </div>
+        <div></div>
         <div className="flex flex-shrink flex-wrap gap-4">
           <MediaControlBar
             iconColor="text-gray-600"

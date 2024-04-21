@@ -12,6 +12,7 @@ export default function MeetSetting() {
   const state = useGlobalStore((d) => d);
   const setState = useGlobalStore.setState;
   const supportSetSinkId = useMemo(
+    // @ts-ignore
     () => !!(HTMLAudioElement.prototype.setSinkId instanceof Function),
     []
   );
@@ -42,6 +43,7 @@ export default function MeetSetting() {
     selectedCameraLabel,
     setSelectedCameraLabel,
     true,
+    () => {},
     videoStream,
     setVideoStream,
     'video',
@@ -53,6 +55,7 @@ export default function MeetSetting() {
     selectedMicrophoneLabel,
     setSelectedMicrophoneLabel,
     true,
+    () => {},
     audioStream,
     setAudioStream,
     'audio',

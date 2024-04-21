@@ -2,8 +2,7 @@ import { useEffect, useRef } from 'react';
 import Avatar from '../avatar';
 import { useElementSize } from '@/utils/use-element-size';
 import { aspRange } from '@/utils/use-panel-size';
-import useMeetingStore from '@/context/meeting-context';
-import useGlobalStore from '@/context/global-context';
+import useAudioStreamPlayer from '@/utils/use-audio-stream-player';
 
 export const VideoPanel: React.FC<{
   limitWidth?: boolean;
@@ -35,8 +34,7 @@ export const VideoPanel: React.FC<{
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [panelRef, panelSize] = useElementSize<HTMLDivElement>(!fixAvatarSize);
-  const meetingContext = useMeetingStore((d) => d);
-  const globalState = useGlobalStore((s) => s);
+  const setAudioStream = useAudioStreamPlayer();
 
   // limit both, or none => fill panel
   const expandPanel = limitWidth === limitHeight;
@@ -55,45 +53,9 @@ export const VideoPanel: React.FC<{
   }, [videoRef, screenStream, camStream]);
 
   useEffect(() => {
-    const enableSpeaker = meetingContext.meetingDeviceState.enableSpeaker;
-    const label = meetingContext.meetingDeviceState.speakerLabel;
-    const speaker = globalState.mediaDiveces.speaker.find(
-      (d) => d.label === label
-    );
-    let audioElement: HTMLAudioElement | undefined;
-
-    if (audioStream && enableSpeaker) {
-      audioElement = new Audio();
-      // @ts-ignore
-      Promise.resolve()
-        .then(() => {
-          console.log('play audio', audioStream, speaker);
-          speaker?.deviceId && audioElement?.setSinkId(speaker?.deviceId);
-        })
-        .then(
-          () => {
-            audioElement!.srcObject = audioStream;
-            audioElement!.play();
-          },
-          () => {
-            audioElement!.srcObject = audioStream;
-            audioElement!.play();
-          }
-        );
-    }
-
-    return () => {
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.srcObject = null;
-        audioElement = undefined;
-      }
-    };
-  }, [
-    audioStream,
-    meetingContext.meetingDeviceState.enableSpeaker,
-    meetingContext.meetingDeviceState.speakerLabel,
-  ]);
+    if (audioStream) setAudioStream(audioStream);
+    return () => setAudioStream(null);
+  }, [audioStream, setAudioStream]);
 
   return (
     <div

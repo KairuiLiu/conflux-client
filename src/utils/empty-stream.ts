@@ -1,4 +1,4 @@
-const createEmptyAudioTrack = (): MediaStreamTrack => {
+export const createEmptyAudioTrack = (): MediaStreamTrack => {
   const ctx = new AudioContext();
   const oscillator = ctx.createOscillator();
   const destination = ctx.createMediaStreamDestination();
@@ -8,7 +8,7 @@ const createEmptyAudioTrack = (): MediaStreamTrack => {
   return Object.assign(track, { enabled: false }) as MediaStreamTrack;
 };
 
-const createEmptyVideoTrack = (): MediaStreamTrack => {
+export const createEmptyVideoTrack = (): MediaStreamTrack => {
   const canvas = Object.assign(document.createElement('canvas'), {
     width: 1,
     height: 1,
@@ -18,15 +18,3 @@ const createEmptyVideoTrack = (): MediaStreamTrack => {
   const track = stream.getVideoTracks()[0];
   return Object.assign(track, { enabled: false }) as MediaStreamTrack;
 };
-
-export const fakeAudioTrack = createEmptyAudioTrack();
-export const fakeCameraTrack = createEmptyVideoTrack();
-export const fakeScreenVideoTrack = createEmptyVideoTrack();
-export const fakeScreenAudioTrack = createEmptyAudioTrack();
-
-export const mediaStream = new MediaStream([fakeAudioTrack, fakeCameraTrack]);
-
-export const screenStream = new MediaStream([
-  fakeScreenAudioTrack,
-  fakeScreenVideoTrack,
-]);

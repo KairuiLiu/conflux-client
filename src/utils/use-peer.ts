@@ -4,19 +4,20 @@ import Peer, { MediaConnection, PeerOptions } from 'peerjs';
 import useMeetingStore from '@/context/meeting-context';
 import { v4 } from 'uuid';
 import useGlobalStore from '@/context/global-context';
-import {
-  fakeAudioTrack,
-  fakeCameraTrack,
-  fakeScreenVideoTrack,
-  fakeScreenAudioTrack,
-  mediaStream,
-  screenStream,
-} from './empty-stream';
+import { createEmptyAudioTrack, createEmptyVideoTrack } from './empty-stream';
 
-let audioTrack = fakeAudioTrack;
-let videoTrack = fakeCameraTrack;
-const screenVideoTrack = fakeScreenVideoTrack;
-let screenAudioTrack = fakeScreenAudioTrack;
+let fakeVidioTrack: MediaStreamTrack | null = null;
+let fakeAudioTrack: MediaStreamTrack | null = null;
+let fakeScreenVideoTrack: MediaStreamTrack | null = null;
+let fakeScreenAudioTrack: MediaStreamTrack | null = null;
+
+let audioTrack: MediaStreamTrack | null = null;
+let videoTrack: MediaStreamTrack | null = null;
+let screenVideoTrack: MediaStreamTrack | null = null;
+let screenAudioTrack: MediaStreamTrack | null = null;
+
+let mediaStream: MediaStream | null = null;
+let screenStream: MediaStream | null = null;
 
 /**
  * Peerjs is not a good choice for this project,
@@ -78,19 +79,19 @@ const updateMediaStream = (peer: Peer) => {
 
   const oldAudioStreamTrack = audioTrack;
   const newAudioStreamTrack =
-    meetingContext.selfState.audioStream?.getTracks()[0] || fakeAudioTrack;
+    meetingContext.selfState.audioStream?.getTracks()[0] || fakeAudioTrack!;
   if (newAudioStreamTrack !== oldAudioStreamTrack) {
-    mediaStream.removeTrack(oldAudioStreamTrack);
-    mediaStream.addTrack(newAudioStreamTrack);
+    mediaStream!.removeTrack(oldAudioStreamTrack!);
+    mediaStream!.addTrack(newAudioStreamTrack);
     audioTrack = newAudioStreamTrack;
   }
 
   const oldVideoStreamTrack = videoTrack;
   const newVideoStreamTrack =
-    meetingContext.selfState.camStream?.getTracks()[0] || fakeCameraTrack;
+    meetingContext.selfState.camStream?.getTracks()[0] || fakeVidioTrack!;
   if (newVideoStreamTrack !== oldVideoStreamTrack) {
-    mediaStream.removeTrack(oldVideoStreamTrack);
-    mediaStream.addTrack(newVideoStreamTrack);
+    mediaStream!.removeTrack(oldVideoStreamTrack!);
+    mediaStream!.addTrack(newVideoStreamTrack);
     videoTrack = newVideoStreamTrack;
   }
 
@@ -109,13 +110,13 @@ const updateMediaStream = (peer: Peer) => {
         dataConnection &&
           dataConnection.peerConnection.getSenders().forEach((sender) => {
             if (
-              sender.track?.id === oldAudioStreamTrack.id &&
-              oldAudioStreamTrack.id !== audioTrack.id
+              sender.track?.id === oldAudioStreamTrack!.id &&
+              oldAudioStreamTrack!.id !== audioTrack!.id
             )
               sender.replaceTrack(audioTrack);
             if (
-              sender.track?.id === oldVideoStreamTrack.id &&
-              oldVideoStreamTrack.id !== videoTrack.id
+              sender.track?.id === oldVideoStreamTrack!.id &&
+              oldVideoStreamTrack!.id !== videoTrack!.id
             )
               sender.replaceTrack(videoTrack);
           });
@@ -137,15 +138,15 @@ const updateScreenStream = (peer: Peer) => {
     fakeScreenAudioTrack;
 
   if (newScreenAudioTrack !== oldScreenAudioTrack) {
-    screenStream.removeTrack(oldScreenAudioTrack);
-    screenStream.addTrack(newScreenAudioTrack);
+    screenStream!.removeTrack(oldScreenAudioTrack!);
+    screenStream!.addTrack(newScreenAudioTrack!);
     screenAudioTrack = newScreenAudioTrack;
   }
 
   if (newScreenVideoTrack !== oldScreenVideoTrack) {
-    screenStream.removeTrack(oldScreenVideoTrack);
-    screenStream.addTrack(newScreenVideoTrack);
-    screenAudioTrack = newScreenVideoTrack;
+    screenStream!.removeTrack(oldScreenVideoTrack!);
+    screenStream!.addTrack(newScreenVideoTrack!);
+    screenVideoTrack = newScreenVideoTrack;
   }
 
   peer &&
@@ -159,17 +160,32 @@ const updateScreenStream = (peer: Peer) => {
       screenConnection &&
         screenConnection.peerConnection.getSenders().forEach((sender) => {
           if (
-            sender.track?.id === oldScreenAudioTrack.id &&
-            oldScreenAudioTrack.id !== newScreenAudioTrack.id
+            sender.track?.id === oldScreenAudioTrack!.id &&
+            oldScreenAudioTrack!.id !== newScreenAudioTrack!.id
           )
             sender.replaceTrack(newScreenAudioTrack);
           if (
-            sender.track?.id === oldScreenVideoTrack.id &&
-            oldScreenVideoTrack.id !== newScreenVideoTrack.id
+            sender.track?.id === oldScreenVideoTrack!.id &&
+            oldScreenVideoTrack!.id !== newScreenVideoTrack!.id
           )
             sender.replaceTrack(newScreenVideoTrack);
         });
     });
+};
+
+const initFakeStream = () => {
+  fakeVidioTrack ??= createEmptyVideoTrack();
+  fakeAudioTrack ??= createEmptyAudioTrack();
+  fakeScreenVideoTrack ??= createEmptyVideoTrack();
+  fakeScreenAudioTrack ??= createEmptyAudioTrack();
+
+  audioTrack ??= fakeAudioTrack;
+  videoTrack ??= fakeVidioTrack;
+  screenAudioTrack ??= fakeScreenAudioTrack;
+  screenVideoTrack ??= fakeScreenVideoTrack;
+
+  mediaStream ??= new MediaStream([audioTrack, videoTrack]);
+  screenStream ??= new MediaStream([screenAudioTrack, screenVideoTrack]);
 };
 
 const handleOnStream = (
@@ -205,6 +221,7 @@ const usePeer = () => {
   // create peer and process oncall event
   useEffect(() => {
     if (peer) return;
+    initFakeStream();
     const muid = v4();
     setSelfState.setMuid(muid);
 
@@ -215,7 +232,7 @@ const usePeer = () => {
 
     newPeer.on('call', (call) => {
       const { type } = call.metadata;
-      call.answer(type === 'screenStream' ? screenStream : mediaStream);
+      call.answer(type === 'screenStream' ? screenStream! : mediaStream!);
       call.on('stream', (stream) => {
         console.log(
           `### on receive ${type} stream from ${call.peer} to ${selfState.muid} @ ${call.connectionId}`
@@ -245,7 +262,7 @@ const usePeer = () => {
     setTryConnected(true);
     meetingState.participants.forEach((p) => {
       if (p.muid === selfState.muid) return;
-      const mediaConnect = peer.call(p.muid!, mediaStream, {
+      const mediaConnect = peer.call(p.muid!, mediaStream!, {
         metadata: { type: 'screenStream' },
       });
       console.log(
@@ -293,7 +310,7 @@ const usePeer = () => {
     participantMuids.forEach((muid) => {
       // find a new participant
       if (!muid || streamMuids.has(muid) || muid === selfState.muid) return;
-      const mediaConnect = peer.call(muid, mediaStream, {
+      const mediaConnect = peer.call(muid, mediaStream!, {
         metadata: { type: 'mediaStream' },
       });
       console.log(
