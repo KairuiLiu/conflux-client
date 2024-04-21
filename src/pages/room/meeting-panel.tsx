@@ -29,7 +29,6 @@ const MeetingPanel: React.FC<{
   );
 
   // Video
-  // TODO AUDIO PROCESS
   const [enableScreenShareAudio, setEnableScreenShareAudio] =
     useScreenshareStream(
       meetingContext.meetingDeviceState.enableShare,
@@ -68,6 +67,7 @@ const MeetingPanel: React.FC<{
       meetingContext.selfState.muid,
       true
     );
+
     setUsePanelConfigArr(
       getUserPanelConfig(participant, meetingContext, state)
     );
@@ -118,6 +118,7 @@ const MeetingPanel: React.FC<{
                       user={panelConfig.user!}
                       camStream={panelConfig.camStream!}
                       screenStream={panelConfig.screenStream!}
+                      audioStream={panelConfig.audioStream!}
                       fixAvatarSize={
                         Math.min(videoPanelSize.width, videoPanelSize.height) /
                           2 || 32

@@ -1,40 +1,51 @@
-import { useEffect, useState, useCallback } from 'react';
-import Peer, { DataConnection, MediaConnection, PeerOptions } from 'peerjs';
+import { PeerStream } from '@/types/meeting';
+import { useEffect, useState } from 'react';
+import Peer, { MediaConnection, PeerOptions } from 'peerjs';
 import useMeetingStore from '@/context/meeting-context';
 import { v4 } from 'uuid';
 import useGlobalStore from '@/context/global-context';
-import { PeerStreamMetadataExchange } from '@/types/meeting';
 import {
   fakeAudioTrack,
   fakeCameraTrack,
   fakeScreenVideoTrack,
   fakeScreenAudioTrack,
-  localStream,
+  mediaStream,
+  screenStream,
 } from './empty-stream';
 
 let audioTrack = fakeAudioTrack;
 let videoTrack = fakeCameraTrack;
-let screenTrack = fakeScreenVideoTrack;
-const screenAudioTrack = fakeScreenAudioTrack;
+const screenVideoTrack = fakeScreenVideoTrack;
+let screenAudioTrack = fakeScreenAudioTrack;
 
-console.log('###########Fake audioTrack', audioTrack.id);
-console.log('###########Fake videoTrack', videoTrack.id);
-console.log('###########Fake screenTrack', screenTrack.id);
-console.log('###########Fake screenAudioTrack', screenAudioTrack.id);
+/**
+ * Peerjs is not a good choice for this project,
+ * 1. can not call / answer with an enpty stream. so we have to use a fake stream
+ * 2. will change metadata of stream. (change id, label to new random string). so other peer can not get the stream by id, and we can not send meta data to help identify the stream
+ * 3. can not call same peer twice (firefox not support). so, we have to let new peer call the old peer, and make old peer call new peer
+ * 4. really hard to send metadata. (call() can send metadata, but answer() can not get metadata), so you need a dataconnection to send metadata. and have to set more callbacks to handle the metadata
+ */
+
+/**
+ * two way connection
+ * B join the meeting:
+ * B -call_screen-> A -answer_screen-> B
+ * A -call_camera-> B -answer_camera-> A
+ */
+
+/**
+ * connection info map
+ * MeetingContext.meetingStream: muid -> PeerStream {mediaStream, screenStream}
+ * connIdMap: muid -> {mediaStream, screenStream}
+ */
 
 const connIdMap = new Map<
   string,
   {
-    data?: string;
-    media?: string;
+    mediaStream?: string;
+    screenStream?: string;
   }
 >();
-
-const metaData = {
-  camStream: [] as string[],
-  audioStream: [] as string[],
-  screenStream: [] as string[],
-};
 
 function getPeerConfig(globalState: StateType): PeerOptions {
   const port = +window.location.port;
@@ -61,6 +72,124 @@ function getPeerConfig(globalState: StateType): PeerOptions {
   return config;
 }
 
+const updateMediaStream = (peer: Peer) => {
+  if (!peer) return;
+  const meetingContext = useMeetingStore.getState();
+
+  const oldAudioStreamTrack = audioTrack;
+  const newAudioStreamTrack =
+    meetingContext.selfState.audioStream?.getTracks()[0] || fakeAudioTrack;
+  if (newAudioStreamTrack !== oldAudioStreamTrack) {
+    mediaStream.removeTrack(oldAudioStreamTrack);
+    mediaStream.addTrack(newAudioStreamTrack);
+    audioTrack = newAudioStreamTrack;
+  }
+
+  const oldVideoStreamTrack = videoTrack;
+  const newVideoStreamTrack =
+    meetingContext.selfState.camStream?.getTracks()[0] || fakeCameraTrack;
+  if (newVideoStreamTrack !== oldVideoStreamTrack) {
+    mediaStream.removeTrack(oldVideoStreamTrack);
+    mediaStream.addTrack(newVideoStreamTrack);
+    videoTrack = newVideoStreamTrack;
+  }
+
+  if (
+    oldAudioStreamTrack !== newAudioStreamTrack ||
+    oldVideoStreamTrack !== newVideoStreamTrack
+  ) {
+    peer &&
+      connIdMap.forEach((connIds, muid) => {
+        const mediaConnId = connIds?.mediaStream;
+        if (!mediaConnId) return;
+        const dataConnection = peer.getConnection(
+          muid,
+          mediaConnId
+        ) as MediaConnection;
+        dataConnection &&
+          dataConnection.peerConnection.getSenders().forEach((sender) => {
+            if (
+              sender.track?.id === oldAudioStreamTrack.id &&
+              oldAudioStreamTrack.id !== audioTrack.id
+            )
+              sender.replaceTrack(audioTrack);
+            if (
+              sender.track?.id === oldVideoStreamTrack.id &&
+              oldVideoStreamTrack.id !== videoTrack.id
+            )
+              sender.replaceTrack(videoTrack);
+          });
+      });
+  }
+};
+
+const updateScreenStream = (peer: Peer) => {
+  if (!peer) return;
+  const meetingContext = useMeetingStore.getState();
+
+  const oldScreenVideoTrack = screenVideoTrack;
+  const newScreenVideoTrack =
+    meetingContext.selfState.screenStream?.getVideoTracks()[0] ||
+    fakeScreenVideoTrack;
+  const oldScreenAudioTrack = screenAudioTrack;
+  const newScreenAudioTrack =
+    meetingContext.selfState.screenStream?.getAudioTracks()[0] ||
+    fakeScreenAudioTrack;
+
+  if (newScreenAudioTrack !== oldScreenAudioTrack) {
+    screenStream.removeTrack(oldScreenAudioTrack);
+    screenStream.addTrack(newScreenAudioTrack);
+    screenAudioTrack = newScreenAudioTrack;
+  }
+
+  if (newScreenVideoTrack !== oldScreenVideoTrack) {
+    screenStream.removeTrack(oldScreenVideoTrack);
+    screenStream.addTrack(newScreenVideoTrack);
+    screenAudioTrack = newScreenVideoTrack;
+  }
+
+  peer &&
+    connIdMap.forEach((connIds, muid) => {
+      const screenConnId = connIds?.screenStream;
+      if (!screenConnId) return;
+      const screenConnection = peer.getConnection(
+        muid,
+        screenConnId
+      ) as MediaConnection;
+      screenConnection &&
+        screenConnection.peerConnection.getSenders().forEach((sender) => {
+          if (
+            sender.track?.id === oldScreenAudioTrack.id &&
+            oldScreenAudioTrack.id !== newScreenAudioTrack.id
+          )
+            sender.replaceTrack(newScreenAudioTrack);
+          if (
+            sender.track?.id === oldScreenVideoTrack.id &&
+            oldScreenVideoTrack.id !== newScreenVideoTrack.id
+          )
+            sender.replaceTrack(newScreenVideoTrack);
+        });
+    });
+};
+
+const handleOnStream = (
+  call: MediaConnection,
+  stream: MediaStream,
+  k: keyof PeerStream
+) => {
+  const { meetingStream, setMeetingStream } = useMeetingStore.getState();
+
+  const newMeetingStream = new Map(meetingStream);
+  const oldStreams = newMeetingStream.get(call.peer);
+
+  newMeetingStream.set(call.peer, {
+    ...oldStreams,
+    [k]: stream,
+  });
+
+  setMeetingStream(newMeetingStream);
+};
+
 const usePeer = () => {
   const {
     selfState,
@@ -73,148 +202,9 @@ const usePeer = () => {
   const globalState = useGlobalStore();
   const [tryConnected, setTryConnected] = useState(false);
 
-  const updateMetaData = useCallback((peer: Peer) => {
-    if (!peer) return;
-    const meetingContext = useMeetingStore.getState();
-
-    const oldAudioStreamTrack = audioTrack;
-    const newAudioStreamTrack =
-      meetingContext.selfState.audioStream?.getTracks()[0];
-    if (newAudioStreamTrack && newAudioStreamTrack !== oldAudioStreamTrack) {
-      localStream.removeTrack(oldAudioStreamTrack);
-      localStream.addTrack(newAudioStreamTrack);
-      audioTrack = newAudioStreamTrack;
-      metaData.audioStream = [newAudioStreamTrack.id];
-      console.log(
-        '###########Replace audio track from',
-        oldAudioStreamTrack.id,
-        'to',
-        audioTrack.id
-      );
-    }
-
-    const oldVideoStreamTrack = videoTrack;
-    const newVideoStreamTrack =
-      meetingContext.selfState.camStream?.getTracks()[0];
-    if (newVideoStreamTrack && newVideoStreamTrack !== oldVideoStreamTrack) {
-      localStream.removeTrack(oldVideoStreamTrack);
-      localStream.addTrack(newVideoStreamTrack);
-      videoTrack = newVideoStreamTrack;
-      metaData.camStream = [newVideoStreamTrack.id];
-      console.log(
-        '###########Replace camera track from',
-        oldVideoStreamTrack.id,
-        'to',
-        videoTrack.id
-      );
-    }
-
-    const oldScreenStreamTrack = screenTrack;
-    const newScreenStreamTrack =
-      meetingContext.selfState.screenStream?.getTracks()[0];
-    if (newScreenStreamTrack && newScreenStreamTrack !== oldScreenStreamTrack) {
-      localStream.removeTrack(oldScreenStreamTrack);
-      localStream.addTrack(newScreenStreamTrack);
-      screenTrack = newScreenStreamTrack;
-      metaData.screenStream = [newScreenStreamTrack.id];
-      console.log(
-        '###########Replace screen track from',
-        oldScreenStreamTrack.id,
-        'to',
-        screenTrack.id
-      );
-    }
-
-    peer &&
-      connIdMap.forEach((connIds, muid) => {
-        console.log('###########Find Connection ', muid, connIds);
-        const dataConnectionId = connIds?.data;
-        if (dataConnectionId) {
-          const dataConnection = peer.getConnection(
-            muid,
-            dataConnectionId
-          ) as DataConnection;
-          if (dataConnection)
-            console.log(
-              '###########Send metadata to ',
-              dataConnection.peer,
-              metaData
-            );
-          dataConnection &&
-            dataConnection?.send({
-              id: meetingContext.selfState.muid,
-              metadata: metaData,
-            });
-        }
-
-        const mediaConnectionId = connIds?.media;
-        if (mediaConnectionId) {
-          const mediaConnection = peer.getConnection(
-            muid,
-            mediaConnectionId
-          ) as MediaConnection;
-          mediaConnection &&
-            mediaConnection.peerConnection.getSenders().forEach((sender) => {
-              if (
-                sender.track?.id === oldAudioStreamTrack.id &&
-                oldAudioStreamTrack.id !== audioTrack.id
-              ) {
-                sender.replaceTrack(audioTrack);
-              }
-              if (
-                sender.track?.id === oldVideoStreamTrack.id &&
-                oldVideoStreamTrack.id !== videoTrack.id
-              ) {
-                sender.replaceTrack(videoTrack);
-              }
-              if (
-                sender.track?.id === oldScreenStreamTrack.id &&
-                oldScreenStreamTrack.id !== screenTrack.id
-              ) {
-                sender.replaceTrack(screenTrack);
-              }
-            });
-        }
-      });
-  }, []);
-
-  const handleOnStream = useCallback(
-    (call: MediaConnection, stream: MediaStream) => {
-      console.log('###########Stream received');
-      stream.getTracks().forEach((track) => {
-        console.log('###########Track', track);
-      });
-      const meetingContext = useMeetingStore.getState();
-      const newMeetingStream = new Map(meetingContext.meetingStream);
-      const oldStream = newMeetingStream.get(call.peer);
-      newMeetingStream.set(call.peer, {
-        stream,
-        metadata: oldStream?.metadata,
-      });
-      setMeetingStream(newMeetingStream);
-    },
-    [setMeetingStream]
-  );
-
-  const handleOnData = useCallback(
-    (data: PeerStreamMetadataExchange) => {
-      const metadata = data.metadata;
-      const id = data.id;
-      console.log('###########Data received', metadata);
-      const meetingContext = useMeetingStore.getState();
-      const newMeetingStream = new Map(meetingContext.meetingStream);
-      const oldStream = newMeetingStream.get(id);
-      newMeetingStream.set(id, {
-        stream: oldStream?.stream,
-        metadata,
-      });
-      setMeetingStream(newMeetingStream);
-    },
-    [setMeetingStream]
-  );
-
   // create peer and process oncall event
   useEffect(() => {
+    if (peer) return;
     const muid = v4();
     setSelfState.setMuid(muid);
 
@@ -223,38 +213,14 @@ const usePeer = () => {
 
     newPeer.on('open', () => {});
 
-    newPeer.on('connection', (call) => {
-      call.on('open', () => {
-        // receive metadata
-        call.on('data', (data) => {
-          handleOnData(data as PeerStreamMetadataExchange);
-        });
-        // send metadata
-        const metaExchange = {
-          id: muid,
-          metadata: metaData,
-        };
-        console.log('###########Send metadata', metaExchange);
-        call.send(metaExchange);
-        // save connection id
-        if (!connIdMap.has(call.peer)) connIdMap.set(call.peer, {});
-        const connId = connIdMap.get(call.peer);
-        connIdMap.set(call.peer, {
-          ...connId,
-          data: call.connectionId,
-        });
-      });
-    });
-
     newPeer.on('call', (call) => {
-      console.log('###########sending media to ', call.connectionId!);
-      localStream.getTracks().forEach((track) => {
-        console.log('###########Track', track);
-      });
-      call.answer(localStream);
-      // receive stream
+      const { type } = call.metadata;
+      call.answer(type === 'screenStream' ? screenStream : mediaStream);
       call.on('stream', (stream) => {
-        handleOnStream(call, stream);
+        console.log(
+          `### on receive ${type} stream from ${call.peer} to ${selfState.muid} @ ${call.connectionId}`
+        );
+        handleOnStream(call, stream, type);
       });
 
       // save connection id
@@ -262,7 +228,7 @@ const usePeer = () => {
       const connId = connIdMap.get(call.peer);
       connIdMap.set(call.peer, {
         ...connId,
-        media: call.connectionId,
+        [type]: call.connectionId,
       });
     });
 
@@ -271,60 +237,44 @@ const usePeer = () => {
         newPeer.destroy();
       }
     };
-  }, [
-    setMeetingStream,
-    setSelfState,
-    globalState,
-    handleOnData,
-    handleOnStream,
-  ]);
+  }, []);
 
-  // if peer is ready, connect to all participants
+  // Join a room, when peer is ready, connect to all participants for screenshare
   useEffect(() => {
     if (!peer?.open || !selfState.muid || tryConnected) return;
     setTryConnected(true);
     meetingState.participants.forEach((p) => {
       if (p.muid === selfState.muid) return;
-
-      const dataConnect = peer.connect(p.muid!);
-      dataConnect.on('open', () => {
-        dataConnect.on('data', (data) => {
-          handleOnData(data as PeerStreamMetadataExchange);
-        });
-        console.log('###########send metadata', metaData);
-        dataConnect.send({
-          id: selfState.muid,
-          metadata: metaData,
-        });
+      const mediaConnect = peer.call(p.muid!, mediaStream, {
+        metadata: { type: 'screenStream' },
       });
-
-      console.log('###########sending media to ', p.muid!);
-      localStream.getTracks().forEach((track) => {
-        console.log('###########Track', track);
-      });
-      const mediaConnect = peer.call(p.muid!, localStream);
+      console.log(
+        `### calling media from ${selfState.muid} to ${p.muid} @ ${mediaConnect.connectionId}`
+      );
       mediaConnect.on('stream', (stream) => {
-        handleOnStream(mediaConnect, stream);
+        console.log(
+          `### on receive screen stream from ${mediaConnect.peer} to ${selfState.muid} @ ${mediaConnect.connectionId}`
+        );
+        handleOnStream(mediaConnect, stream, 'screenStream');
       });
-
+      if (!connIdMap.has(p.muid!)) connIdMap.set(p.muid!, {});
       connIdMap.set(p.muid!, {
-        data: dataConnect.connectionId,
-        media: mediaConnect.connectionId,
+        ...connIdMap.get(p.muid!),
+        screenStream: mediaConnect.connectionId,
       });
     });
   }, [
     peer?.open,
     peer,
-    handleOnData,
-    handleOnStream,
     selfState.muid,
     tryConnected,
     meetingState.participants,
   ]);
 
-  // someone exit, remove stream
+  // someone join the meeting, connect to him for media
+  // someone leave the meeting, close the connection
   useEffect(() => {
-    if (!peer) return;
+    if (!peer || !selfState.muid || !tryConnected) return;
 
     const streamMuids = new Set(meetingStream.keys());
     const participantMuids = new Set(
@@ -333,22 +283,52 @@ const usePeer = () => {
 
     streamMuids.forEach((muid) => {
       if (!participantMuids.has(muid)) {
-        console.log('[PEER] close connect: ', muid);
         const newMeetingStream = new Map(meetingStream);
         newMeetingStream.delete(muid);
         setMeetingStream(newMeetingStream);
-      }
-      if (connIdMap.has(muid)) {
-        connIdMap.delete(muid);
+        if (connIdMap.has(muid)) connIdMap.delete(muid);
       }
     });
-  }, [peer, meetingState.participants, setMeetingStream]);
+
+    participantMuids.forEach((muid) => {
+      // find a new participant
+      if (!muid || streamMuids.has(muid) || muid === selfState.muid) return;
+      const mediaConnect = peer.call(muid, mediaStream, {
+        metadata: { type: 'mediaStream' },
+      });
+      console.log(
+        `### calling media from ${selfState.muid} to ${muid} @ ${mediaConnect.connectionId}`
+      );
+      mediaConnect.on('stream', (stream) => {
+        console.log(
+          `### on receive media stream from ${mediaConnect.peer} to ${selfState.muid} @ ${mediaConnect.connectionId}`
+        );
+        handleOnStream(mediaConnect, stream, 'mediaStream');
+      });
+      if (!connIdMap.has(muid)) connIdMap.set(muid, {});
+      connIdMap.set(muid, {
+        ...connIdMap.get(muid),
+        mediaStream: mediaConnect.connectionId,
+      });
+    });
+  }, [
+    peer,
+    meetingState.participants,
+    setMeetingStream,
+    meetingStream,
+    selfState.muid,
+  ]);
 
   // on self change, boardcast participants
   useEffect(() => {
     if (!peer || !selfState.muid) return;
-    updateMetaData(peer);
-  }, [selfState, peer]);
+    updateMediaStream(peer);
+  }, [selfState.camStream, selfState.audioStream, selfState.muid, peer]);
+
+  useEffect(() => {
+    if (!peer || !selfState.muid) return;
+    updateScreenStream(peer);
+  }, [selfState.screenStream, selfState.muid, peer]);
 };
 
 export default usePeer;

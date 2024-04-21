@@ -43,12 +43,13 @@ export const ScreenShareControlPanel: React.FC<{
       }}
     >
       <video
-        className={`h-full w-full object-contain absolute`}
+        className={`absolute h-full w-full object-contain`}
         autoPlay
         playsInline
         ref={videoRef}
+        muted={true}
       />
-      <div className="flex h-full w-full flex-col items-center  justify-evenly p-2 text-center absolute backdrop-blur-md backdrop-brightness-90 rounded-lg overflow-hidden">
+      <div className="absolute flex h-full w-full flex-col  items-center justify-evenly overflow-hidden rounded-lg p-2 text-center backdrop-blur-md backdrop-brightness-90">
         <div className="flex flex-col gap-3">
           <p className="text-xl">You are Sharing the Screen</p>
           <div className="flex items-center justify-center gap-2">

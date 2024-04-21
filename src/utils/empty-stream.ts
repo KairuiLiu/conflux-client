@@ -20,17 +20,13 @@ const createEmptyVideoTrack = (): MediaStreamTrack => {
 };
 
 export const fakeAudioTrack = createEmptyAudioTrack();
-fakeAudioTrack.contentHint = 'speech';
 export const fakeCameraTrack = createEmptyVideoTrack();
-fakeCameraTrack.contentHint = 'motion';
 export const fakeScreenVideoTrack = createEmptyVideoTrack();
-fakeScreenVideoTrack.contentHint = 'detail';
 export const fakeScreenAudioTrack = createEmptyAudioTrack();
-fakeScreenAudioTrack.contentHint = '';
 
-export const localStream = new MediaStream([
-  fakeAudioTrack,
-  fakeCameraTrack,
-  fakeScreenVideoTrack,
+export const mediaStream = new MediaStream([fakeAudioTrack, fakeCameraTrack]);
+
+export const screenStream = new MediaStream([
   fakeScreenAudioTrack,
+  fakeScreenVideoTrack,
 ]);

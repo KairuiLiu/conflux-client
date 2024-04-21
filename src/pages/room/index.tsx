@@ -16,11 +16,9 @@ export default function Room() {
   const navigator = useNavigate();
   const globalState = useGlobalStore((s) => s);
 
-  usePeer();
-
   useEffect(() => {
-    meetingContext.setSelfState.setExiting(true);
     if (id !== meetingContext.meetingState.id) {
+      meetingContext.setSelfState.setExiting(true);
       navigator('/join/' + id);
     }
   }, [id, meetingContext.meetingState.id, navigator]);
@@ -52,6 +50,7 @@ export default function Room() {
     };
   }, [meetingContext.meetingState.id, meetingContext.selfState.muid]);
 
+  usePeer();
   useHandleSocketEvents(meetingContext, globalState);
 
   return (

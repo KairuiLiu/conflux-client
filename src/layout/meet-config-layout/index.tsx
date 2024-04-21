@@ -80,6 +80,7 @@ const MeetConfigLayout = ({
                 ? videoStream
                 : null
             }
+            audioStream={null}
             screenStream={null}
             expandCamera={state.user.expandCamera}
             limitHeight

@@ -10,8 +10,6 @@ function getUserPanelConfig(
   participant.forEach((participant) => {
     const remoteStream = meetingContext.meetingStream.get(participant.muid!);
 
-    const remoteStreamTracks = remoteStream?.stream?.getTracks();
-
     if (participant.state.screen) {
       if (participant.muid === meetingContext.selfState.muid)
         newConfig.push({
@@ -19,24 +17,20 @@ function getUserPanelConfig(
           screenStream: meetingContext.selfState.screenStream,
         });
       else {
-        const screenStreamTrack = remoteStreamTracks?.filter((track) =>
-          remoteStream?.metadata?.screenStream?.includes(track.id)
-        );
-        // ! TEMP: GUESS SCREEN STREAM TRACK IF NOT FOUND [TODO]
-        const guessScreenStreamTrack = remoteStreamTracks
-          ?.filter((track) => track.kind === 'video')
-          .at(0);
-        if (screenStreamTrack?.length === 0 && guessScreenStreamTrack)
-          screenStreamTrack.push(guessScreenStreamTrack);
+        const screenVideoTracks = remoteStream?.screenStream?.getVideoTracks();
+        const screenAudioTracks = remoteStream?.screenStream?.getAudioTracks();
 
-        if (screenStreamTrack?.length)
+        if (screenVideoTracks?.length)
           newConfig.push({
             user: {
               name: meetingContext.selfState.name,
               avatar: globalState.user.avatar || '',
             },
             camStream: null,
-            screenStream: new MediaStream(screenStreamTrack),
+            screenStream: new MediaStream(screenVideoTracks),
+            audioStream: screenAudioTracks?.length
+              ? new MediaStream(screenAudioTracks)
+              : null,
             mirrroCamera: globalState.user.mirrorCamera,
             expandCamera: globalState.user.expandCamera,
           });
@@ -54,21 +48,18 @@ function getUserPanelConfig(
         expandCamera: globalState.user.expandCamera,
       });
     } else {
-      const videoAndAudioTracks =
-        remoteStreamTracks?.filter(
-          (track) => !remoteStream?.metadata?.screenStream.includes(track.id)
-        ) || [];
+      const videoTracks = remoteStream?.mediaStream?.getVideoTracks();
+      const audioTracks = remoteStream?.mediaStream?.getAudioTracks();
 
-      // ! TEMP: GUESS SCREEN STREAM TRACK IF NOT FOUND [TODO]
-      const guessScreenStreamTrack = remoteStreamTracks
-        ?.filter((track) => track.kind === 'video')
-        .at(-1);
-      if (!videoAndAudioTracks?.length && guessScreenStreamTrack)
-        videoAndAudioTracks.push(guessScreenStreamTrack);
+      const camStream =
+        videoTracks?.length && participant.state.camera
+          ? new MediaStream(videoTracks)
+          : null;
 
-      const camStream = videoAndAudioTracks
-        ? new MediaStream(videoAndAudioTracks)
-        : null;
+      const audioStream =
+        audioTracks?.length && participant.state.mic
+          ? new MediaStream(audioTracks)
+          : null;
 
       newConfig.push({
         user: {
@@ -76,14 +67,13 @@ function getUserPanelConfig(
           avatar: participant.avatar,
         },
         camStream: camStream,
+        audioStream: audioStream,
         screenStream: null,
         mirrroCamera: participant.mirrorCamera,
         expandCamera: participant.expandCamera,
       });
     }
   });
-
-  console.log('newConfig', newConfig)
 
   return newConfig;
 }

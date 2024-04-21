@@ -73,8 +73,8 @@ interface PeerStreamMetadataExchange {
 }
 
 interface PeerStream {
-  metadata?: PeerStreamMetadata;
-  stream?: MediaStream;
+  mediaStream?: MediaStream;
+  screenStream?: MediaStream;
 }
 
 interface MeetingContextState {
@@ -99,6 +99,7 @@ type MeetingContextType = MeetingContextState &
 type UserPanelConfig = {
   user?: Pick<UserInfo, 'name' | 'avatar'>;
   camStream?: MediaStream | null;
+  audioStream?: MediaStream | null;
   screenStream?: MediaStream | null;
   mirrroCamera?: boolean;
   expandCamera?: boolean;

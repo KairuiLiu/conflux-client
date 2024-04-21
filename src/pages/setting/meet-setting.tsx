@@ -407,6 +407,7 @@ export default function MeetSetting() {
             className="rounded-lg"
             expandCamera={expandCamera}
             limitHeight
+            audioStream={null}
           />
         </div>
       </section>
