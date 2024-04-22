@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .switch-wapper-enable {
+    @apply relative inline-flex h-6 w-11 items-center rounded-full bg-sky-600;
+  }
+
+  .switch-wapper-disable {
+    @apply relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200;
+  }
+
+  .switch-core-enable {
+    @apply inline-block h-4 w-4 translate-x-6 transform rounded-full bg-white transition-all;
+  }
+
+  .switch-core-disable {
+    @apply inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition-all;
+  }
+}
