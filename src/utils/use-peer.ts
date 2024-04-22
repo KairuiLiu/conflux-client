@@ -264,7 +264,7 @@ const usePeer = () => {
     setTryConnected(true);
     meetingState.participants.forEach((p) => {
       if (p.muid === selfState.muid) return;
-      const mediaConnect = peer.call(p.muid!, mediaStream!, {
+      const mediaConnect = peer.call(p.muid!, screenStream!, {
         metadata: { type: 'screenStream' },
       });
       console.log(

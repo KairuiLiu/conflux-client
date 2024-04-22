@@ -21,6 +21,7 @@ const UserItemCard: React.FC<{
 
   const isSelfHost = meetingContext.selfState?.role === 'HOST';
   const canOperate = meetingContext.selfState.muid === user.muid || isSelfHost;
+  const isMySelf = meetingContext.selfState.muid === user.muid;
 
   useEffect(() => {
     setNewName(user.name);
@@ -119,7 +120,8 @@ const UserItemCard: React.FC<{
               {user.name}
             </h4>
             <span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500">
-              {user.role}
+              {(user.role === 'HOST' ? 'Host' : 'Participant') +
+                (isMySelf ? ' (You)' : '')}
             </span>
           </div>
         </div>
