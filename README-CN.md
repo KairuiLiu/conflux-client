@@ -2,7 +2,7 @@
   <img src="./src/assets/logo_color.svg" width="128" height="128"/>
   <h2 style="margin-top: 0;">ConFlux Client</h2>
   <p>
-    <strong>🎥 Another meeting and collaboration platform</strong>
+    <strong>🎥 又一个视频会议与协作平台</strong>
   </p>
   <p>
     <img alt="WebRTC" src="https://img.shields.io/badge/WebRTC-333333?style=flat-square&logo=WebRTC&logoColor=white"/>
@@ -16,7 +16,7 @@
     <span> | </span>
     <a href="./README.md">English</a>
     <span> | </span>
-    <a href="./README.md">简体中文</a>
+    <a href="./README-CN.md">简体中文</a>
   </h4>
 </div>
 
@@ -24,30 +24,29 @@
 
 ### ✨ Feature
 
-- Multi-person P2P video conferencing based on WebRTC
-- Local users, no registration required, no login required
-- Supports screen sharing
-- Supports audio and video device testing and switching
-- Supports meeting invitations
-- Supports meeting member permission management (setting co-hosts, muting, kicking out)
-- Real-time traffic monitoring
+- 基于 WebRTC 的多人 P2P 视频会议
+- 本地用户, 无需注册, 无需登录
+- 支持屏幕共享
+- 支持音视频设备测试与切换
+- 支持会议邀请
+- 支持会议成员权限管理 (设置联席主持人, 禁言, 踢出)
+- 实时流量监控
 
-### 🛠️ Install
+### 🛠️ 安装
 
 ```bash
-# Install pnpm
+# 安装pnpm
 > npm install -g pnpm
 
-# Install all dependencies
+# 安装全部依赖
 > pnpm install
 
-# Install a dependency
+# 安装某个依赖
 > pnpm install xxx  -D/-S
 
-# Run
+# 运行
 > pnpm dev
 
-# Build
+# 打包
 > pnpm build
 ```
-
