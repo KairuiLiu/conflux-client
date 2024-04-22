@@ -5,14 +5,17 @@ export default function MeetSystemInfo() {
   const state = useGlobalStore((d) => d);
 
   return (
-    <div className="flex flex-col gap-2">
-      {state.rtcStatus.map((data) => (
-        <RTCPanel key={data.title} data={data} />
-      ))}
-      <mark>VERSION: {process.env.VERSION}</mark>
-      <mark>BUILDTIME: {process.env.BUILDTIME}</mark>
-      <mark>MODE: {process.env.MODE}</mark>
-      <mark>TODO Reactivity Component</mark>
-    </div>
+    <>
+      <div className="flex h-full flex-col gap-2 overflow-auto">
+        {state.rtcStatus.map((data) => (
+          <RTCPanel key={data.title} data={data} />
+        ))}
+        <div className="flex h-full shrink items-end text-gray-400">
+          {`Ver: ${process.env.VERSION}${
+            process.env.MODE ? `-${process.env.MODE}` : ''
+          }-${process.env.BUILDTIME}`}
+        </div>
+      </div>
+    </>
   );
 }

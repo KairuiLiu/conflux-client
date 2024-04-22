@@ -28,65 +28,7 @@ export function initState(
       microphone: [],
       speaker: [],
     },
-    rtcStatus: [
-      {
-        title: 'Network',
-        Bandwidth: {
-          upload: '0 kbps',
-          download: '0 kbps',
-        },
-        PackageLost: {
-          upload: '0 %',
-          download: '0 %',
-        },
-        Delay: {
-          value: '0 ms',
-        },
-      },
-      {
-        title: 'Audio',
-        Bitrate: {
-          upload: '0 kbps',
-          download: '0 kbps',
-        },
-        Microphone: {
-          value: '0 dB',
-        },
-        Speaker: {
-          value: '0 dB',
-        },
-      },
-      {
-        title: 'Video',
-        Resolution: {
-          upload: '0 x 0',
-          download: '0 x 0',
-        },
-        Framerate: {
-          upload: '0 fps',
-          download: '0 fps',
-        },
-        Bitrate: {
-          upload: '0 kbps',
-          download: '0 kbps',
-        },
-      },
-      {
-        title: 'Screen Sharing',
-        Resolution: {
-          upload: '0 x 0',
-          download: '0 x 0',
-        },
-        Framerate: {
-          upload: '0 fps',
-          download: '0 fps',
-        },
-        Bitrate: {
-          upload: '0 kbps',
-          download: '0 kbps',
-        },
-      },
-    ],
+    rtcStatus: getNewRtcStatus(),
     siteConfig: {
       token: '',
       COTURN_PASSWORD: '',
@@ -119,4 +61,66 @@ function fetchConfig(
       console.info('[ERROR] Fetch config failed ', e);
       toast.error('Network error, try again later.', toastConfig);
     });
+}
+
+export function getNewRtcStatus(): MeetingRTCStatus[] {
+  return [
+    {
+      title: 'Network',
+      Bandwidth: {
+        upload: '- kbps',
+        download: '- kbps',
+      },
+      PackageLost: {
+        upload: '- %',
+        download: '- %',
+      },
+      Delay: {
+        value: '- ms',
+      },
+    },
+    {
+      title: 'Audio',
+      Bitrate: {
+        upload: '- kbps',
+        download: '- kbps',
+      },
+      Microphone: {
+        value: '- dB',
+      },
+      Speaker: {
+        value: '- dB',
+      },
+    },
+    {
+      title: 'Video',
+      Resolution: {
+        upload: '-',
+        download: '-',
+      },
+      Framerate: {
+        upload: '- fps',
+        download: '- fps',
+      },
+      Bitrate: {
+        upload: '- kbps',
+        download: '- kbps',
+      },
+    },
+    {
+      title: 'Screen Sharing',
+      Resolution: {
+        upload: '-',
+        download: '-',
+      },
+      Framerate: {
+        upload: '- fps',
+        download: '- fps',
+      },
+      Bitrate: {
+        upload: '- kbps',
+        download: '- kbps',
+      },
+    },
+  ];
 }

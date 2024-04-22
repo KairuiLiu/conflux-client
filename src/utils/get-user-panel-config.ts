@@ -3,7 +3,7 @@ import { MeetingContextType, UserPanelConfig } from '@/types/meeting';
 function getUserPanelConfig(
   participant: Participant[],
   meetingContext: MeetingContextType,
-  globalState: StateType
+  user: UserInfo
 ): UserPanelConfig[] {
   const newConfig: UserPanelConfig[] = [];
 
@@ -24,15 +24,15 @@ function getUserPanelConfig(
           newConfig.push({
             user: {
               name: meetingContext.selfState.name,
-              avatar: globalState.user.avatar || '',
+              avatar: user.avatar || '',
             },
             camStream: null,
             screenStream: new MediaStream(screenVideoTracks),
             audioStream: screenAudioTracks?.length
               ? new MediaStream(screenAudioTracks)
               : null,
-            mirrroCamera: globalState.user.mirrorCamera,
-            expandCamera: globalState.user.expandCamera,
+            mirrroCamera: user.mirrorCamera,
+            expandCamera: user.expandCamera,
           });
       }
     }
@@ -44,8 +44,8 @@ function getUserPanelConfig(
         },
         camStream: meetingContext.selfState.camStream,
         screenStream: null,
-        mirrroCamera: globalState.user.mirrorCamera,
-        expandCamera: globalState.user.expandCamera,
+        mirrroCamera: user.mirrorCamera,
+        expandCamera: user.expandCamera,
       });
     } else {
       const videoTracks = remoteStream?.mediaStream?.getVideoTracks();

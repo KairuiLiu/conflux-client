@@ -9,12 +9,14 @@ type MeetingRTCStatusKey =
   | 'Framerate';
 
 interface MeetingRTCStatusItem {
-  upload?: string;
-  download?: string;
-  value?: string;
+  upload?: number | string;
+  download?: number | string;
+  value?: number | string;
+  suffix?: string;
 }
 
-interface MeetingRTCStatus {
+type MeetingRTCStatus = {
+  [key in MeetingRTCStatusKey]?: MeetingRTCStatusItem;
+} & {
   title: 'Network' | 'Audio' | 'Video' | 'Screen Sharing';
-  [key: string]: MeetingRTCStatusItem | string;
-}
+};

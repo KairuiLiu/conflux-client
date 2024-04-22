@@ -6,11 +6,13 @@ import Room from '@/pages/room';
 import Exit from '@/pages/exit';
 import Setting from '@/pages/setting';
 import MainLayout from '@/layout/main-layout';
+import ErrorPage from '@/pages/error';
 
 const routes = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
@@ -19,34 +21,29 @@ const routes = createBrowserRouter([
       {
         path: '/j/:id?',
         element: <Join />,
-        errorElement: <div>TODO</div>,
       },
       {
         path: '/join/:id?',
         element: <Join />,
-        errorElement: <div>TODO</div>,
       },
       {
         path: '/create/',
         element: <Create />,
-        errorElement: <div>TODO</div>,
       },
       {
         path: '/exit',
         element: <Exit />,
-        errorElement: <div>TODO</div>,
       },
       {
         path: '/setting',
         element: <Setting />,
-        errorElement: <div>TODO</div>,
       },
     ],
   },
   {
     path: '/room/:id',
     element: <Room />,
-    errorElement: <div>TODO</div>,
+    errorElement: <ErrorPage />,
   },
 ]);
 

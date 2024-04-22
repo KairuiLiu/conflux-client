@@ -14,7 +14,14 @@ export default defineConfig({
   },
   define: {
     'process.env.MODE': JSON.stringify(process.env.MODE),
-    'process.env.BUILDTIME': JSON.stringify(new Date().toISOString()),
+    'process.env.BUILDTIME': JSON.stringify(
+      new Date()
+        .toISOString()
+        .replace(
+          /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.\d*Z/,
+          '$1$2$3$4$5'
+        )
+    ),
     'process.env.VERSION': JSON.stringify(packageJson.version),
   },
   server: {

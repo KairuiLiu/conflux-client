@@ -71,9 +71,9 @@ const MeetingPanel: React.FC<{
     );
 
     setUsePanelConfigArr(
-      getUserPanelConfig(participant, meetingContext, state)
+      getUserPanelConfig(participant, meetingContext, state.user)
     );
-  }, [meetingContext, state]);
+  }, [meetingContext, state.user]);
 
   return (
     <>

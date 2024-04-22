@@ -9,7 +9,7 @@ const RTCPanel: React.FC<{
       <section className="flex rounded-lg border border-dashed border-gray-300 p-3">
         {Object.keys(data).map((key) => {
           if (key === 'title') return null;
-          const item = data[key] as MeetingRTCStatusItem;
+          const item = data[key as MeetingRTCStatusKey]!;
           return (
             <div
               key={data.title + key}

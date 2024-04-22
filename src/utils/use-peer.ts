@@ -5,6 +5,7 @@ import useMeetingStore from '@/context/meeting-context';
 import { v4 } from 'uuid';
 import useGlobalStore from '@/context/global-context';
 import { createEmptyAudioTrack, createEmptyVideoTrack } from './empty-stream';
+import { usePeerStateReport } from './peer-state-report';
 
 let fakeVidioTrack: MediaStreamTrack | null = null;
 let fakeAudioTrack: MediaStreamTrack | null = null;
@@ -40,7 +41,9 @@ let screenStream: MediaStream | null = null;
  * connIdMap: muid -> {mediaStream, screenStream}
  */
 
-const connIdMap = new Map<
+// TODO: duplicate and self connection
+
+export const connIdMap = new Map<
   string,
   {
     mediaStream?: string;
@@ -217,6 +220,7 @@ const usePeer = () => {
   const [peer, setPeer] = useState<Peer | null>(null);
   const globalState = useGlobalStore();
   const [tryConnected, setTryConnected] = useState(false);
+  usePeerStateReport(peer);
 
   // create peer and process oncall event
   useEffect(() => {
@@ -235,7 +239,7 @@ const usePeer = () => {
       call.answer(type === 'screenStream' ? screenStream! : mediaStream!);
       call.on('stream', (stream) => {
         console.log(
-          `### on receive ${type} stream from ${call.peer} to ${selfState.muid} @ ${call.connectionId}`
+          `[Peer] on receive ${type} stream from ${call.peer} to ${selfState.muid} @ ${call.connectionId}`
         );
         handleOnStream(call, stream, type);
       });
@@ -250,9 +254,7 @@ const usePeer = () => {
     });
 
     return () => {
-      if (newPeer) {
-        newPeer.destroy();
-      }
+      if (newPeer) newPeer.destroy();
     };
   }, []);
 
@@ -266,11 +268,11 @@ const usePeer = () => {
         metadata: { type: 'screenStream' },
       });
       console.log(
-        `### calling media from ${selfState.muid} to ${p.muid} @ ${mediaConnect.connectionId}`
+        `[Peer] calling media from ${selfState.muid} to ${p.muid} @ ${mediaConnect.connectionId}`
       );
       mediaConnect.on('stream', (stream) => {
         console.log(
-          `### on receive screen stream from ${mediaConnect.peer} to ${selfState.muid} @ ${mediaConnect.connectionId}`
+          `[Peer] on receive screen stream from ${mediaConnect.peer} to ${selfState.muid} @ ${mediaConnect.connectionId}`
         );
         handleOnStream(mediaConnect, stream, 'screenStream');
       });
@@ -314,11 +316,11 @@ const usePeer = () => {
         metadata: { type: 'mediaStream' },
       });
       console.log(
-        `### calling media from ${selfState.muid} to ${muid} @ ${mediaConnect.connectionId}`
+        `[Peer] calling media from ${selfState.muid} to ${muid} @ ${mediaConnect.connectionId}`
       );
       mediaConnect.on('stream', (stream) => {
         console.log(
-          `### on receive media stream from ${mediaConnect.peer} to ${selfState.muid} @ ${mediaConnect.connectionId}`
+          `[Peer] on receive media stream from ${mediaConnect.peer} to ${selfState.muid} @ ${mediaConnect.connectionId}`
         );
         handleOnStream(mediaConnect, stream, 'mediaStream');
       });
