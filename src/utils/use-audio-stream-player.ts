@@ -16,7 +16,7 @@ function useAudioStreamPlayer() {
 
       Promise.resolve()
         .then(() => {
-          console.log('start play audio', audioStream, speaker);
+          console.log('[Media] start play audio', audioStream, speaker);
           if (speaker?.deviceId) {
             // @ts-ignore
             audioElement?.setSinkId?.(speaker.deviceId);

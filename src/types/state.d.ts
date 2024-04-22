@@ -6,10 +6,23 @@ interface StateType {
 }
 
 interface ReportContext {
+  type: 'media' | 'screen';
   lastGenerateTime: number;
-  byteReceived: number;
-  byteSent: number;
-  sentpackageLost: number;
+  mediaByteReceived: number;
+  mediaByteSent: number;
+  screenByteReceived: number;
+  screenByteSent: number;
+  audioByteReceived: number;
+  audioByteSent: number;
   receivedPackageLost: number;
   delay: number;
+  packageReceived: number;
+  maxResolutionSend: string;
+  maxResolutionRecv: string;
+  screenResolutionSend: string;
+  screenResolutionRecv: string;
+  mediaSendFrameRate: number;
+  mediaRecvFrameRate: number;
+  screenSendFrameRate: number;
+  screenRecvFrameRate: number;
 }

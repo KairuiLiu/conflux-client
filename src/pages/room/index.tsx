@@ -46,7 +46,7 @@ export default function Room() {
         });
       const context = useMeetingStore.getState();
       socket.connected && !context.selfState.exiting && socket.disconnect();
-      console.log('disconnect');
+      console.log('[WS-DISCONNECT]');
     };
   }, [meetingContext.meetingState.id, meetingContext.selfState.muid]);
 

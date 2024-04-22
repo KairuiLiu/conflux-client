@@ -5,7 +5,7 @@ import useMeetingStore from '@/context/meeting-context';
 import { v4 } from 'uuid';
 import useGlobalStore from '@/context/global-context';
 import { createEmptyAudioTrack, createEmptyVideoTrack } from './empty-stream';
-import { usePeerStateReport } from './peer-state-report';
+import { usePeerStateReport } from './use-peer-state-report';
 
 let fakeVidioTrack: MediaStreamTrack | null = null;
 let fakeAudioTrack: MediaStreamTrack | null = null;

@@ -1,41 +1,94 @@
 import { getNewRtcStatus } from '@/context/global-context/init-state';
 
-export const emptyReport: ReportContext = {
+// operation
+
+export const getEmptyReport = (): ReportContext => ({
+  type: 'media',
   lastGenerateTime: 0,
-  byteReceived: 0,
-  byteSent: 0,
-  sentpackageLost: 0,
+  screenByteReceived: 0,
+  screenByteSent: 0,
+  mediaByteReceived: 0,
+  mediaByteSent: 0,
+  audioByteReceived: 0,
+  audioByteSent: 0,
+  packageReceived: 0,
   receivedPackageLost: 0,
   delay: 0,
-};
+  maxResolutionSend: '0x0',
+  maxResolutionRecv: '0x0',
+  screenResolutionSend: '0x0',
+  screenResolutionRecv: '0x0',
+  mediaSendFrameRate: 0,
+  mediaRecvFrameRate: 0,
+  screenSendFrameRate: 0,
+  screenRecvFrameRate: 0,
+});
 
 export const addReport = (
   oldReport: ReportContext,
   newReport: ReportContext
 ): ReportContext => ({
+  ...newReport,
   lastGenerateTime: Date.now(),
-  byteReceived: newReport.byteReceived + oldReport.byteReceived,
-  byteSent: newReport.byteSent + oldReport.byteSent,
-  sentpackageLost: newReport.sentpackageLost + oldReport.sentpackageLost,
+  screenByteReceived:
+    newReport.screenByteReceived + oldReport.screenByteReceived,
+  screenByteSent: newReport.screenByteSent + oldReport.screenByteSent,
+  mediaByteReceived: newReport.mediaByteReceived + oldReport.mediaByteReceived,
+  mediaByteSent: newReport.mediaByteSent + oldReport.mediaByteSent,
+  audioByteReceived: newReport.audioByteReceived + oldReport.audioByteReceived,
+  audioByteSent: newReport.audioByteSent + oldReport.audioByteSent,
   receivedPackageLost:
     newReport.receivedPackageLost + oldReport.receivedPackageLost,
   delay: newReport.delay + oldReport.delay,
+  packageReceived: newReport.packageReceived + oldReport.packageReceived,
+  maxResolutionSend: getMaxResolution(
+    oldReport.maxResolutionSend,
+    newReport.maxResolutionSend
+  ),
+  maxResolutionRecv: getMaxResolution(
+    oldReport.maxResolutionRecv,
+    newReport.maxResolutionRecv
+  ),
+  mediaRecvFrameRate:
+    newReport.mediaRecvFrameRate + oldReport.mediaRecvFrameRate,
+  mediaSendFrameRate:
+    newReport.mediaSendFrameRate + oldReport.mediaSendFrameRate,
+  screenRecvFrameRate:
+    newReport.screenRecvFrameRate + oldReport.screenRecvFrameRate,
+  screenSendFrameRate:
+    newReport.screenSendFrameRate + oldReport.screenSendFrameRate,
 });
 
 export const diffReport = (
   newReport: ReportContext,
   oldReport: ReportContext
 ): ReportContext => ({
+  ...newReport,
   lastGenerateTime: newReport.lastGenerateTime - oldReport.lastGenerateTime,
-  byteReceived: newReport.byteReceived - oldReport.byteReceived,
-  byteSent: newReport.byteSent - oldReport.byteSent,
-  sentpackageLost: newReport.sentpackageLost - oldReport.sentpackageLost,
+  screenByteReceived:
+    newReport.screenByteReceived - oldReport.screenByteReceived,
+  screenByteSent: newReport.screenByteSent - oldReport.screenByteSent,
+  mediaByteReceived: newReport.mediaByteReceived - oldReport.mediaByteReceived,
+  mediaByteSent: newReport.mediaByteSent - oldReport.mediaByteSent,
+  audioByteReceived: newReport.audioByteReceived - oldReport.audioByteReceived,
+  audioByteSent: newReport.audioByteSent - oldReport.audioByteSent,
   receivedPackageLost:
     newReport.receivedPackageLost - oldReport.receivedPackageLost,
   delay: newReport.delay - 0,
+  packageReceived: newReport.packageReceived - oldReport.packageReceived,
 });
 
-function getNetworkSpeed(v: number) {
+// formate
+
+const getMaxResolution = (oldRes: string, newRes: string) => {
+  const [oldWidth, oldHeight] = oldRes.split('x').map(Number);
+  const [newWidth, newHeight] = newRes.split('x').map(Number);
+  return newWidth * newHeight > oldWidth * oldHeight ? newRes : oldRes;
+};
+
+function formateNetworkSpeedFbps(v: number) {
+  if (Number.isNaN(v)) return '- bps';
+
   let speed = v;
   const suffixs = ['bps', 'kbps', 'Mbps', 'Gbps'];
 
@@ -47,11 +100,25 @@ function getNetworkSpeed(v: number) {
   return `${speed.toFixed(2)} ${suffix}`;
 }
 
-function getRate(v: number) {
+function formateRate(v: number) {
+  if (Number.isNaN(v)) return '- %';
   return `${v.toFixed(2)} %`;
 }
 
-function getTime(v: number) {
+function formateFps(v: number) {
+  if (Number.isNaN(v)) return '- fps';
+  return `${v.toFixed(2)} fps`;
+}
+
+function formateRevolution(v: string) {
+  const [width, height] = v.split('x').map(Number);
+  if (!width || !height) return `-`;
+  return v;
+}
+
+function formateTimeFms(v: number) {
+  if (Number.isNaN(v)) return '- ms';
+
   let time = v;
   const suffixs = ['ms', 's'];
 
@@ -63,61 +130,143 @@ function getTime(v: number) {
   return `${time.toFixed(2)} ${suffix}`;
 }
 
-export function getRtcStatus(
+// export
+
+export function genRtcStatus(
   deltaReport: ReportContext,
-  connectLen: number
+  mediaReportLen: number,
+  screenReportLen: number
 ): MeetingRTCStatus[] {
   const [
     networkStatus,
-    // audioStatus,
-    // videoStatus,
-    // screenStatus,
+    audioStatus,
+    videoStatus,
+    screenStatus,
   ]: MeetingRTCStatus[] = getNewRtcStatus();
   const timePast = deltaReport.lastGenerateTime / 1000;
-  if (timePast === 0) console.log(deltaReport, connectLen);
+
+  audioStatus.Bitrate = {
+    upload: formateNetworkSpeedFbps(deltaReport.audioByteSent / timePast),
+    download: formateNetworkSpeedFbps(deltaReport.audioByteReceived / timePast),
+  };
+
+  screenStatus.Bitrate = {
+    upload: formateNetworkSpeedFbps(deltaReport.screenByteSent / timePast),
+    download: formateNetworkSpeedFbps(
+      deltaReport.screenByteReceived / timePast
+    ),
+  };
+
+  videoStatus.Bitrate = {
+    upload: formateNetworkSpeedFbps(deltaReport.mediaByteSent / timePast),
+    download: formateNetworkSpeedFbps(deltaReport.mediaByteReceived / timePast),
+  };
 
   networkStatus.Bandwidth = {
-    upload: getNetworkSpeed(timePast ? deltaReport.byteSent / timePast : 0),
-    download: getNetworkSpeed(
-      timePast ? deltaReport.byteReceived / timePast : 0
+    upload: formateNetworkSpeedFbps(
+      (8 *
+        (deltaReport.screenByteSent +
+          deltaReport.mediaByteSent +
+          deltaReport.audioByteSent)) /
+        timePast
+    ),
+    download: formateNetworkSpeedFbps(
+      (8 *
+        (deltaReport.screenByteReceived +
+          deltaReport.mediaByteReceived +
+          deltaReport.audioByteReceived)) /
+        timePast
     ),
   };
   networkStatus.PackageLost = {
-    upload: getRate(deltaReport.sentpackageLost),
-    download: getRate(deltaReport.receivedPackageLost),
-  };
-  networkStatus.Delay = {
-    value: getTime(connectLen ? deltaReport.delay / connectLen : 0),
+    value: formateRate(
+      deltaReport.receivedPackageLost / deltaReport.packageReceived
+    ),
   };
 
-  return [
-    networkStatus,
-    // audioStatus,
-    // videoStatus,
-    // screenStatus,
-  ];
+  networkStatus.Delay = {
+    value: formateTimeFms(
+      (1000 * deltaReport.delay) / (mediaReportLen + screenReportLen)
+    ),
+  };
+
+  videoStatus.Resolution = {
+    upload: formateRevolution(deltaReport.maxResolutionSend),
+    download: formateRevolution(deltaReport.maxResolutionRecv),
+  };
+
+  videoStatus.Framerate = {
+    upload: formateFps(deltaReport.mediaSendFrameRate / mediaReportLen),
+    download: formateFps(deltaReport.mediaRecvFrameRate / mediaReportLen),
+  };
+
+  screenStatus.Resolution = {
+    upload: formateRevolution(deltaReport.screenResolutionSend),
+    download: formateRevolution(deltaReport.screenResolutionRecv),
+  };
+
+  screenStatus.Framerate = {
+    upload: formateFps(deltaReport.screenSendFrameRate / screenReportLen),
+    download: formateFps(deltaReport.screenRecvFrameRate / screenReportLen),
+  };
+
+  return [networkStatus, audioStatus, videoStatus, screenStatus];
 }
 
-export function getNetworkReportContext(states: RTCStatsReport) {
-  const networkReport = {
-    byteReceived: 0,
-    byteSent: 0,
-    sentpackageLost: 0,
-    receivedPackageLost: 0,
-    delay: 0,
-  };
+// work with rtc stats
+
+export function getNetworkReportContext(
+  states: RTCStatsReport,
+  type: 'media' | 'screen'
+) {
+  const repo = getEmptyReport();
+  repo.type = type;
 
   states.forEach((report) => {
     if (report.type === 'inbound-rtp') {
-      networkReport.byteReceived += report.bytesReceived;
-      networkReport.receivedPackageLost += report.packetsLost;
+      repo.receivedPackageLost += report.packetsLost;
+      repo.packageReceived += report.packetsReceived;
+      if (report.mediaType === 'video') {
+        if (type === 'media') {
+          repo.maxResolutionRecv = getMaxResolution(
+            repo.maxResolutionRecv,
+            `${report.frameWidth}x${report.frameHeight}`
+          );
+          repo.mediaRecvFrameRate += report.framesPerSecond;
+          repo.mediaByteReceived += report.bytesReceived;
+        }
+        if (type === 'screen') {
+          repo.screenResolutionRecv = `${report.frameWidth}x${report.frameHeight}`;
+          repo.screenRecvFrameRate += report.framesPerSecond;
+          repo.screenByteReceived += report.bytesReceived;
+        }
+      }
+      if (report.mediaType === 'audio') {
+        repo.audioByteReceived += report.bytesReceived;
+      }
     } else if (report.type === 'outbound-rtp') {
-      networkReport.byteSent += report.bytesSent;
-      networkReport.sentpackageLost += report.packetsLost;
+      if (report.mediaType === 'video') {
+        if (type === 'media') {
+          repo.maxResolutionSend = getMaxResolution(
+            repo.maxResolutionSend,
+            `${report.frameWidth}x${report.frameHeight}`
+          );
+          repo.mediaSendFrameRate += report.framesPerSecond;
+          repo.mediaByteSent += report.bytesSent;
+        }
+        if (type === 'screen') {
+          repo.screenResolutionSend = `${report.frameWidth || 0}x${report.frameHeight || 0}`;
+          repo.screenSendFrameRate += report.framesPerSecond;
+          repo.screenByteSent += report.bytesSent;
+        }
+      }
+      if (report.mediaType === 'audio') {
+        repo.audioByteSent += report.bytesSent;
+      }
     } else if (report.type === 'candidate-pair') {
-      networkReport.delay += report.currentRoundTripTime;
+      repo.delay += report.currentRoundTripTime;
     }
   });
 
-  return networkReport;
+  return repo;
 }

@@ -72,8 +72,7 @@ export function getNewRtcStatus(): MeetingRTCStatus[] {
         download: '- kbps',
       },
       PackageLost: {
-        upload: '- %',
-        download: '- %',
+        value: '- %',
       },
       Delay: {
         value: '- ms',
@@ -84,12 +83,6 @@ export function getNewRtcStatus(): MeetingRTCStatus[] {
       Bitrate: {
         upload: '- kbps',
         download: '- kbps',
-      },
-      Microphone: {
-        value: '- dB',
-      },
-      Speaker: {
-        value: '- dB',
       },
     },
     {

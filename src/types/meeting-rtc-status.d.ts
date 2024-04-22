@@ -3,8 +3,6 @@ type MeetingRTCStatusKey =
   | 'PackageLost'
   | 'Delay'
   | 'Bitrate'
-  | 'Microphone'
-  | 'Speaker'
   | 'Resolution'
   | 'Framerate';
 
