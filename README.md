@@ -51,3 +51,6 @@
 > pnpm build
 ```
 
+### 🥰 Reference
+
+- The implementation of video background replacement is based on [Volcomix/virtual-background](https://github.com/Volcomix/virtual-background) and uses the [Meet Segmentation](https://drive.google.com/file/d/1lnP1bRi9CSqQQXUHa13159vLELYDgDu0/preview) model from [google/mediapipe](https://github.com/google/mediapipe).

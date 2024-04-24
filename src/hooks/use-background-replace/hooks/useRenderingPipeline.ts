@@ -37,7 +37,6 @@ function useRenderingPipeline(
       sourcePlayback,
       backgroundImageRef.current,
       backgroundConfig,
-      segmentationConfig,
       canvasRef.current,
       tflite,
       timerWorker,

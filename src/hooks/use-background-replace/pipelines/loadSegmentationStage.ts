@@ -1,4 +1,3 @@
-import { SegmentationConfig } from '../helpers/segmentationHelper'
 import { TFLite } from '../hooks/useTFLite'
 import {
   compileShader,
@@ -12,7 +11,6 @@ export function buildLoadSegmentationStage(
   vertexShader: WebGLShader,
   positionBuffer: WebGLBuffer,
   texCoordBuffer: WebGLBuffer,
-  segmentationConfig: SegmentationConfig,
   tflite: TFLite,
   outputTexture: WebGLTexture
 ) {

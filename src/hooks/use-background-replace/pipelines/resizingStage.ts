@@ -1,4 +1,3 @@
-import { SegmentationConfig } from '../helpers/segmentationHelper'
 import { TFLite } from '../../use-background-replace/hooks/useTFLite'
 import { TimerWorker } from '../helpers/timerHelper'
 import {
@@ -15,7 +14,6 @@ export function buildResizingStage(
   vertexShader: WebGLShader,
   positionBuffer: WebGLBuffer,
   texCoordBuffer: WebGLBuffer,
-  segmentationConfig: SegmentationConfig,
   tflite: TFLite
 ) {
   const fragmentShaderSource = glsl`#version 300 es

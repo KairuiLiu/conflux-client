@@ -1,6 +1,5 @@
 import { BackgroundConfig } from '../helpers/backgroundHelper'
 import { PostProcessingConfig } from '../helpers/postProcessingHelper'
-import { SegmentationConfig } from '../helpers/segmentationHelper'
 import { SourcePlayback } from '../helpers/sourceHelper'
 import { TFLite } from '../hooks/useTFLite'
 import { TimerWorker } from '../helpers/timerHelper'
@@ -21,7 +20,6 @@ export function buildWebGL2Pipeline(
   sourcePlayback: SourcePlayback,
   backgroundImage: HTMLImageElement | null,
   backgroundConfig: BackgroundConfig,
-  segmentationConfig: SegmentationConfig,
   canvas: HTMLCanvasElement,
   tflite: TFLite,
   timerWorker: TimerWorker,
@@ -97,7 +95,6 @@ export function buildWebGL2Pipeline(
     vertexShader,
     positionBuffer,
     texCoordBuffer,
-    segmentationConfig,
     tflite
   )
   const loadSegmentationStage = buildSoftmaxStage(
@@ -105,7 +102,6 @@ export function buildWebGL2Pipeline(
     vertexShader,
     positionBuffer,
     texCoordBuffer,
-    segmentationConfig,
     tflite,
     segmentationTexture
   )
@@ -116,7 +112,6 @@ export function buildWebGL2Pipeline(
     positionBuffer,
     texCoordBuffer,
     segmentationTexture,
-    segmentationConfig,
     personMaskTexture,
     canvas
   )

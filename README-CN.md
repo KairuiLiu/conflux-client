@@ -50,3 +50,7 @@
 # 打包
 > pnpm build
 ```
+
+### 🥰 参考
+
+- 视频背景替换的实现参考自 [Volcomix/virtual-background](https://github.com/Volcomix/virtual-background) , 使用了 [google/mediapipe](https://github.com/google/mediapipe) 的 [Meet Segmentation](https://drive.google.com/file/d/1lnP1bRi9CSqQQXUHa13159vLELYDgDu0/preview) 模型
