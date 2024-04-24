@@ -1,3 +1,4 @@
+// @ts-ignore
 declare const self: DedicatedWorkerGlobalScope
 
 type TimerData = {
@@ -21,4 +22,4 @@ self.onmessage = (event: MessageEvent<TimerData>) => {
   }
 }
 
-export {}
+// export {}

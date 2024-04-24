@@ -4,10 +4,12 @@ import {
   UserGroupIcon,
   GlobeAsiaAustraliaIcon,
   XMarkIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/solid';
 import UserSetting from './user-setting';
 import MeetSetting from './meet-setting';
 import MeetSystemInfo from './meet-system-info';
+import VideoBackgroundSetting from './video-background-setting';
 
 const settingCategories = [
   {
@@ -19,6 +21,11 @@ const settingCategories = [
     icon: <UserGroupIcon className="h-5 w-5" />,
     name: 'Meeting Setting',
     page: () => <MeetSetting />,
+  },
+  {
+    icon: <SparklesIcon className="h-5 w-5" />,
+    name: 'Effects',
+    page: () => <VideoBackgroundSetting />,
   },
   {
     icon: <GlobeAsiaAustraliaIcon className="h-5 w-5" />,

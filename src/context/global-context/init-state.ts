@@ -22,6 +22,7 @@ export function initState(
       defaultSpeaker: null,
       mirrorCamera: true,
       expandCamera: true,
+      videoBackground: 0,
     },
     mediaDiveces: {
       camera: [],

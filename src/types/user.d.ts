@@ -9,6 +9,7 @@ interface MeetingConfig {
   defaultSpeaker: string?;
   mirrorCamera: boolean;
   expandCamera: boolean;
+  videoBackground: number;
 }
 
 interface UserInfo extends MeetingConfig {
