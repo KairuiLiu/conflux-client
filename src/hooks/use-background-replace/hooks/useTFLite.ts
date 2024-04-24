@@ -73,10 +73,8 @@ function useTFLite(segmentationConfig: SegmentationConfig) {
       console.log('Model buffer memory offset:', modelBufferOffset)
       console.log('Loading model buffer...')
       newSelectedTFLite.HEAPU8.set(new Uint8Array(model), modelBufferOffset)
-      console.log(
-        '_loadModel result:',
-        newSelectedTFLite._loadModel(model.byteLength)
-      )
+      const loadModelResult = newSelectedTFLite._loadModel(model.byteLength)
+      console.log('_loadModel result:', loadModelResult)
 
       console.log(
         'Input memory offset:',
