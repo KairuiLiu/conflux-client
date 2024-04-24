@@ -1,4 +1,4 @@
-import { aspRange } from '@/utils/use-panel-size';
+import { aspRange } from '@/hooks/use-panel-size';
 import { Switch } from '@headlessui/react';
 import { useEffect, useRef } from 'react';
 

@@ -5,8 +5,8 @@ import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/solid';
 import MicrophoneVolume from '@/components/microphone-volume';
 import { VideoPanel } from '@/components/video-panel';
 import SpeakerVolume from '@/components/speaker-volume';
-import useMediaStream from '@/utils/use-media-stream';
-import useSpeakerStream from '@/utils/use-speaker-stream';
+import useMediaStream from '@/hooks/use-media-stream';
+import useSpeakerStream from '@/hooks/use-speaker-stream';
 
 export default function MeetSetting() {
   const state = useGlobalStore((d) => d);

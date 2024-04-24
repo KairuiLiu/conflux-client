@@ -1,4 +1,4 @@
-import { useSocketListener, useSyncSocket } from '@/utils/use-socket';
+import { useSocketListener, useSyncSocket } from '@/hooks/use-socket';
 import { MeetingContextType } from '@/types/meeting';
 import useMeetingStore from '@/context/meeting-context';
 import { useNavigate } from 'react-router-dom';

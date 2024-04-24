@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { stopStream } from './media-stream';
+import { stopStream } from '../utils/media-stream';
 
 const useScreenshareStream = (
   enableShare: boolean,

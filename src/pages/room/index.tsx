@@ -4,10 +4,10 @@ import UserPanle from './user-panel';
 import MeetingPanel from './meeting-panel';
 import { useNavigate, useParams } from 'react-router-dom';
 import useMeetingStore from '@/context/meeting-context';
-import { emitSocket, socket } from '@/utils/use-socket';
+import { emitSocket, socket } from '@/hooks/use-socket';
 import useHandleSocketEvents from '../../utils/socket_events';
 import useGlobalStore from '@/context/global-context';
-import usePeer from '@/utils/use-peer';
+import usePeer from '@/hooks/use-peer';
 
 export default function Room() {
   const [showUserPanel, setShowUserPanel] = useState(false);

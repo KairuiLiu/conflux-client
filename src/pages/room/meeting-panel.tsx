@@ -1,9 +1,9 @@
 import { VideoPanel } from '@/components/video-panel';
-import { useVideoPanelSize } from '@/utils/use-panel-size';
+import { useVideoPanelSize } from '@/hooks/use-panel-size';
 import { useEffect, useMemo, useState } from 'react';
-import useMediaStream from '@/utils/use-media-stream';
+import useMediaStream from '@/hooks/use-media-stream';
 import useGlobalStore from '@/context/global-context';
-import useScreenshareStream from '@/utils/use-screenshare-stream';
+import useScreenshareStream from '@/hooks/use-screenshare-stream';
 import MeetingControlBar from './meeting-control-bar';
 import useMeetingStore from '@/context/meeting-context';
 import { ScreenShareControlPanel } from '@/components/screen-share-control-panel';

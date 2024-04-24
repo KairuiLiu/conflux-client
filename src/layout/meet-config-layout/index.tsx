@@ -3,7 +3,7 @@ import { VideoPanel } from '@/components/video-panel';
 import useGlobalStore from '@/context/global-context';
 import SettingPanel from '@/pages/setting/setting-panel';
 import { MeetingContextType } from '@/types/meeting';
-import useMediaStream from '@/utils/use-media-stream';
+import useMediaStream from '@/hooks/use-media-stream';
 import { Dialog } from '@headlessui/react';
 import { Cog8ToothIcon } from '@heroicons/react/24/solid';
 import { ReactNode, useState } from 'react';

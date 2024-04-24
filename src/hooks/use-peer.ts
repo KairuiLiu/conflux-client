@@ -4,7 +4,10 @@ import Peer, { MediaConnection, PeerOptions } from 'peerjs';
 import useMeetingStore from '@/context/meeting-context';
 import { v4 } from 'uuid';
 import useGlobalStore from '@/context/global-context';
-import { createEmptyAudioTrack, createEmptyVideoTrack } from './empty-stream';
+import {
+  createEmptyAudioTrack,
+  createEmptyVideoTrack,
+} from '../utils/empty-stream';
 import { usePeerStateReport } from './use-peer-state-report';
 
 let fakeVidioTrack: MediaStreamTrack | null = null;

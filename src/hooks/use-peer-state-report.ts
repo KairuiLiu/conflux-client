@@ -7,7 +7,7 @@ import {
   getEmptyReport,
   getNetworkReportContext,
   genRtcStatus,
-} from './report';
+} from '../utils/report';
 import useGlobalStore from '@/context/global-context';
 import { getNewRtcStatus } from '@/context/global-context/init-state';
 
@@ -49,13 +49,19 @@ export function usePeerStateReport(peer: Peer | null) {
     ) as ReportContext[];
 
     const mediaReportLen = allReports.filter((r) => r.type === 'media').length;
-    const screenReportLen = allReports.filter((r) => r.type === 'screen').length;
+    const screenReportLen = allReports.filter(
+      (r) => r.type === 'screen'
+    ).length;
 
     const combinedReport = allReports.reduce(addReport, getEmptyReport());
     const deltaReport = diffReport(combinedReport, reportContext);
     setReportContext(combinedReport);
 
-    const rtcStatus = genRtcStatus(deltaReport, mediaReportLen, screenReportLen);
+    const rtcStatus = genRtcStatus(
+      deltaReport,
+      mediaReportLen,
+      screenReportLen
+    );
     useGlobalStore.setState((v) => ({
       ...v,
       rtcStatus,

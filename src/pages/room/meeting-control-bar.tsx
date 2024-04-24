@@ -10,7 +10,7 @@ import React, { Fragment, useState } from 'react';
 import SettingPanel from '../setting/setting-panel';
 import { useNavigate } from 'react-router-dom';
 import useMeetingStore from '@/context/meeting-context';
-import { emitSocket } from '@/utils/use-socket';
+import { emitSocket } from '@/hooks/use-socket';
 import { toast } from 'react-toastify';
 import toastConfig from '@/utils/toast-config';
 
