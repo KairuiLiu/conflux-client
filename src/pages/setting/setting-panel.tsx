@@ -24,7 +24,7 @@ const settingCategories = [
   },
   {
     icon: <SparklesIcon className="h-5 w-5" />,
-    name: 'Effects',
+    name: 'Virtual Background',
     page: () => <VideoBackgroundSetting />,
   },
   {

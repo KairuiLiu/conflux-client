@@ -6,10 +6,10 @@ import { MeetingContextType } from '@/types/meeting';
 import useMediaStream from '@/hooks/use-media-stream';
 import { Dialog } from '@headlessui/react';
 import { Cog8ToothIcon } from '@heroicons/react/24/solid';
-import { ReactNode, useState } from 'react';
-
-// const maxHeight = 75;
-// const maxWidth = (maxHeight / 2) * aspRange[1];
+import { ReactNode, useMemo, useState } from 'react';
+import { getVideoBackgroundConfig } from '@/utils/video-background-image';
+import { BackgroundConfig } from '@/hooks/use-background-replace/helpers/backgroundHelper';
+import useBgReplace from '@/hooks/use-background-replace';
 
 const MeetConfigLayout = ({
   titleBar,
@@ -53,6 +53,16 @@ const MeetConfigLayout = ({
     'camera'
   );
 
+  const backgroundConfig = useMemo<BackgroundConfig>(
+    () => getVideoBackgroundConfig(state.user.videoBackground),
+    [state.user.videoBackground]
+  );
+
+  const [canvasRef, backgroundImageRef, replacedStream] = useBgReplace(
+    backgroundConfig,
+    videoStream
+  );
+
   const user = {
     name: meetingContext.selfState.name,
     avatar: state.user.avatar,
@@ -74,12 +84,27 @@ const MeetConfigLayout = ({
             'overflow-visible rounded-none shadow-none transition-all lg:flex-grow-0 lg:overflow-hidden lg:rounded-lg lg:shadow-panel '
           }
         >
+          {backgroundConfig.type === 'image' && (
+            <img
+              ref={backgroundImageRef}
+              src={backgroundConfig.url}
+              alt=""
+              hidden={true}
+            />
+          )}
+          <canvas
+            key={'webgl2'}
+            ref={canvasRef}
+            width={videoStream?.getVideoTracks()[0].getSettings().width}
+            height={videoStream?.getVideoTracks()[0].getSettings().height}
+            hidden={true}
+          />
           <VideoPanel
             user={user}
             mirrroCamera={state.user.mirrorCamera}
             camStream={
               meetingContext.meetingDeviceState.enableCamera
-                ? videoStream
+                ? replacedStream
                 : null
             }
             audioStream={null}

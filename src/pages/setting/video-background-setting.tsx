@@ -1,17 +1,18 @@
 import useGlobalStore from '@/context/global-context';
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import useMediaStream from '@/hooks/use-media-stream';
 import useBgReplace from '@/hooks/use-background-replace';
 import { BackgroundConfig } from '@/hooks/use-background-replace/helpers/backgroundHelper';
-import videoBackgroundImage from '@/utils/video-background-image';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/solid';
+import { CubeTransparentIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { VideoPanel } from '@/components/video-panel';
+import { getVideoBackgroundConfig, videoBackgrounds } from '@/utils/video-background-image';
 
 function VideoBackgroundSetting() {
   const globalState = useGlobalStore((d) => d);
-  const [currentBackground] = useState<number>(
-    // globalState.user.videoBackground
-    3
+  const [currentBackground, setCurrentBackground] = useState<number>(
+    globalState.user.videoBackground
   );
 
   const [selectedCameraLabel, setSelectedCameraLabel] = useState<string>(
@@ -31,36 +32,32 @@ function VideoBackgroundSetting() {
     'camera'
   );
 
-  const backgroundConfig = useMemo<BackgroundConfig>(() => {
-    return currentBackground < 2
-      ? {
-          type: currentBackground === 0 ? 'none' : 'blur',
-        }
-      : {
-          type: 'image',
-          url: videoBackgroundImage[currentBackground - 2],
-        };
-  }, [currentBackground]);
+  const backgroundConfig = useMemo<BackgroundConfig>(
+    () => getVideoBackgroundConfig(currentBackground),
+    [currentBackground]
+  );
 
   const [canvasRef, backgroundImageRef, replacedStream] = useBgReplace(
     backgroundConfig,
     originVideoStream
   );
-  const videoRef = useRef<HTMLVideoElement>(null);
 
-  useEffect(() => {
-    if (!videoRef.current) return;
-    const instance = videoRef.current;
-    instance.srcObject = replacedStream;
-    return () => {
-      instance.srcObject = null;
-    };
-  }, [replacedStream, videoRef, originVideoStream]);
+  const submitState = () => {
+    useGlobalStore.setState((state) => ({
+      ...state,
+      user: {
+        ...state.user,
+        videoBackground: currentBackground,
+      },
+    }));
+  };
+  const initState = () => {
+    setCurrentBackground(globalState.user.videoBackground);
+  };
 
-  // const submitState = () => {};
   return (
     <>
-      <div>
+      <div className="flex h-full flex-shrink flex-col gap-2 overflow-auto">
         <div className="flex">
           <Listbox
             value={selectedCameraLabel}
@@ -127,7 +124,6 @@ function VideoBackgroundSetting() {
             </div>
           </Listbox>
         </div>
-
         <div>
           {backgroundConfig.type === 'image' && (
             <img
@@ -144,28 +140,61 @@ function VideoBackgroundSetting() {
             height={originVideoStream?.getVideoTracks()[0].getSettings().height}
             hidden={true}
           />
-          <video autoPlay muted ref={videoRef} />
-          <div className="grid grid-cols-3 gap-2">
-            {['', ...videoBackgroundImage].map((image, index) => (
-              <div
-                key={image}
-                className="relative aspect-video w-full overflow-hidden"
-              >
-                <img
-                  src={image}
-                  alt=""
-                  className={
-                    'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform ' +
-                    (index === 1 ? 'backdrop-blur-lg' : '')
-                  }
-                />
-                <div className="h-full w-full opacity-50"></div>
+          <VideoPanel
+            camStream={replacedStream}
+            user={globalState.user}
+            mirrroCamera={globalState.user.mirrorCamera}
+            screenStream={null}
+            className="rounded-lg"
+            expandCamera={globalState.user.expandCamera}
+            limitHeight
+            audioStream={null}
+          />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {['', ...videoBackgrounds].map((image, index) => (
+            <div
+              key={image}
+              className={
+                'relative aspect-video w-full cursor-pointer overflow-hidden rounded-md border-2 ' +
+                (index === currentBackground
+                  ? 'border-primary'
+                  : 'border-gray-300')
+              }
+              onClick={() => setCurrentBackground(index)}
+            >
+              <img
+                src={image}
+                alt=""
+                className={
+                  'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform ' +
+                  (index === 1 ? 'blur-lg' : '')
+                }
+              />
+              <div className="flex h-full w-full items-center justify-center opacity-50">
+                {index === 0 ? (
+                  <XCircleIcon width={24} height={24} />
+                ) : index === 1 ? (
+                  <CubeTransparentIcon width={24} height={24} />
+                ) : (
+                  <></>
+                )}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
-      <div>save</div>
+      <div className="flex flex-shrink-0 flex-grow-0 justify-end gap-2 p-5 pb-0">
+        <button
+          className="btn btn-remove-focus btn-primary-outline"
+          onClick={initState}
+        >
+          Reset
+        </button>
+        <button className="btn btn-primary" onClick={submitState}>
+          Save
+        </button>
+      </div>
     </>
   );
 }

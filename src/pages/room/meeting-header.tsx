@@ -1,6 +1,7 @@
 import useMeetingStore from '@/context/meeting-context';
 import { fillLeft } from '@/utils/fill-left';
 import { genJoinInfo } from '@/utils/gen-join-info';
+import getLocalTime from '@/utils/get-local-time';
 import { writeClipboard } from '@/utils/write-clipboard';
 import { Menu, Transition } from '@headlessui/react';
 import {
@@ -16,16 +17,24 @@ const MeetingHeader: React.FC = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
+      const meetingTime = getLocalTime(
+        meetingContext?.meetingState?.meetingStartTime || 0
+      );
+
       const timePast = meetingContext?.meetingState?.meetingStartTime
         ? Date.now() - meetingContext?.meetingState?.meetingStartTime
         : 0;
       setPastTime(
-        `${fillLeft(`${Math.floor(timePast / 1000 / 60)}`, 2)}:${fillLeft(
-          `${Math.floor((timePast / 1000) % 60)}`,
-          2
-        )}`
+        timePast > 0
+          ? `${fillLeft(`${Math.floor(timePast / 1000 / 60)}`, 2)}:${fillLeft(
+              `${Math.floor((timePast / 1000) % 60)}`,
+              2
+            )}`
+          : meetingContext?.meetingState?.meetingStartTime
+            ? 'The meeting will start at ' + meetingTime
+            : ''
       );
-    }, 1000);
+    }, 500);
 
     return () => {
       clearInterval(timer);
@@ -78,6 +87,13 @@ const MeetingHeader: React.FC = () => {
                   <span>Organizer</span>
                 </div>
                 <div>{meetingContext.meetingState.organizer.name}</div>
+                <div>Meeting Time</div>
+                <div>
+                  {getLocalTime(
+                    meetingContext?.meetingState?.meetingStartTime || 0,
+                    true
+                  )}
+                </div>
                 <div className="flex  items-center">
                   <span>Meeting Link</span>
                 </div>
@@ -107,7 +123,8 @@ const MeetingHeader: React.FC = () => {
                     genJoinInfo(
                       meetingContext?.meetingState?.organizer?.name,
                       meetingContext?.meetingState?.title || '',
-                      meetingContext.meetingState.id
+                      meetingContext.meetingState.id,
+                      meetingContext?.meetingState?.meetingStartTime
                     )
                   );
                 }}

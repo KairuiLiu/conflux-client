@@ -16,8 +16,9 @@ function useBgReplace(
   const [segmentationConfig, setSegmentationConfig] =
     useState<SegmentationConfig>({
       backend: 'wasm',
-      targetFps: 65, // 60 introduces fps drop and unstable fps on Chrome
+      targetFps: stream?.getVideoTracks()[0].getSettings().frameRate || 65, // 60 introduces fps drop and unstable fps on Chrome
     });
+
   const { tflite, isSIMDSupported } = useTFLite(segmentationConfig);
   const [sourcePlayback, setSourcePlayback] = useState<SourcePlayback>();
   const [replacedStream, setReplacedStream] = useState<MediaStream | null>(
@@ -26,6 +27,10 @@ function useBgReplace(
 
   useEffect(() => {
     if (!stream) return;
+    setSegmentationConfig((d) => ({
+      ...d,
+      targetFps: stream.getVideoTracks()[0].getSettings().frameRate || 65,
+    }));
     const video = document.createElement('video');
     video.autoplay = true;
     video.srcObject = stream;

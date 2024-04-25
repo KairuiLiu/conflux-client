@@ -10,6 +10,8 @@ import { ScreenShareControlPanel } from '@/components/screen-share-control-panel
 import { UserPanelConfig } from '@/types/meeting';
 import sortParticipants from '@/utils/sort-participants';
 import getUserPanelConfig from '@/utils/get-user-panel-config';
+import useBgReplace from '@/hooks/use-background-replace';
+import { getVideoBackgroundConfig } from '@/utils/video-background-image';
 
 const MeetingPanel: React.FC<{
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
@@ -38,16 +40,32 @@ const MeetingPanel: React.FC<{
       meetingContext.setSelfState.setScreenStream
     );
 
+  const [originVideoStream, setOriginVideoStream] =
+    useState<MediaStream | null>(null);
   useMediaStream(
     meetingContext.meetingDeviceState.cameraLabel,
     meetingContext.setMeetingDeviceState.setCameraLabel,
     meetingContext.meetingDeviceState.enableCamera,
     meetingContext.setMeetingDeviceState.setEnableCamera,
-    meetingContext.selfState.camStream,
-    meetingContext.setSelfState.setCamStream,
+    originVideoStream,
+    setOriginVideoStream,
     'video',
     'camera'
   );
+
+  const backgroundConfig = useMemo(
+    () => getVideoBackgroundConfig(state.user.videoBackground),
+    [state.user.videoBackground]
+  );
+
+  const [canvasRef, backgroundImageRef, replacedStream] = useBgReplace(
+    backgroundConfig,
+    originVideoStream
+  );
+
+  useEffect(() => {
+    meetingContext.setSelfState.setCamStream(replacedStream);
+  }, [replacedStream, meetingContext.setSelfState]);
 
   const itemCount = useMemo(
     () =>
@@ -141,6 +159,21 @@ const MeetingPanel: React.FC<{
         }
         setShowUserPanel={setShowUserPanel}
       ></MeetingControlBar>
+      {backgroundConfig.type === 'image' && (
+        <img
+          ref={backgroundImageRef}
+          src={backgroundConfig.url}
+          alt=""
+          hidden={true}
+        />
+      )}
+      <canvas
+        key={'webgl2'}
+        ref={canvasRef}
+        width={originVideoStream?.getVideoTracks()[0].getSettings().width}
+        height={originVideoStream?.getVideoTracks()[0].getSettings().height}
+        hidden={true}
+      />
     </>
   );
 };

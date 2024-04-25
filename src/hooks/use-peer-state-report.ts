@@ -70,7 +70,7 @@ export function usePeerStateReport(peer: Peer | null) {
 
   useEffect(() => {
     if (!peer) return;
-    const timer = setInterval(() => reportStatus(peer), 2000);
+    const timer = setInterval(() => reportStatus(peer), 3000);
     return () => {
       clearInterval(timer);
     };
