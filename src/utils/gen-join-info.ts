@@ -1,4 +1,4 @@
-import getLocalTime from './get-local-time';
+import { getLocalDateTime } from './get-local-time';
 
 export function genJoinInfo(
   user: string,
@@ -11,7 +11,7 @@ Meeting ID: ${id.replace(/(.{1,3})/g, '$1 ').trim()}
 Meeting topic: ${title}${
     meetingTime &&
     `
-Meeting time: ${getLocalTime(meetingTime, true)}`
+Meeting time: ${getLocalDateTime(meetingTime, true)}`
   }
 Meeting link: ${window.location.origin}/j/${id}`;
 }

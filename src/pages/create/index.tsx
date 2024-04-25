@@ -2,21 +2,27 @@ import useGlobalStore from '@/context/global-context';
 import useMeetingStore from '@/context/meeting-context';
 import MeetConfigLayout from '@/layout/meet-config-layout';
 import toastConfig from '@/utils/toast-config';
-import { useEffect, useState } from 'react';
+import { Menu, Transition } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { CalendarDaysIcon } from '@heroicons/react/24/solid';
+import { Fragment, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import BookMeeting from './book-meeting';
 
 export default function Create() {
   const state = useGlobalStore((d) => d);
   const meetingContext = useMeetingStore((d) => d);
   const [canCreate, setCanCreate] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     meetingContext.resetMeetingContext();
   }, []);
 
-  async function onCreate() {
+  async function onCreate(time: number = 0) {
+    const start_time = time || Date.now();
     const createFetch = fetch('/api/meeting', {
       method: 'POST',
       headers: {
@@ -26,6 +32,7 @@ export default function Create() {
       body: JSON.stringify({
         organizer_name: meetingContext.selfState.name,
         title: meetingContext.meetingState.title,
+        start_time,
       }),
     })
       .then((d) => d.json())
@@ -37,8 +44,8 @@ export default function Create() {
             name: meetingContext.selfState.name,
           });
           meetingContext.setMeetingState.setId(`${data.id}`);
-          meetingContext.setMeetingState.setMeetingStartTime(Date.now());
-          navigate(`/room/${data.id}`);
+          meetingContext.setMeetingState.setMeetingStartTime(start_time);
+          if (!time) navigate(`/room/${data.id}`);
         }
       });
     toast.promise(
@@ -49,6 +56,7 @@ export default function Create() {
       },
       toastConfig
     );
+    return createFetch;
   }
 
   useEffect(() => {
@@ -89,14 +97,66 @@ export default function Create() {
                 required
               ></input>
             </div>
-            <button
-              disabled={!canCreate}
-              className={`btn btn-primary p-1 ${canCreate ? '' : 'btn-disabled'}`}
-              onClick={onCreate}
-            >
-              Start
-            </button>
+            <div className="flex">
+              <button
+                disabled={!canCreate}
+                className={`btn btn-primary p-1 ${canCreate ? '' : 'btn-disabled'} w-full flex-shrink rounded-r-none`}
+                onClick={() => onCreate()}
+              >
+                Start
+              </button>
+              <div className="relative flex flex-shrink-0 flex-nowrap overflow-y-visible">
+                <Menu>
+                  <div className="w-full flex-shrink flex-grow">
+                    <Menu.Button
+                      className={`btn btn-primary rounded-l-none ${canCreate ? '' : 'btn-disabled'}`}
+                    >
+                      <span>
+                        <ChevronDownIcon
+                          strokeWidth="2px"
+                          className="h-4 w-4 rotate-180 lg:rotate-0 transition-all"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </Menu.Button>
+
+                    <Transition
+                      as={Fragment}
+                      leave="transition ease-in duration-100"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                    >
+                      <Menu.Items
+                        className={`list-options list-options-right absolute px-2 bottom-full lg:bottom-auto`}
+                      >
+                        <Menu.Item key={'later'}>
+                          {({ active }) => (
+                            <button
+                              className={`${
+                                active && 'bg-primary text-white'
+                              } btn flex px-2 py-2`}
+                              onClick={() => setShowCalendar(true)}
+                            >
+                              <CalendarDaysIcon
+                                className="mr-2 h-5 w-5"
+                                aria-hidden="true"
+                              />
+                              Book for later
+                            </button>
+                          )}
+                        </Menu.Item>
+                      </Menu.Items>
+                    </Transition>
+                  </div>
+                </Menu>
+              </div>
+            </div>
           </div>
+          <BookMeeting
+            showCalendar={showCalendar}
+            setShowCalendar={setShowCalendar}
+            onBook={onCreate}
+          />
         </>
       }
     ></MeetConfigLayout>

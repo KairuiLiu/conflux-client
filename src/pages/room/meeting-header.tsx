@@ -1,23 +1,21 @@
+import MeetingInfoCard from '@/components/meeting-info-card';
 import useMeetingStore from '@/context/meeting-context';
 import { fillLeft } from '@/utils/fill-left';
 import { genJoinInfo } from '@/utils/gen-join-info';
-import getLocalTime from '@/utils/get-local-time';
+import { getLocalDateTime } from '@/utils/get-local-time';
 import { writeClipboard } from '@/utils/write-clipboard';
 import { Menu, Transition } from '@headlessui/react';
-import {
-  EllipsisHorizontalCircleIcon,
-  Square2StackIcon,
-} from '@heroicons/react/24/outline';
+import { EllipsisHorizontalCircleIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 
 const MeetingHeader: React.FC = () => {
   const meetingContext = useMeetingStore((d) => d);
-  const [pastTime, setPastTime] = useState('00:00');
+  const [pastTime, setPastTime] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const meetingTime = getLocalTime(
+      const meetingTime = getLocalDateTime(
         meetingContext?.meetingState?.meetingStartTime || 0
       );
 
@@ -64,56 +62,9 @@ const MeetingHeader: React.FC = () => {
               <h3 className="pb-3 text-lg font-semibold">
                 {meetingContext?.meetingState?.title || ''}
               </h3>
-              <div className="grid grid-cols-[min-content_1fr] gap-3 whitespace-nowrap">
-                <div className="flex  items-center">
-                  <span>Meeting ID</span>
-                </div>
-                <div className="flex  items-center gap-1">
-                  <span>
-                    {meetingContext?.meetingState?.id
-                      ?.replace(/(.{1,3})/g, '$1 ')
-                      ?.trim() || ''}
-                  </span>
-                  <button
-                    className="btn btn-text -scale-x-100 p-1"
-                    onClick={() => {
-                      writeClipboard(meetingContext.meetingState.id);
-                    }}
-                  >
-                    <Square2StackIcon className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="flex  items-center">
-                  <span>Organizer</span>
-                </div>
-                <div>{meetingContext.meetingState.organizer.name}</div>
-                <div>Meeting Time</div>
-                <div>
-                  {getLocalTime(
-                    meetingContext?.meetingState?.meetingStartTime || 0,
-                    true
-                  )}
-                </div>
-                <div className="flex  items-center">
-                  <span>Meeting Link</span>
-                </div>
-                <div className="flex  items-center gap-1">
-                  <span>
-                    {window.location.origin}/room/
-                    {meetingContext.meetingState.id}
-                  </span>
-                  <button
-                    className="btn btn-text -scale-x-100 p-1"
-                    onClick={() => {
-                      writeClipboard(
-                        `${window.location.origin}/room/${meetingContext.meetingState.id}`
-                      );
-                    }}
-                  >
-                    <Square2StackIcon className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+              <MeetingInfoCard
+                withTopic={false}
+              />
             </section>
             <footer className="border-t p-4">
               <button
