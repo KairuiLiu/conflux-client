@@ -75,7 +75,8 @@ const BookMeeting: FC<{
         meetingContext.meetingState.organizer?.name,
         meetingContext.meetingState.title || '',
         meetingContext.meetingState.id,
-        meetingContext.meetingState.meetingStartTime
+        meetingContext.meetingState.meetingStartTime,
+        meetingContext.meetingState.passcode
       )
     );
   }

@@ -62,9 +62,7 @@ const MeetingHeader: React.FC = () => {
               <h3 className="pb-3 text-lg font-semibold">
                 {meetingContext?.meetingState?.title || ''}
               </h3>
-              <MeetingInfoCard
-                withTopic={false}
-              />
+              <MeetingInfoCard withTopic={false} />
             </section>
             <footer className="border-t p-4">
               <button
@@ -75,7 +73,8 @@ const MeetingHeader: React.FC = () => {
                       meetingContext?.meetingState?.organizer?.name,
                       meetingContext?.meetingState?.title || '',
                       meetingContext.meetingState.id,
-                      meetingContext?.meetingState?.meetingStartTime
+                      meetingContext?.meetingState?.meetingStartTime,
+                      meetingContext?.meetingState?.passcode
                     )
                   );
                 }}

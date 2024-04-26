@@ -9,6 +9,7 @@ interface MeetingState {
     name: string;
   };
   participants: Participant[];
+  passcode: string;
 }
 
 interface SetMeetingState {
@@ -17,6 +18,7 @@ interface SetMeetingState {
   setMeetingStartTime: (meetingStartTime: number) => void;
   setOrganizer: (organizer: { muid: string; name: string }) => void;
   setParticipants: (participants: UserInfo[]) => void;
+  setPasscode: (passcode: string) => void;
 }
 
 interface MeetingDeviceState {

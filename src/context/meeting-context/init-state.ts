@@ -13,6 +13,7 @@ function initState(): MeetingContextState {
         name: '',
       },
       participants: [],
+      passcode: '',
     },
     meetingDeviceState: {
       enableCamera: globalState.user.autoEnableCamera,

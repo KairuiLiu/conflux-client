@@ -12,6 +12,8 @@ export default function Join() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [canJoin, setCanJoin] = useState(false);
+  const [passcode, setPasscode] = useState('');
+  const [showPasscode, setShowPasscode] = useState(false);
 
   useEffect(() => {
     meetingContext.resetMeetingContext();
@@ -19,7 +21,7 @@ export default function Join() {
 
   function onJoin() {
     const joinFetch = fetch(
-      `/api/meeting?id=${meetingContext.meetingState.id}&name=${meetingContext.selfState.name}`,
+      `/api/meeting?id=${meetingContext.meetingState.id}&name=${meetingContext.selfState.name}&passcode=${passcode}`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -30,7 +32,8 @@ export default function Join() {
       .then((d) => d.json())
       .then(({ code, data, msg }) => {
         if (code) {
-          toast.error(msg, toastConfig);
+          if (code === 401 && !showPasscode) setShowPasscode(true);
+          else toast.error(msg, toastConfig);
         } else {
           meetingContext.setMeetingState.setTitle(data.title);
           meetingContext.setMeetingState.setOrganizer({
@@ -39,6 +42,7 @@ export default function Join() {
           });
           meetingContext.setMeetingState.setMeetingStartTime(data.start_time);
           meetingContext.setMeetingState.setParticipants(data.participants);
+          meetingContext.setMeetingState.setPasscode(data.passcode);
           navigate(`/room/${data.id}`);
         }
       });
@@ -59,11 +63,17 @@ export default function Join() {
   }, [id]);
 
   useEffect(() => {
+    setShowPasscode(false);
+    setPasscode('');
+  }, [meetingContext.meetingState.id]);
+
+  useEffect(() => {
     setCanJoin(
       meetingContext.meetingState.id.length === 9 &&
-        meetingContext.selfState.name.length > 0
+        meetingContext.selfState.name.length > 0 &&
+        (!showPasscode || passcode.length > 0)
     );
-  }, [meetingContext.meetingState.id, meetingContext.selfState.name]);
+  }, [meetingContext.meetingState.id, meetingContext.selfState.name, passcode, showPasscode]);
 
   return (
     <MeetConfigLayout
@@ -97,6 +107,17 @@ export default function Join() {
                 }}
                 required
               ></input>
+              {showPasscode && (
+                <input
+                  className="input"
+                  placeholder="Passcode"
+                  value={passcode}
+                  onChange={(e) => {
+                    setPasscode(e.target.value.trim());
+                  }}
+                  required
+                ></input>
+              )}
             </div>
             <button
               disabled={!canJoin}

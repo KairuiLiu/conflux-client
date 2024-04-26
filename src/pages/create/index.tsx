@@ -2,7 +2,7 @@ import useGlobalStore from '@/context/global-context';
 import useMeetingStore from '@/context/meeting-context';
 import MeetConfigLayout from '@/layout/meet-config-layout';
 import toastConfig from '@/utils/toast-config';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, Switch, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { CalendarDaysIcon } from '@heroicons/react/24/solid';
 import { Fragment, useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ export default function Create() {
   const [canCreate, setCanCreate] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const navigate = useNavigate();
+  const [usePasscode, setUsepasscode] = useState(true);
 
   useEffect(() => {
     meetingContext.resetMeetingContext();
@@ -23,6 +24,7 @@ export default function Create() {
 
   async function onCreate(time: number = 0) {
     const start_time = time || Date.now();
+    const passcode = usePasscode ? Math.random().toString().slice(-6) : '';
     const createFetch = fetch('/api/meeting', {
       method: 'POST',
       headers: {
@@ -33,6 +35,7 @@ export default function Create() {
         organizer_name: meetingContext.selfState.name,
         title: meetingContext.meetingState.title,
         start_time,
+        passcode,
       }),
     })
       .then((d) => d.json())
@@ -45,6 +48,7 @@ export default function Create() {
           });
           meetingContext.setMeetingState.setId(`${data.id}`);
           meetingContext.setMeetingState.setMeetingStartTime(start_time);
+          meetingContext.setMeetingState.setPasscode(passcode);
           if (!time) navigate(`/room/${data.id}`);
         }
       });
@@ -96,7 +100,27 @@ export default function Create() {
                 }}
                 required
               ></input>
+              <div className="flex items-center justify-start">
+                <Switch
+                  checked={usePasscode}
+                  onChange={() => setUsepasscode((d) => !d)}
+                  className={
+                    '-translate-x-[12.5%] scale-75 ' +
+                    (usePasscode
+                      ? 'switch-wapper-enable'
+                      : 'switch-wapper-disable')
+                  }
+                >
+                  <span
+                    className={
+                      usePasscode ? 'switch-core-enable' : 'switch-core-disable'
+                    }
+                  />
+                </Switch>
+                <span>Use passcode</span>
+              </div>
             </div>
+
             <div className="flex">
               <button
                 disabled={!canCreate}
@@ -114,7 +138,7 @@ export default function Create() {
                       <span>
                         <ChevronDownIcon
                           strokeWidth="2px"
-                          className="h-4 w-4 rotate-180 lg:rotate-0 transition-all"
+                          className="h-4 w-4 rotate-180 transition-all lg:rotate-0"
                           aria-hidden="true"
                         />
                       </span>
@@ -127,7 +151,7 @@ export default function Create() {
                       leaveTo="opacity-0"
                     >
                       <Menu.Items
-                        className={`list-options list-options-right absolute px-2 bottom-full lg:bottom-auto`}
+                        className={`list-options list-options-right absolute bottom-full px-2 lg:bottom-auto`}
                       >
                         <Menu.Item key={'later'}>
                           {({ active }) => (

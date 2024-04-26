@@ -46,19 +46,39 @@ const MeetingInfoCard: React.FC<{
           true
         )}
       </div>
+      {meetingContext.meetingState.passcode !== '' && (
+        <>
+          <div className="flex  items-center">
+            <span>Passcode</span>
+          </div>
+          <div className="flex  items-center gap-1">
+            <span>{meetingContext.meetingState.passcode}</span>
+            <span>
+              <button
+                className="btn btn-text -scale-x-100 p-1"
+                onClick={() => {
+                  writeClipboard(meetingContext.meetingState.passcode);
+                }}
+              >
+                <Square2StackIcon className="h-4 w-4" />
+              </button>
+            </span>
+          </div>
+        </>
+      )}
       <div className="flex  items-center">
         <span>Meeting Link</span>
       </div>
       <div className="flex  items-center gap-1">
         <span>
-          {window.location.origin}/room/
+          {window.location.origin}/j/
           {meetingContext.meetingState.id}
         </span>
         <button
           className="btn btn-text -scale-x-100 p-1"
           onClick={() => {
             writeClipboard(
-              `${window.location.origin}/room/${meetingContext.meetingState.id}`
+              `${window.location.origin}/j/${meetingContext.meetingState.id}`
             );
           }}
         >

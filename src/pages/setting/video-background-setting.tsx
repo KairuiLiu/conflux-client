@@ -7,12 +7,15 @@ import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/24/solid';
 import { CubeTransparentIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { VideoPanel } from '@/components/video-panel';
-import { getVideoBackgroundConfig, videoBackgrounds } from '@/utils/video-background-image';
+import {
+  getVideoBackgroundConfig,
+  videoBackgrounds,
+} from '@/utils/video-background-image';
 
 function VideoBackgroundSetting() {
   const globalState = useGlobalStore((d) => d);
   const [currentBackground, setCurrentBackground] = useState<number>(
-    globalState.user.videoBackground
+    globalState.user.videoBackground || 0
   );
 
   const [selectedCameraLabel, setSelectedCameraLabel] = useState<string>(

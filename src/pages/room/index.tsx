@@ -36,6 +36,7 @@ export default function Room() {
         camera: meetingContext.meetingDeviceState.enableCamera,
         screen: meetingContext.meetingDeviceState.enableShare,
       },
+      passcode: meetingContext.meetingState.passcode,
       expandCamera: globalState.user.expandCamera,
       mirrorCamera: globalState.user.mirrorCamera,
     });

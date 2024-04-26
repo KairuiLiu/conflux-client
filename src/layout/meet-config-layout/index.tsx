@@ -54,7 +54,7 @@ const MeetConfigLayout = ({
   );
 
   const backgroundConfig = useMemo<BackgroundConfig>(
-    () => getVideoBackgroundConfig(state.user.videoBackground),
+    () => getVideoBackgroundConfig(state.user.videoBackground || 0),
     [state.user.videoBackground]
   );
 

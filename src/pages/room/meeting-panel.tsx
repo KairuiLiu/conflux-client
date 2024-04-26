@@ -54,7 +54,7 @@ const MeetingPanel: React.FC<{
   );
 
   const backgroundConfig = useMemo(
-    () => getVideoBackgroundConfig(state.user.videoBackground),
+    () => getVideoBackgroundConfig(state.user.videoBackground || 0),
     [state.user.videoBackground]
   );
 
