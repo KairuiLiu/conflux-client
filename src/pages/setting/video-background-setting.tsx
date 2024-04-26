@@ -60,7 +60,7 @@ function VideoBackgroundSetting() {
 
   return (
     <>
-      <div className="flex h-full flex-shrink flex-col gap-2 overflow-auto">
+      <div className="flex h-full flex-shrink flex-col gap-2 overflow-auto pr-3">
         <div className="flex">
           <Listbox
             value={selectedCameraLabel}
@@ -144,7 +144,13 @@ function VideoBackgroundSetting() {
             hidden={true}
           />
           <VideoPanel
-            camStream={replacedStream}
+            camStream={
+              originVideoStream
+                ? currentBackground
+                  ? replacedStream
+                  : originVideoStream
+                : null
+            }
             user={globalState.user}
             mirrroCamera={globalState.user.mirrorCamera}
             screenStream={null}

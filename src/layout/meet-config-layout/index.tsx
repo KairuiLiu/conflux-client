@@ -103,8 +103,10 @@ const MeetConfigLayout = ({
             user={user}
             mirrroCamera={state.user.mirrorCamera}
             camStream={
-              meetingContext.meetingDeviceState.enableCamera
-                ? replacedStream
+              meetingContext.meetingDeviceState.enableCamera && videoStream
+                ? state.user.videoBackground
+                  ? replacedStream
+                  : videoStream
                 : null
             }
             audioStream={null}

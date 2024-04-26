@@ -64,8 +64,15 @@ const MeetingPanel: React.FC<{
   );
 
   useEffect(() => {
-    meetingContext.setSelfState.setCamStream(replacedStream);
-  }, [replacedStream, meetingContext.setSelfState]);
+    if (!originVideoStream || !state.user.videoBackground)
+      meetingContext.setSelfState.setCamStream(originVideoStream);
+    else meetingContext.setSelfState.setCamStream(replacedStream);
+  }, [
+    replacedStream,
+    meetingContext.setSelfState,
+    originVideoStream,
+    state.user,
+  ]);
 
   const itemCount = useMemo(
     () =>
