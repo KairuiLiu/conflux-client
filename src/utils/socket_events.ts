@@ -1,5 +1,5 @@
 import { useSocketListener, useSyncSocket } from '@/hooks/use-socket';
-import { MeetingContextType } from '@/types/meeting';
+import { Chat, MeetingContextType } from '@/types/meeting';
 import useMeetingStore from '@/context/meeting-context';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,7 +20,8 @@ function getGSt(globalContext: StateType) {
 
 function useHandleSocketEvents(
   initMeetingContext: MeetingContextType,
-  initGlobalContext: StateType
+  initGlobalContext: StateType,
+  setChats: React.Dispatch<React.SetStateAction<Chat[]>>
 ) {
   const navigate = useNavigate();
 
@@ -62,6 +63,10 @@ function useHandleSocketEvents(
     if (message !== 'SUCCESS') {
       initMeetingContext.setMeetingDeviceState.setEnableShare(false);
     }
+  });
+
+  useSocketListener('CHAT', ({ data }) => {
+    setChats((prev) => [...prev, data]);
   });
 
   useSocketListener('USER_STATE_UPDATE', ({ data }) => {

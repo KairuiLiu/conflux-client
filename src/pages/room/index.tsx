@@ -8,9 +8,14 @@ import { emitSocket, socket } from '@/hooks/use-socket';
 import useHandleSocketEvents from '../../utils/socket_events';
 import useGlobalStore from '@/context/global-context';
 import usePeer from '@/hooks/use-peer';
+import ChatPanel from './chat-panel';
+import { Chat } from '@/types/meeting';
 
 export default function Room() {
   const [showUserPanel, setShowUserPanel] = useState(false);
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const showSidePanel = showUserPanel || showChatPanel;
+  const [chats, setChats] = useState<Chat[]>([]);
   const { id } = useParams();
   const meetingContext = useMeetingStore((d) => d);
   const navigator = useNavigate();
@@ -52,27 +57,52 @@ export default function Room() {
   }, [meetingContext.meetingState.id, meetingContext.selfState.muid]);
 
   usePeer();
-  useHandleSocketEvents(meetingContext, globalState);
+  useHandleSocketEvents(meetingContext, globalState, setChats);
 
   return (
     <div className="flex h-dvh max-h-dvh flex-grow flex-col">
       <MeetingHeader />
       <main
         className={`flex h-0 flex-grow gap-0 px-2 pb-2 transition-all ${
-          showUserPanel ? 'sm:gap-4' : 'sm:gap-0'
+          showSidePanel ? 'sm:gap-4' : 'sm:gap-0'
         }`}
       >
         <section className="panel-classic flex w-0 flex-grow flex-col overflow-hidden shadow-none transition-all">
-          <MeetingPanel setShowUserPanel={setShowUserPanel} />
+          <MeetingPanel
+            setShowUserPanel={(v) => {
+              setShowChatPanel(false);
+              setShowUserPanel(v);
+            }}
+            setShowChatPanel={(v) => {
+              setShowUserPanel(false);
+              setShowChatPanel(v);
+            }}
+          />
         </section>
         <aside
           className={`panel-classic flex flex-shrink-0 flex-col shadow-none transition-all ${
-            showUserPanel
+            showSidePanel
               ? 'w-full overflow-visible sm:w-[33vmin] '
               : 'w-0 overflow-hidden'
           }`}
         >
-          <UserPanle handleClose={() => setShowUserPanel(false)} />
+          {showUserPanel && (
+            <UserPanle
+              handleClose={() => {
+                setShowUserPanel(false);
+                setShowChatPanel(false);
+              }}
+            />
+          )}
+          {showChatPanel && (
+            <ChatPanel
+              chats={chats}
+              handleClose={() => {
+                setShowChatPanel(false);
+                setShowUserPanel(false);
+              }}
+            />
+          )}
         </aside>
       </main>
     </div>

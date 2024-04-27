@@ -5,6 +5,7 @@ import {
   WindowIcon,
   PhoneXMarkIcon,
   UsersIcon,
+  ChatBubbleLeftIcon,
 } from '@heroicons/react/24/solid';
 import React, { Fragment, useState } from 'react';
 import SettingPanel from '../setting/setting-panel';
@@ -17,7 +18,8 @@ import toastConfig from '@/utils/toast-config';
 const MeetingControlBar: React.FC<{
   setEnableScreenShareStream: (enableShare: boolean) => void;
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ setEnableScreenShareStream, setShowUserPanel }) => {
+  setShowChatPanel: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ setEnableScreenShareStream, setShowUserPanel, setShowChatPanel }) => {
   const [showSetting, setShowSetting] = useState(false);
   const navigate = useNavigate();
   const meetingContext = useMeetingStore((d) => d);
@@ -60,6 +62,14 @@ const MeetingControlBar: React.FC<{
             }}
           >
             <UsersIcon className="h-4 w-4 text-gray-600" />
+          </button>
+          <button
+            className="btn btn-gray-glass flex-shrink-0"
+            onClick={() => {
+              setShowChatPanel((d) => !d);
+            }}
+          >
+            <ChatBubbleLeftIcon className="h-4 w-4 text-gray-600" />
           </button>
 
           <Menu as="div" className="relative inline-block text-left">

@@ -107,3 +107,9 @@ type UserPanelConfig = {
   expandCamera?: boolean;
   isScreenShareControlPanel?: boolean;
 };
+
+declare interface Chat {
+  muid: string;
+  message: string;
+  time: number;
+}

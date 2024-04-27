@@ -15,7 +15,8 @@ import { getVideoBackgroundConfig } from '@/utils/video-background-image';
 
 const MeetingPanel: React.FC<{
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ setShowUserPanel }) => {
+  setShowChatPanel: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ setShowUserPanel, setShowChatPanel }) => {
   const state = useGlobalStore((d) => d);
   const meetingContext = useMeetingStore((d) => d);
 
@@ -165,6 +166,7 @@ const MeetingPanel: React.FC<{
           meetingContext.setMeetingDeviceState.setEnableShare
         }
         setShowUserPanel={setShowUserPanel}
+        setShowChatPanel={setShowChatPanel}
       ></MeetingControlBar>
       {backgroundConfig.type === 'image' && (
         <img

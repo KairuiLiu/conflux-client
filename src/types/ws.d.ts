@@ -45,6 +45,7 @@ declare interface ClientToServerEvents {
   FINISH_MEETING: ClientEventListenersCb<'FINISH_MEETING', {}>;
   UPDATE_USER_STATE: ClientEventListenersCb<'UPDATE_USER_STATE', Participant>;
   REMOVE_USER: ClientEventListenersCb<'REMOVE_USER', { muid: string }>;
+  BOARDCAST_CHAT: ClientEventListenersCb<'BOARDCAST_CHAT',  Chat>;
   disconnect: ClientEventListenersCb<'disconnect', {}>;
 }
 
@@ -55,9 +56,10 @@ declare interface ServerToClientEvents {
   RES_UPDATE_USER_STATE: ServerEventListenersCb<'RES_UPDATE_USER_STATE', null>;
   RES_REMOVE_USER: ServerEventListenersCb<'RES_REMOVE_USER', null>;
 
-  USER_STATE_UPDATE: ServerEventListenersCb<'USER_STATE_UPDATE', Participant>;
+  CHAT: ServerEventListenersCb<'CHAT',  Chat>;
   USER_UPDATE: ServerEventListenersCb<'USER_UPDATE', MeetingState>;
   FINISH_MEETING: ServerEventListenersCb<'FINISH_MEETING', null>;
+  USER_STATE_UPDATE: ServerEventListenersCb<'USER_STATE_UPDATE', Participant>;
   disconnect: ServerEventListenersCb<'disconnect', null>;
 }
 
@@ -69,7 +71,7 @@ declare type ClientRoomKeys =
   | 'LEAVE_MEETING'
   | 'FINISH_MEETING'
   | 'disconnect';
-declare type ClientMeetingKeys = 'UPDATE_USER_STATE' | 'REMOVE_USER';
+declare type ClientMeetingKeys = 'UPDATE_USER_STATE' | 'REMOVE_USER' | 'BOARDCAST_CHAT';
 
 declare type ControllerKeys = ClientRoomKeys | ClientMeetingKeys;
 
