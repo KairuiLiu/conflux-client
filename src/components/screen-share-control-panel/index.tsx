@@ -73,6 +73,7 @@ export const ScreenShareControlPanel: React.FC<{
           <button
             className="btn btn-danger-secondary"
             onClick={handleStopSharing}
+            onMouseDown={(e) => e.preventDefault()}
           >
             Stop Sharing
           </button>

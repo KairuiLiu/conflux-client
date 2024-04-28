@@ -31,6 +31,7 @@ const MediaControlBar: React.FC<{
               !meetingContext.meetingDeviceState.enableMic
             )
           }
+          onMouseDown={(e) => e.preventDefault()}
         >
           {meetingContext.meetingDeviceState.enableMic ? (
             <MicrophoneIcon className={`h-4 w-4 ${iconColor}`} />
@@ -119,6 +120,7 @@ const MediaControlBar: React.FC<{
               !meetingContext.meetingDeviceState.enableCamera
             )
           }
+          onMouseDown={(e) => e.preventDefault()}
         >
           {meetingContext.meetingDeviceState.enableCamera ? (
             <VideoCameraIcon className={`h-4 w-4 ${iconColor}`} />
@@ -207,6 +209,7 @@ const MediaControlBar: React.FC<{
               !meetingContext.meetingDeviceState.enableSpeaker
             )
           }
+          onMouseDown={(e) => e.preventDefault()}
         >
           {meetingContext.meetingDeviceState.enableSpeaker ? (
             <SpeakerWaveIcon className={`h-4 w-4 ${iconColor}`} />

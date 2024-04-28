@@ -51,6 +51,7 @@ const MeetingControlBar: React.FC<{
                     !meetingContext.meetingDeviceState.enableShare
                   );
               }}
+              onMouseDown={(e) => e.preventDefault()}
             >
               <WindowIcon className="h-4 w-4 text-gray-600" />
             </button>
@@ -60,6 +61,7 @@ const MeetingControlBar: React.FC<{
             onClick={() => {
               setShowUserPanel((d) => !d);
             }}
+            onMouseDown={(e) => e.preventDefault()}
           >
             <UsersIcon className="h-4 w-4 text-gray-600" />
           </button>
@@ -68,6 +70,7 @@ const MeetingControlBar: React.FC<{
             onClick={() => {
               setShowChatPanel((d) => !d);
             }}
+            onMouseDown={(e) => e.preventDefault()}
           >
             <ChatBubbleLeftIcon className="h-4 w-4 text-gray-600" />
           </button>
@@ -136,6 +139,7 @@ const MeetingControlBar: React.FC<{
             onClick={() => {
               setShowSetting(true);
             }}
+            onMouseDown={(e) => e.preventDefault()}
           >
             <Cog8ToothIcon className="h-4 w-4 text-gray-600" />
           </button>

@@ -16,7 +16,7 @@ export default function Create() {
   const [canCreate, setCanCreate] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const navigate = useNavigate();
-  const [usePasscode, setUsepasscode] = useState(true);
+  const [usePasscode, setUsepasscode] = useState(false);
 
   useEffect(() => {
     meetingContext.resetMeetingContext();

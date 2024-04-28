@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MeetingHeader from './meeting-header';
 import UserPanle from './user-panel';
 import MeetingPanel from './meeting-panel';
@@ -20,6 +20,8 @@ export default function Room() {
   const meetingContext = useMeetingStore((d) => d);
   const navigator = useNavigate();
   const globalState = useGlobalStore((s) => s);
+  const holdingSpace = useRef(false);
+  const meetingMainPanel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (id !== meetingContext.meetingState.id) {
@@ -56,6 +58,38 @@ export default function Room() {
     };
   }, [meetingContext.meetingState.id, meetingContext.selfState.muid]);
 
+  useEffect(() => {
+    if (!meetingMainPanel.current) return;
+    const dom = meetingMainPanel.current;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const enableMic = useMeetingStore.getState().meetingDeviceState.enableMic;
+      if (e.code === 'Space' && !enableMic && !holdingSpace.current) {
+        setTimeout(() => {
+          meetingContext.setMeetingDeviceState.setEnableMic(true);
+        });
+        holdingSpace.current = true;
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && holdingSpace.current) {
+        setTimeout(() => {
+          meetingContext.setMeetingDeviceState.setEnableMic(false);
+        });
+        holdingSpace.current = false;
+      }
+    };
+
+    dom.addEventListener('keydown', handleKeyDown);
+    dom.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      dom.removeEventListener('keydown', handleKeyDown);
+      dom.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [meetingMainPanel]);
+
   usePeer();
   useHandleSocketEvents(meetingContext, globalState, setChats);
 
@@ -67,7 +101,11 @@ export default function Room() {
           showSidePanel ? 'sm:gap-4' : 'sm:gap-0'
         }`}
       >
-        <section className="panel-classic flex w-0 flex-grow flex-col overflow-hidden shadow-none transition-all">
+        <section
+          ref={meetingMainPanel}
+          className="panel-classic flex w-0 flex-grow flex-col overflow-hidden shadow-none transition-all focus:outline-none"
+          tabIndex={0}
+        >
           <MeetingPanel
             setShowUserPanel={(v) => {
               setShowChatPanel(false);

@@ -3,7 +3,7 @@ import useMeetingStore from '@/context/meeting-context';
 import { emitSocket } from '@/hooks/use-socket';
 import { Chat } from '@/types/meeting';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const ChatPanel: React.FC<{
   chats: Chat[];
@@ -11,8 +11,14 @@ const ChatPanel: React.FC<{
 }> = ({ chats, handleClose }) => {
   const [message, setMessage] = useState('');
   const meetingContext = useMeetingStore((d) => d);
+  const endOfMessagesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chats]);
 
   const sendMessage = () => {
+    if (!message.trim()) return;
     emitSocket('BOARDCAST_CHAT', {
       muid: meetingContext.selfState.muid,
       message,
@@ -33,6 +39,7 @@ const ChatPanel: React.FC<{
         {chats.map((chat, index) => (
           <UserChatCard chat={chat} key={chat.muid + '@' + index} />
         ))}
+        <div ref={endOfMessagesRef} />
       </div>
       <div className="flex gap-2 p-2">
         <input
@@ -43,7 +50,11 @@ const ChatPanel: React.FC<{
           onChange={(d) => setMessage(d.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
         />
-        <button className="btn btn-primary shrink-0 px-3" onClick={sendMessage}>
+        <button
+          className="btn btn-primary shrink-0 px-3"
+          onClick={sendMessage}
+          onMouseDown={(e) => e.preventDefault()}
+        >
           Send
         </button>
       </div>
