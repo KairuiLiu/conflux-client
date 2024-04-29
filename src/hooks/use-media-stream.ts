@@ -18,7 +18,7 @@ const useMediaStream = (
 
   useEffect(() => {
     refreshMediaDevice(mediaType, setState);
-  });
+  }, []);
 
   useEffect(() => {
     if (!enableStream) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BackgroundConfig } from './helpers/backgroundHelper';
 import { SegmentationConfig } from './helpers/segmentationHelper';
 import { SourcePlayback } from './helpers/sourceHelper';
@@ -24,23 +24,29 @@ function useBgReplace(
   const [replacedStream, setReplacedStream] = useState<MediaStream | null>(
     null
   );
+  const videoElem = useMemo(() => document.createElement('video'), []);
+  videoElem.autoplay = true;
 
   useEffect(() => {
     if (!stream) return;
-    setSegmentationConfig((d) => ({
-      ...d,
-      targetFps: stream.getVideoTracks()[0].getSettings().frameRate || 65,
-    }));
-    const video = document.createElement('video');
-    video.autoplay = true;
-    video.srcObject = stream;
+    setSegmentationConfig((d) => {
+      const trackFps = stream.getVideoTracks()[0].getSettings().frameRate || 60;
+      const targetFps = Math.floor(trackFps * 1.1);
+
+      return {
+        ...d,
+        targetFps,
+      };
+    });
+    videoElem.srcObject = stream;
     setSourcePlayback({
-      htmlElement: video,
+      htmlElement: videoElem,
       width: stream.getVideoTracks()[0].getSettings().width!,
       height: stream.getVideoTracks()[0].getSettings().height!,
     });
     return () => {
-      video.srcObject = null;
+      videoElem.srcObject = null;
+      setSourcePlayback(undefined);
     };
   }, [stream]);
 

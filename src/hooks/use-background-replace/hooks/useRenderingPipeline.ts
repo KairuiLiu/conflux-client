@@ -16,8 +16,6 @@ function useRenderingPipeline(
   const [pipeline, setPipeline] = useState<RenderingPipeline | null>(null);
   const backgroundImageRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
-  const [fps, setFps] = useState(0);
-  const [durations, setDurations] = useState<number[]>([]);
 
   useEffect(() => {
     if (!sourcePlayback || !tflite) return;
@@ -25,7 +23,6 @@ function useRenderingPipeline(
     let previousTime = 0;
     let beginTime = 0;
     let eventCount = 0;
-    let frameCount = 0;
     const frameDurations: number[] = [];
 
     let renderTimeoutId: number;
@@ -69,12 +66,8 @@ function useRenderingPipeline(
     function endFrame() {
       const time = Date.now();
       frameDurations[eventCount] = time - beginTime;
-      frameCount++;
       if (time >= previousTime + 1000) {
-        setFps((frameCount * 1000) / (time - previousTime));
-        setDurations(frameDurations);
         previousTime = time;
-        frameCount = 0;
       }
       eventCount = 0;
     }
@@ -108,8 +101,6 @@ function useRenderingPipeline(
     pipeline,
     backgroundImageRef,
     canvasRef,
-    fps,
-    durations,
   };
 }
 
