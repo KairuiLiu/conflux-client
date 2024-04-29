@@ -13,7 +13,7 @@ interface SizeWithLayout extends Size {
 export const aspRange = [1.25, 1.8];
 const MAX_LINE = 6;
 const MAX_COLUMN = 6;
-const MAX_ITEM_IN_PAGE = 9
+const MAX_ITEM_IN_PAGE = 9;
 
 function calculateSize({ width, height }: Size, count: number): SizeWithLayout {
   if (count === 0) return { width: 0, height: 0, col: 0, row: 0 };
@@ -73,23 +73,42 @@ function calculateSize({ width, height }: Size, count: number): SizeWithLayout {
   return res;
 }
 
+function calcListSize({ width, height }: Size): Size {
+  const asp = width / height;
+  if (asp >= aspRange[0] && asp <= aspRange[1]) {
+    return { width: width, height: height };
+  } else if (asp < aspRange[0]) {
+    return { width: width, height: width / aspRange[0] };
+  } else {
+    return { width: height * aspRange[1], height: height };
+  }
+}
+
 export function useVideoPanelSize<T extends HTMLElement>(
   itemCount: number
-): [
-  React.RefObject<T>,
-  SizeWithLayout,
-] {
+): [React.RefObject<T>, SizeWithLayout, Size] {
   const panelRef = useRef<T>(null);
-  const [videoPanelSize, setVideoPanelSize] = useState<SizeWithLayout>({
+  const [videoPanelGridSize, setVideoPanelGridSize] = useState<SizeWithLayout>({
     width: 0,
     height: 0,
     col: 0,
     row: 0,
   });
+  const [videoPanelMainSize, setVideoPanelMainSize] = useState<Size>({
+    width: 0,
+    height: 0,
+  });
+
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
-    setVideoPanelSize(calculateSize(containerSize, itemCount));
+    setVideoPanelGridSize(calculateSize(containerSize, itemCount));
+    setVideoPanelMainSize(
+      calcListSize({
+        width: ((containerSize.width - 48) / 7) * 6,
+        height: ((containerSize.height - 48) / 7) * 6,
+      })
+    );
   }, [containerSize, itemCount]);
 
   useEffect(() => {
@@ -110,7 +129,7 @@ export function useVideoPanelSize<T extends HTMLElement>(
     }
   }, [panelRef]);
 
-  return [panelRef, videoPanelSize];
+  return [panelRef, videoPanelGridSize, videoPanelMainSize];
 }
 
 // function calculateSize({ width, height }: Size, count: number): Size {

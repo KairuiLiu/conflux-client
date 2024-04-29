@@ -16,9 +16,12 @@ import { getVideoBackgroundConfig } from '@/utils/video-background-image';
 const MeetingPanel: React.FC<{
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
   setShowChatPanel: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ setShowUserPanel, setShowChatPanel }) => {
+  layout: 'grid' | 'list';
+}> = ({ setShowUserPanel, setShowChatPanel, layout }) => {
   const state = useGlobalStore((d) => d);
   const meetingContext = useMeetingStore((d) => d);
+
+  // Media Stream
 
   // Audio
   useMediaStream(
@@ -75,6 +78,8 @@ const MeetingPanel: React.FC<{
     state.user,
   ]);
 
+  // layout
+
   const itemCount = useMemo(
     () =>
       meetingContext.meetingState.participants.length +
@@ -84,10 +89,13 @@ const MeetingPanel: React.FC<{
     [meetingContext.meetingState.participants]
   );
 
-  const [videoPanelRef, videoPanelSize] = useVideoPanelSize(itemCount);
+  const [videoPanelRef, videoPanelGridSize, videoPanelMainSize] =
+    useVideoPanelSize(itemCount);
   const [userPanelConfigArr, setUsePanelConfigArr] = useState<
     UserPanelConfig[]
   >([]);
+  const [pined, setPined] = useState<UserPanelConfig>();
+  const [userPined, setUserPined] = useState<string | null>(null);
 
   useEffect(() => {
     const participant = sortParticipants(
@@ -96,41 +104,120 @@ const MeetingPanel: React.FC<{
       true
     );
 
-    setUsePanelConfigArr(
-      getUserPanelConfig(participant, meetingContext, state.user)
-    );
-  }, [meetingContext, state.user]);
+    const config = getUserPanelConfig(participant, meetingContext, state.user);
+
+    setUsePanelConfigArr(config);
+    let userPinedConfig = null;
+    if (userPined) {
+      const [userPinedMuid, userPinedType] = userPined.split('@');
+      userPinedConfig = config.find(
+        (d) =>
+          d.user.muid === userPinedMuid &&
+          ((userPinedType === 'S' &&
+            (d.type === 'CONTROL' || d.type === 'SCREEN')) ||
+            (userPinedType === 'C' && d.type === 'CAMERA'))
+      );
+      if (userPinedConfig) setPined(userPinedConfig);
+    }
+    if (!userPinedConfig) {
+      setUserPined(null);
+      setPined(config[0]);
+    }
+  }, [meetingContext, state.user, userPined]);
+
+  const handleDoubleClick = (config: UserPanelConfig) => {
+    const index = config.user.muid + (config.type === 'CAMERA' ? '@C' : '@S');
+    if (userPined === index) setUserPined(null);
+    else setUserPined(index);
+  };
 
   return (
     <>
       <section
         ref={videoPanelRef}
-        className="flex flex-grow flex-col items-center justify-center gap-4 overflow-hidden rounded-lg"
+        className={
+          'flex flex-grow gap-4 overflow-hidden rounded-lg ' +
+          (layout === 'grid'
+            ? 'flex-col items-center justify-center'
+            : 'flex-col-reverse justify-between p-4 lg:flex-row')
+        }
       >
-        {Array.from({ length: videoPanelSize.row }).map((_, rowIndex) => (
-          <div
-            key={rowIndex}
-            className="flex flex-nowrap content-center items-center justify-center gap-4 overflow-hidden rounded-lg"
-          >
-            {Array.from({ length: videoPanelSize.col }).map((_, colIndex) => {
-              const panelIndex = rowIndex * videoPanelSize.col + colIndex;
-              if (panelIndex >= userPanelConfigArr.length) return null;
-              const panelConfig = userPanelConfigArr[panelIndex];
+        {layout === 'grid' ? (
+          Array.from({ length: videoPanelGridSize.row }).map((_, rowIndex) => (
+            <div
+              key={rowIndex}
+              className="flex flex-nowrap content-center items-center justify-center gap-4 overflow-hidden rounded-lg"
+            >
+              {Array.from({ length: videoPanelGridSize.col }).map(
+                (_, colIndex) => {
+                  const panelIndex =
+                    rowIndex * videoPanelGridSize.col + colIndex;
+                  if (panelIndex >= userPanelConfigArr.length) return null;
+                  const panelConfig = userPanelConfigArr[panelIndex];
 
-              return (
+                  return (
+                    <div
+                      key={`${rowIndex} ${colIndex}`}
+                      style={{
+                        width:
+                          videoPanelGridSize.width -
+                          ((videoPanelGridSize.col + 1) * 16) /
+                            videoPanelGridSize.col,
+                        height:
+                          videoPanelGridSize.height -
+                          ((videoPanelGridSize.row + 1) * 16) /
+                            videoPanelGridSize.row,
+                      }}
+                      className="flex-shrink-0 overflow-hidden rounded-lg"
+                      onDoubleClick={() => handleDoubleClick(panelConfig)}
+                    >
+                      {panelConfig.isScreenShareControlPanel ? (
+                        <ScreenShareControlPanel
+                          handleStopSharing={() =>
+                            meetingContext.setMeetingDeviceState.setEnableShare(
+                              false
+                            )
+                          }
+                          enableAudio={enableScreenShareAudio}
+                          setEnableAudio={setEnableScreenShareAudio}
+                          screenStream={panelConfig.screenStream!}
+                        />
+                      ) : (
+                        <VideoPanel
+                          user={panelConfig.user!}
+                          camStream={panelConfig.camStream!}
+                          screenStream={panelConfig.screenStream!}
+                          audioStream={panelConfig.audioStream!}
+                          fixAvatarSize={
+                            Math.min(
+                              videoPanelGridSize.width,
+                              videoPanelGridSize.height
+                            ) / 2 || 32
+                          }
+                          mirrroCamera={panelConfig.mirrroCamera!}
+                          expandCamera={panelConfig.expandCamera!}
+                        />
+                      )}
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          ))
+        ) : (
+          <>
+            <main className="flex flex-1 items-center justify-center align-middle">
+              {pined && (
                 <div
-                  key={`${rowIndex} ${colIndex}`}
+                  key={pined.user?.muid}
+                  className="overflow-hidden rounded-lg"
+                  onDoubleClick={() => handleDoubleClick(pined)}
                   style={{
-                    width:
-                      videoPanelSize.width -
-                      ((videoPanelSize.col + 1) * 16) / videoPanelSize.col,
-                    height:
-                      videoPanelSize.height -
-                      ((videoPanelSize.row + 1) * 16) / videoPanelSize.row,
+                    width: videoPanelMainSize.width,
+                    height: videoPanelMainSize.height,
                   }}
-                  className="flex-shrink-0 overflow-hidden rounded-lg"
                 >
-                  {panelConfig.isScreenShareControlPanel ? (
+                  {pined.isScreenShareControlPanel ? (
                     <ScreenShareControlPanel
                       handleStopSharing={() =>
                         meetingContext.setMeetingDeviceState.setEnableShare(
@@ -139,28 +226,74 @@ const MeetingPanel: React.FC<{
                       }
                       enableAudio={enableScreenShareAudio}
                       setEnableAudio={setEnableScreenShareAudio}
-                      screenStream={panelConfig.screenStream!}
+                      screenStream={pined.screenStream!}
                     />
                   ) : (
                     <VideoPanel
-                      user={panelConfig.user!}
-                      camStream={panelConfig.camStream!}
-                      screenStream={panelConfig.screenStream!}
-                      audioStream={panelConfig.audioStream!}
+                      user={pined.user!}
+                      camStream={pined.camStream!}
+                      screenStream={pined.screenStream!}
+                      audioStream={pined.audioStream!}
                       fixAvatarSize={
-                        Math.min(videoPanelSize.width, videoPanelSize.height) /
-                          2 || 32
+                        Math.min(
+                          videoPanelMainSize.width,
+                          videoPanelMainSize.height
+                        ) / 2 || 32
                       }
-                      mirrroCamera={panelConfig.mirrroCamera!}
-                      expandCamera={panelConfig.expandCamera!}
+                      mirrroCamera={pined.mirrroCamera!}
+                      expandCamera={pined.expandCamera!}
                     />
                   )}
                 </div>
-              );
-            })}
-          </div>
-        ))}
+              )}
+            </main>
+            <aside className="flex h-1/6 w-full items-center justify-start gap-2 lg:h-full lg:w-1/6 lg:flex-col overflow-auto">
+              {userPanelConfigArr.map((config, index) => {
+                return (
+                  <div
+                    key={config.user?.muid + index}
+                    onDoubleClick={() => handleDoubleClick(config)}
+                    className="overflow-hidden rounded-lg flex-shrink-0"
+                    style={{
+                      width: videoPanelMainSize.width / 6,
+                      height: videoPanelMainSize.height / 6,
+                    }}
+                  >
+                    {config.isScreenShareControlPanel ? (
+                      <ScreenShareControlPanel
+                        handleStopSharing={() =>
+                          meetingContext.setMeetingDeviceState.setEnableShare(
+                            false
+                          )
+                        }
+                        enableAudio={enableScreenShareAudio}
+                        setEnableAudio={setEnableScreenShareAudio}
+                        screenStream={config.screenStream!}
+                      />
+                    ) : (
+                      <VideoPanel
+                        user={config.user!}
+                        camStream={config.camStream!}
+                        screenStream={config.screenStream!}
+                        audioStream={config.audioStream!}
+                        fixAvatarSize={
+                          Math.min(
+                            videoPanelMainSize.width,
+                            videoPanelMainSize.height
+                          ) / 12 || 32
+                        }
+                        mirrroCamera={config.mirrroCamera!}
+                        expandCamera={config.expandCamera!}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </aside>
+          </>
+        )}
       </section>
+      <section className=""></section>
       <MeetingControlBar
         setEnableScreenShareStream={
           meetingContext.setMeetingDeviceState.setEnableShare

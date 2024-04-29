@@ -99,13 +99,14 @@ type MeetingContextType = MeetingContextState &
   };
 
 type UserPanelConfig = {
-  user?: Pick<UserInfo, 'name' | 'avatar'>;
+  user?: Pick<UserInfo, 'name' | 'avatar', 'muid'>;
   camStream?: MediaStream | null;
   audioStream?: MediaStream | null;
   screenStream?: MediaStream | null;
   mirrroCamera?: boolean;
   expandCamera?: boolean;
   isScreenShareControlPanel?: boolean;
+  type?: 'CAMERA' | 'SCREEN' | 'CONTROL';
 };
 
 declare interface Chat {

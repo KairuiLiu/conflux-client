@@ -22,6 +22,7 @@ export default function Room() {
   const globalState = useGlobalStore((s) => s);
   const holdingSpace = useRef(false);
   const meetingMainPanel = useRef<HTMLDivElement>(null);
+  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     if (id !== meetingContext.meetingState.id) {
@@ -95,7 +96,7 @@ export default function Room() {
 
   return (
     <div className="flex h-dvh max-h-dvh flex-grow flex-col">
-      <MeetingHeader />
+      <MeetingHeader setLayour={setLayout} />
       <main
         className={`flex h-0 flex-grow gap-0 px-2 pb-2 transition-all ${
           showSidePanel ? 'sm:gap-4' : 'sm:gap-0'
@@ -103,7 +104,7 @@ export default function Room() {
       >
         <section
           ref={meetingMainPanel}
-          className="panel-classic flex w-0 flex-grow flex-col overflow-hidden shadow-none transition-all focus:outline-none"
+          className="panel-classic flex w-0 flex-grow flex-col overflow-hidden shadow-none transition-all outline-none focus:outline-none"
           tabIndex={0}
         >
           <MeetingPanel
@@ -115,6 +116,7 @@ export default function Room() {
               setShowUserPanel(false);
               setShowChatPanel(v);
             }}
+            layout={layout}
           />
         </section>
         <aside
