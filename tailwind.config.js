@@ -16,6 +16,9 @@ export default {
       boxShadow: {
         panel: `0 10px 60px 10px ${colorWithOpacity(colors.gray[800], 0.1)}`,
       },
+      animation: {
+        'icon-animate': 'icon-animate 1.33s ease-in-out infinite',
+      },
     },
   },
 };

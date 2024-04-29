@@ -5,11 +5,13 @@ import {
   GlobeAsiaAustraliaIcon,
   XMarkIcon,
   SparklesIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/solid';
 import UserSetting from './user-setting';
 import MeetSetting from './meet-setting';
 import MeetSystemInfo from './meet-system-info';
 import VideoBackgroundSetting from './video-background-setting';
+import About from './about';
 
 const settingCategories = [
   {
@@ -29,8 +31,13 @@ const settingCategories = [
   },
   {
     icon: <GlobeAsiaAustraliaIcon className="h-5 w-5" />,
-    name: 'System Info',
+    name: 'Connections',
     page: () => <MeetSystemInfo />,
+  },
+  {
+    icon: <QuestionMarkCircleIcon className="h-5 w-5" />,
+    name: 'About',
+    page: () => <About />,
   },
 ];
 

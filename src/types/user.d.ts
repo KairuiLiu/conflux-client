@@ -40,4 +40,6 @@ interface SiteConfig {
   COTURN_PREFIX: string;
   COTURN_USERNAME: string;
   PEER_SERVER_PATH: string;
+  BUILD_VERSION: string;
+  BUILD_TIME: string;
 }
