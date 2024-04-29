@@ -36,6 +36,8 @@ export function initState(
       COTURN_PREFIX: '',
       COTURN_USERNAME: '',
       PEER_SERVER_PATH: '',
+      BUILD_VERSION: '',
+      BUILD_TIME: '',
     },
   } as StateType;
   fetchConfig(res.user.uuid, setState);

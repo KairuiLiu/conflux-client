@@ -30,7 +30,7 @@ export function usePeerStateReport(peer: Peer | null) {
           muid,
           streamId!
         ) as MediaConnection;
-        if (connection.peerConnection === null) return Promise.resolve(false);
+        if (!connection?.peerConnection) return Promise.resolve(false);
         const state = await connection.peerConnection?.getStats();
 
         const networkReportContext = getNetworkReportContext(
