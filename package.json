@@ -16,6 +16,7 @@
     "@heroicons/react": "^2.1.3",
     "@tensorflow/tfjs": "^4.18.0",
     "@types/lodash-es": "^4.17.12",
+    "image-conversion": "^2.1.1",
     "lodash-es": "^4.17.21",
     "peerjs": "^1.5.2",
     "react": "^18.2.0",

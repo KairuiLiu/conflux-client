@@ -22,4 +22,4 @@ self.onmessage = (event: MessageEvent<TimerData>) => {
   }
 }
 
-// export {}
+export {}

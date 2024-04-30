@@ -38,7 +38,7 @@ export default function Room() {
     emitSocket('JOIN_MEETING', {
       muid,
       user_name: meetingContext.selfState.name,
-      avatar: '' && useGlobalStore.getState().user.avatar, // TODO: Next version
+      avatar: useGlobalStore.getState().user.avatar || '',
       state: {
         mic: meetingContext.meetingDeviceState.enableMic,
         camera: meetingContext.meetingDeviceState.enableCamera,
@@ -104,7 +104,7 @@ export default function Room() {
       >
         <section
           ref={meetingMainPanel}
-          className="panel-classic flex w-0 flex-grow flex-col overflow-hidden shadow-none transition-all outline-none focus:outline-none"
+          className="panel-classic flex w-0 flex-grow flex-col overflow-hidden shadow-none outline-none transition-all focus:outline-none"
           tabIndex={0}
         >
           <MeetingPanel

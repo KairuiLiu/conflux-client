@@ -27,7 +27,7 @@ const Avatar: React.FC<{
       >
         {user.avatar ? (
           <img
-            src={user.avatar}
+            src={'/api/avatar?fileName=' + user.avatar}
             alt={user.name}
             className="h-full w-full rounded-full object-cover"
           />
