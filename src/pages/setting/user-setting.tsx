@@ -25,7 +25,7 @@ export default function UserSetting() {
     compressAccurately(file, options)
       .then((compressedBlob) => {
         const formData = new FormData();
-        formData.append('image', compressedBlob);
+        formData.append('image', compressedBlob, file.name);
         return fetch('/api/avatar', {
           method: 'POST',
           body: formData,
@@ -39,6 +39,8 @@ export default function UserSetting() {
       .catch((e) => {
         console.error(e);
       });
+
+    e.target.value = '';
   }
 
   return (
