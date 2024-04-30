@@ -46,7 +46,16 @@ export default function UserSetting() {
       <section className="flex flex-col">
         <div className="grid flex-grow grid-cols-[min-content_min-content] gap-8 p-5">
           <p className="self-center">Avatar</p>
-          <div className="relative h-[96px] w-[96px] cursor-pointer">
+          <div
+            className="relative h-[96px] w-[96px] cursor-pointer"
+            onClick={(e) => {
+              if (avatar) {
+                setAvatar(null);
+                e.preventDefault();
+                return false;
+              }
+            }}
+          >
             <Avatar user={user} size={96} />
             <input
               type="file"
