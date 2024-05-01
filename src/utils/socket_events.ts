@@ -11,16 +11,16 @@ function getSt(meetingContext: MeetingContextType) {
   };
 }
 
-function getGSt(globalContext: StateType) {
+function getGSt(user: UserInfo) {
   return {
-    mirrorCamera: globalContext.user.mirrorCamera,
-    expandCamera: globalContext.user.expandCamera,
+    mirrorCamera: user.mirrorCamera,
+    expandCamera: user.expandCamera,
   };
 }
 
 function useHandleSocketEvents(
   initMeetingContext: MeetingContextType,
-  initGlobalContext: StateType,
+  initUser: UserInfo,
   setChats: React.Dispatch<React.SetStateAction<Chat[]>>
 ) {
   const navigate = useNavigate();
@@ -53,9 +53,9 @@ function useHandleSocketEvents(
     'UPDATE_USER_STATE',
     {
       muid: initMeetingContext.selfState.muid,
-      ...getGSt(initGlobalContext),
+      ...getGSt(initUser),
     },
-    getGSt(initGlobalContext),
+    getGSt(initUser),
     (d) => !!(d as { muid: string }).muid
   );
 

@@ -1,6 +1,6 @@
 import Peer, { MediaConnection } from 'peerjs';
 import { connIdMap } from './use-peer';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   addReport,
   diffReport,
@@ -12,10 +12,9 @@ import useGlobalStore from '@/context/global-context';
 import { getNewRtcStatus } from '@/context/global-context/init-state';
 
 export function usePeerStateReport(peer: Peer | null) {
-  const [reportContext, setReportContext] =
-    useState<ReportContext>(getEmptyReport());
+  const reportContext = useRef(getEmptyReport());
 
-  async function reportStatus(peer: Peer) {
+  const reportStatus = useCallback(async (peer: Peer) => {
     const connectionIds = [...connIdMap]
       .map(([muid, connIds]) => [
         { muid: muid, streamId: connIds?.mediaStream, type: 'media' },
@@ -54,8 +53,8 @@ export function usePeerStateReport(peer: Peer | null) {
     ).length;
 
     const combinedReport = allReports.reduce(addReport, getEmptyReport());
-    const deltaReport = diffReport(combinedReport, reportContext);
-    setReportContext(combinedReport);
+    const deltaReport = diffReport(combinedReport, reportContext.current);
+    reportContext.current = combinedReport;
 
     const rtcStatus = genRtcStatus(
       deltaReport,
@@ -66,15 +65,15 @@ export function usePeerStateReport(peer: Peer | null) {
       ...v,
       rtcStatus,
     }));
-  }
+  }, []);
 
   useEffect(() => {
     if (!peer) return;
-    const timer = setInterval(() => reportStatus(peer), 3000);
+    const timer = setInterval(() => reportStatus(peer), 2000);
     return () => {
       clearInterval(timer);
     };
-  }, [peer, reportContext]);
+  }, [peer, reportStatus]);
 
   useEffect(() => {
     return () => {

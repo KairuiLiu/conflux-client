@@ -18,7 +18,7 @@ const MeetingPanel: React.FC<{
   setShowChatPanel: React.Dispatch<React.SetStateAction<boolean>>;
   layout: 'grid' | 'list';
 }> = ({ setShowUserPanel, setShowChatPanel, layout }) => {
-  const state = useGlobalStore((d) => d);
+  const user = useGlobalStore((d) => d.user);
   const meetingContext = useMeetingStore((d) => d);
 
   // Media Stream
@@ -58,8 +58,8 @@ const MeetingPanel: React.FC<{
   );
 
   const backgroundConfig = useMemo(
-    () => getVideoBackgroundConfig(state.user.videoBackground || 0),
-    [state.user.videoBackground]
+    () => getVideoBackgroundConfig(user.videoBackground || 0),
+    [user.videoBackground]
   );
 
   const [canvasRef, backgroundImageRef, replacedStream] = useBgReplace(
@@ -68,14 +68,14 @@ const MeetingPanel: React.FC<{
   );
 
   useEffect(() => {
-    if (!originVideoStream || !state.user.videoBackground)
+    if (!originVideoStream || !user.videoBackground)
       meetingContext.setSelfState.setCamStream(originVideoStream);
     else meetingContext.setSelfState.setCamStream(replacedStream);
   }, [
     replacedStream,
     meetingContext.setSelfState,
     originVideoStream,
-    state.user,
+    user,
   ]);
 
   // layout
@@ -104,7 +104,7 @@ const MeetingPanel: React.FC<{
       true
     );
 
-    const config = getUserPanelConfig(participant, meetingContext, state.user);
+    const config = getUserPanelConfig(participant, meetingContext, user);
 
     setUsePanelConfigArr(config);
     let userPinedConfig = null;
@@ -123,7 +123,7 @@ const MeetingPanel: React.FC<{
       setUserPined(null);
       setPined(config[0]);
     }
-  }, [meetingContext, state.user, userPined]);
+  }, [meetingContext, user, userPined]);
 
   const handleDoubleClick = (config: UserPanelConfig) => {
     const index = config.user.muid + (config.type === 'CAMERA' ? '@C' : '@S');

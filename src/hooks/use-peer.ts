@@ -54,21 +54,21 @@ export const connIdMap = new Map<
   }
 >();
 
-function getPeerConfig(globalState: StateType): PeerOptions {
+function getPeerConfig(siteConfig: SiteConfig): PeerOptions {
   const port = +window.location.port;
 
   const config = {
     host: window.location.hostname,
-    path: '/api' + globalState.siteConfig.PEER_SERVER_PATH,
+    path: '/api' + siteConfig.PEER_SERVER_PATH,
     config: {
       iceServers: [
         {
           url: `stun:${window.location.hostname}`,
         },
         {
-          url: `turn:${globalState.siteConfig.COTURN_PREFIX ? globalState.siteConfig.COTURN_PREFIX + '.' : ''}${window.location.hostname}`,
-          username: globalState.siteConfig.COTURN_USERNAME,
-          credential: globalState.siteConfig.COTURN_PASSWORD,
+          url: `turn:${siteConfig.COTURN_PREFIX ? siteConfig.COTURN_PREFIX + '.' : ''}${window.location.hostname}`,
+          username: siteConfig.COTURN_USERNAME,
+          credential: siteConfig.COTURN_PASSWORD,
         },
       ],
     },
@@ -221,7 +221,7 @@ const usePeer = () => {
     meetingState,
   } = useMeetingStore();
   const [peer, setPeer] = useState<Peer | null>(null);
-  const globalState = useGlobalStore();
+  const siteConfig = useGlobalStore(d=>d.siteConfig);
   const [tryConnected, setTryConnected] = useState(false);
   usePeerStateReport(peer);
 
@@ -232,7 +232,7 @@ const usePeer = () => {
     const muid = v4();
     setSelfState.setMuid(muid);
 
-    const newPeer = new Peer(muid, getPeerConfig(globalState));
+    const newPeer = new Peer(muid, getPeerConfig(siteConfig));
     setPeer(newPeer);
 
     newPeer.on('open', () => {});

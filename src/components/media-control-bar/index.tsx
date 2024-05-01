@@ -19,7 +19,7 @@ const MediaControlBar: React.FC<{
   iconColor?: string;
   optionsAside?: boolean;
 }> = ({ meetingContext, iconColor = 'text-white', optionsAside = true }) => {
-  const state = useGlobalStore((d) => d);
+  const mediaDiveces = useGlobalStore((d) => d.mediaDiveces);
 
   return (
     <>
@@ -49,13 +49,13 @@ const MediaControlBar: React.FC<{
             <Listbox.Button
               className="btn btn-gray-glass rounded-l-none"
               title={
-                state.mediaDiveces.microphone.length
+                mediaDiveces.microphone.length
                   ? 'Select a microphone'
                   : 'No permission / no microphone found'
               }
             >
               <span>
-                {state.mediaDiveces.microphone.length ? (
+                {mediaDiveces.microphone.length ? (
                   <ChevronUpIcon
                     strokeWidth="2px"
                     className={`h-4 w-4 ${iconColor}`}
@@ -81,7 +81,7 @@ const MediaControlBar: React.FC<{
                   optionsAside ? '' : 'list-options-middle'
                 } absolute`}
               >
-                {state.mediaDiveces.microphone.map((microphone) => (
+                {mediaDiveces.microphone.map((microphone) => (
                   <Listbox.Option
                     key={microphone.label}
                     value={microphone.label}
@@ -138,13 +138,13 @@ const MediaControlBar: React.FC<{
             <Listbox.Button
               className="btn btn-gray-glass rounded-l-none"
               title={
-                state.mediaDiveces.camera.length
+                mediaDiveces.camera.length
                   ? 'Select a camera'
                   : 'No permission / no camera found'
               }
             >
               <span>
-                {state.mediaDiveces.camera.length ? (
+                {mediaDiveces.camera.length ? (
                   <ChevronUpIcon
                     strokeWidth="2px"
                     className={`h-4 w-4 ${iconColor}`}
@@ -170,7 +170,7 @@ const MediaControlBar: React.FC<{
                   optionsAside ? '' : 'list-options-middle'
                 } absolute`}
               >
-                {state.mediaDiveces.camera.map((camera) => (
+                {mediaDiveces.camera.map((camera) => (
                   <Listbox.Option
                     key={camera.label}
                     value={camera.label}
@@ -227,13 +227,13 @@ const MediaControlBar: React.FC<{
             <Listbox.Button
               className="btn btn-gray-glass rounded-l-none"
               title={
-                state.mediaDiveces.speaker.length
+                mediaDiveces.speaker.length
                   ? 'Select a speaker'
                   : 'No permission / no speaker found'
               }
             >
               <span>
-                {state.mediaDiveces.speaker.length ? (
+                {mediaDiveces.speaker.length ? (
                   <ChevronUpIcon
                     strokeWidth="2px"
                     className={`h-4 w-4 ${iconColor}`}
@@ -259,7 +259,7 @@ const MediaControlBar: React.FC<{
                   optionsAside ? 'list-options-right' : 'list-options-middle'
                 } absolute`}
               >
-                {state.mediaDiveces.speaker.map((speaker) => (
+                {mediaDiveces.speaker.map((speaker) => (
                   <Listbox.Option
                     key={speaker.label}
                     value={speaker.label}

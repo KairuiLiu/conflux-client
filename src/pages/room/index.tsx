@@ -19,7 +19,7 @@ export default function Room() {
   const { id } = useParams();
   const meetingContext = useMeetingStore((d) => d);
   const navigator = useNavigate();
-  const globalState = useGlobalStore((s) => s);
+  const user = useGlobalStore((s) => s.user);
   const holdingSpace = useRef(false);
   const meetingMainPanel = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = useState<'grid' | 'list'>('grid');
@@ -45,8 +45,8 @@ export default function Room() {
         screen: meetingContext.meetingDeviceState.enableShare,
       },
       passcode: meetingContext.meetingState.passcode,
-      expandCamera: globalState.user.expandCamera,
-      mirrorCamera: globalState.user.mirrorCamera,
+      expandCamera: user.expandCamera,
+      mirrorCamera: user.mirrorCamera,
     });
     return () => {
       socket.connected &&
@@ -92,7 +92,7 @@ export default function Room() {
   }, [meetingMainPanel]);
 
   usePeer();
-  useHandleSocketEvents(meetingContext, globalState, setChats);
+  useHandleSocketEvents(meetingContext, user, setChats);
 
   return (
     <div className="flex h-dvh max-h-dvh flex-grow flex-col">
