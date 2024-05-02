@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 function getUserShortName(name: string) {
   const input = name.trim();
   if (input.includes(' ')) {
@@ -18,6 +20,16 @@ const Avatar: React.FC<{
   const avatarColorIndex =
     username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) %
     avatarColors.length;
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setIsLoaded(false);
+    if (user.avatar) {
+      const img = new Image();
+      img.onload = () => setIsLoaded(true);
+      img.src = '/api/avatar?fileName=' + user.avatar;
+    }
+  }, [user.avatar]);
 
   return (
     size > 0 && (
@@ -25,7 +37,7 @@ const Avatar: React.FC<{
         className="flex flex-shrink-0 select-none items-center justify-center overflow-hidden rounded-full"
         style={{ width: size, height: size }}
       >
-        {user.avatar ? (
+        {user.avatar && isLoaded ? (
           <img
             src={'/api/avatar?fileName=' + user.avatar}
             alt={user.name}

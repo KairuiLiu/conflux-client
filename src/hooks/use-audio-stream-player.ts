@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState } from 'react';
 
 function useAudioStreamPlayer() {
   const meetingContext = useMeetingStore((d) => d);
-  const globalState = useGlobalStore((s) => s);
+  const mediaDiveces = useGlobalStore((s) => s.mediaDiveces);
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
   const audioElement = useMemo(() => new Audio(), []);
 
   useEffect(() => {
     if (audioStream && meetingContext.meetingDeviceState.enableSpeaker) {
-      const speaker = globalState.mediaDiveces.speaker.find(
+      const speaker = mediaDiveces.speaker.find(
         (d) => d.label === meetingContext.meetingDeviceState.speakerLabel
       );
 
@@ -39,7 +39,7 @@ function useAudioStreamPlayer() {
   ]);
 
   useEffect(() => {
-    const speaker = globalState.mediaDiveces.speaker.find(
+    const speaker = mediaDiveces.speaker.find(
       (d) => d.label === meetingContext.meetingDeviceState.speakerLabel
     );
 
@@ -60,7 +60,7 @@ function useAudioStreamPlayer() {
         .catch((e: unknown) => console.error('Failed to set device:', e));
     }
   }, [
-    globalState.mediaDiveces.speaker,
+    mediaDiveces.speaker,
     meetingContext.meetingDeviceState.speakerLabel,
     audioElement,
     audioStream,

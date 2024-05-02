@@ -147,14 +147,12 @@ const MeetingControlBar: React.FC<{
       </section>
       <Dialog open={showSetting} onClose={() => setShowSetting(false)}>
         <Dialog.Panel>
-          <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-            <div className="h-min w-min rounded-lg bg-slate-200">
+          <div className="fixed inset-0 flex h-screen w-screen items-stretch justify-center bg-gray-300 p-4 sm:h-auto sm:items-center z-10">
               <SettingPanel
                 handleClose={() => {
                   setShowSetting(false);
                 }}
               />
-            </div>
           </div>
         </Dialog.Panel>
       </Dialog>
