@@ -1,5 +1,5 @@
-import { useSocketListener, useSyncSocket } from '@/utils/use-socket';
-import { MeetingContextType } from '@/types/meeting';
+import { useSocketListener, useSyncSocket } from '@/hooks/use-socket';
+import { Chat, MeetingContextType } from '@/types/meeting';
 import useMeetingStore from '@/context/meeting-context';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,16 +11,17 @@ function getSt(meetingContext: MeetingContextType) {
   };
 }
 
-function getGSt(globalContext: StateType) {
+function getGSt(user: UserInfo) {
   return {
-    mirrorCamera: globalContext.user.mirrorCamera,
-    expandCamera: globalContext.user.expandCamera,
+    mirrorCamera: user.mirrorCamera,
+    expandCamera: user.expandCamera,
   };
 }
 
 function useHandleSocketEvents(
   initMeetingContext: MeetingContextType,
-  initGlobalContext: StateType
+  initUser: UserInfo,
+  setChats: React.Dispatch<React.SetStateAction<Chat[]>>
 ) {
   const navigate = useNavigate();
 
@@ -52,9 +53,9 @@ function useHandleSocketEvents(
     'UPDATE_USER_STATE',
     {
       muid: initMeetingContext.selfState.muid,
-      ...getGSt(initGlobalContext),
+      ...getGSt(initUser),
     },
-    getGSt(initGlobalContext),
+    getGSt(initUser),
     (d) => !!(d as { muid: string }).muid
   );
 
@@ -62,6 +63,10 @@ function useHandleSocketEvents(
     if (message !== 'SUCCESS') {
       initMeetingContext.setMeetingDeviceState.setEnableShare(false);
     }
+  });
+
+  useSocketListener('CHAT', ({ data }) => {
+    setChats((prev) => [...prev, data]);
   });
 
   useSocketListener('USER_STATE_UPDATE', ({ data }) => {

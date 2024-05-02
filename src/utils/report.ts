@@ -102,7 +102,7 @@ function formateNetworkSpeedFbps(v: number) {
 
 function formateRate(v: number) {
   if (Number.isNaN(v)) return '- %';
-  return `${v.toFixed(2)} %`;
+  return `${(v * 100).toFixed(2)} %`;
 }
 
 function formateFps(v: number) {
@@ -180,7 +180,8 @@ export function genRtcStatus(
   };
   networkStatus.PackageLost = {
     value: formateRate(
-      deltaReport.receivedPackageLost / deltaReport.packageReceived
+      deltaReport.receivedPackageLost /
+        (deltaReport.packageReceived + deltaReport.receivedPackageLost)
     ),
   };
 

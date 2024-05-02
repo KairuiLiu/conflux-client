@@ -5,7 +5,7 @@ import useMeetingStore from '@/context/meeting-context';
 import { useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
-import toastConfig from './toast-config';
+import toastConfig from '../utils/toast-config';
 
 const timeStampPool = new Map<string, number>();
 

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import Avatar from '../avatar';
-import { useElementSize } from '@/utils/use-element-size';
-import { aspRange } from '@/utils/use-panel-size';
-import useAudioStreamPlayer from '@/utils/use-audio-stream-player';
+import { useElementSize } from '@/hooks/use-element-size';
+import { aspRange } from '@/hooks/use-panel-size';
+import useAudioStreamPlayer from '@/hooks/use-audio-stream-player';
 
 export const VideoPanel: React.FC<{
   limitWidth?: boolean;

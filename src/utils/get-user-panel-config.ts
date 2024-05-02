@@ -13,8 +13,14 @@ function getUserPanelConfig(
     if (participant.state.screen) {
       if (participant.muid === meetingContext.selfState.muid)
         newConfig.push({
+          user: {
+            name: meetingContext.selfState.name,
+            avatar: user.avatar || '',
+            muid: participant.muid,
+          },
           isScreenShareControlPanel: true,
           screenStream: meetingContext.selfState.screenStream,
+          type: 'CONTROL'
         });
       else {
         const screenVideoTracks = remoteStream?.screenStream?.getVideoTracks();
@@ -25,6 +31,7 @@ function getUserPanelConfig(
             user: {
               name: meetingContext.selfState.name,
               avatar: user.avatar || '',
+              muid: participant.muid,
             },
             camStream: null,
             screenStream: new MediaStream(screenVideoTracks),
@@ -33,6 +40,7 @@ function getUserPanelConfig(
               : null,
             mirrroCamera: user.mirrorCamera,
             expandCamera: user.expandCamera,
+            type: 'SCREEN'
           });
       }
     }
@@ -41,11 +49,13 @@ function getUserPanelConfig(
         user: {
           name: participant.name,
           avatar: participant.avatar,
+          muid: participant.muid,
         },
         camStream: meetingContext.selfState.camStream,
         screenStream: null,
         mirrroCamera: user.mirrorCamera,
         expandCamera: user.expandCamera,
+        type: 'CAMERA'
       });
     } else {
       const videoTracks = remoteStream?.mediaStream?.getVideoTracks();
@@ -65,15 +75,19 @@ function getUserPanelConfig(
         user: {
           name: participant.name,
           avatar: participant.avatar,
+          muid: participant.muid,
         },
         camStream: camStream,
         audioStream: audioStream,
         screenStream: null,
         mirrroCamera: participant.mirrorCamera,
         expandCamera: participant.expandCamera,
+        type: 'CAMERA'
       });
     }
   });
+
+
 
   return newConfig;
 }

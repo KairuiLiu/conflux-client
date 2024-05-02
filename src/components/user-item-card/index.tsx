@@ -9,7 +9,7 @@ import MicroPhoneMuteIcon from '@/assets/MicrophoneMuteIcon.svg?react';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react/jsx-runtime';
 import { useEffect, useState } from 'react';
-import { emitSocket } from '@/utils/use-socket';
+import { emitSocket } from '@/hooks/use-socket';
 import useMeetingStore from '@/context/meeting-context';
 
 const UserItemCard: React.FC<{

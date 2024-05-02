@@ -12,7 +12,7 @@
     <img alt="TypeScript" src="https://img.shields.io/badge/Tailwind CSS-06B6D4?style=flat-square&logo=Tailwind CSS&logoColor=white"/>
   </p>
   <h4>
-    <a href="https://conflux.liukairui.me/">Live Demo</a>
+    <a href="https://conflux.liukairui.me/">在线演示</a>
     <span> | </span>
     <a href="./README.md">English</a>
     <span> | </span>
@@ -22,13 +22,15 @@
 
 
 
-### ✨ Feature
+### ✨ 特性
 
 - 基于 WebRTC 的多人 P2P 视频会议
 - 本地用户, 无需注册, 无需登录
+- 支持会议预约与邀请码入会
+- 支持视频背景替换
 - 支持屏幕共享
+- 支持会议聊天室
 - 支持音视频设备测试与切换
-- 支持会议邀请
 - 支持会议成员权限管理 (设置联席主持人, 禁言, 踢出)
 - 实时流量监控
 
@@ -50,3 +52,7 @@
 # 打包
 > pnpm build
 ```
+
+### 🥰 参考
+
+- 视频背景替换的实现参考自 [Volcomix/virtual-background](https://github.com/Volcomix/virtual-background) , 使用了 [google/mediapipe](https://github.com/google/mediapipe) 的 [Meet Segmentation](https://drive.google.com/file/d/1lnP1bRi9CSqQQXUHa13159vLELYDgDu0/preview) 模型

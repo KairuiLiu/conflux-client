@@ -4,10 +4,14 @@ import {
   UserGroupIcon,
   GlobeAsiaAustraliaIcon,
   XMarkIcon,
+  SparklesIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/solid';
 import UserSetting from './user-setting';
 import MeetSetting from './meet-setting';
 import MeetSystemInfo from './meet-system-info';
+import VideoBackgroundSetting from './video-background-setting';
+import About from './about';
 
 const settingCategories = [
   {
@@ -21,9 +25,19 @@ const settingCategories = [
     page: () => <MeetSetting />,
   },
   {
+    icon: <SparklesIcon className="h-5 w-5" />,
+    name: 'Virtual Background',
+    page: () => <VideoBackgroundSetting />,
+  },
+  {
     icon: <GlobeAsiaAustraliaIcon className="h-5 w-5" />,
-    name: 'System Info',
+    name: 'Connections',
     page: () => <MeetSystemInfo />,
+  },
+  {
+    icon: <QuestionMarkCircleIcon className="h-5 w-5" />,
+    name: 'About',
+    page: () => <About />,
   },
 ];
 
@@ -38,7 +52,7 @@ const SettingPanel: React.FC<{
           <XMarkIcon className="h-5 w-5" />
         </button>
       </div>
-      <div className="flex h-[calc(100dvh-200px)] max-h-[700px] min-h-80 w-dvw min-w-80 max-w-3xl flex-col sm:flex-row">
+      <div className="flex h-full sm:h-[calc(100dvh-200px)] sm:max-h-[700px] min-h-80 w-dvw min-w-80 max-w-3xl flex-col sm:flex-row">
         <Tab.Group>
           <Tab.List className="flex flex-shrink-0 flex-grow-0 flex-col gap-3 border-b-2 border-gray-300 p-5 sm:border-b-0 sm:border-r-2 ">
             {settingCategories.map(({ icon, name }) => (

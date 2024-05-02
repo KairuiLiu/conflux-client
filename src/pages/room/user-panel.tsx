@@ -42,7 +42,9 @@ const UserPanle: React.FC<{
             genJoinInfo(
               meetingContext.meetingState.organizer?.name,
               meetingContext.meetingState.title || '',
-              meetingContext.meetingState.id
+              meetingContext.meetingState.id,
+              meetingContext.meetingState.meetingStartTime,
+              meetingContext.meetingState.passcode
             )
           );
         }}

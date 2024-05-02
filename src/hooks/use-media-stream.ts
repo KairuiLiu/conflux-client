@@ -13,12 +13,12 @@ const useMediaStream = (
   mediaType: 'video' | 'audio',
   deviceKey: 'camera' | 'microphone'
 ): void => {
-  const state = useGlobalStore((d) => d);
+  const mediaDiveces = useGlobalStore((d) => d.mediaDiveces);
   const setState = useGlobalStore.setState;
 
   useEffect(() => {
     refreshMediaDevice(mediaType, setState);
-  });
+  }, []);
 
   useEffect(() => {
     if (!enableStream) {
@@ -28,7 +28,7 @@ const useMediaStream = (
     }
 
     // try to find the given device
-    const device = state.mediaDiveces[deviceKey].find(
+    const device = mediaDiveces[deviceKey].find(
       (d) => d.label === selectedDeviceLabel
     );
 
@@ -36,8 +36,8 @@ const useMediaStream = (
       setStreamWithId(stream, setStream, device.deviceId, mediaType).then(
         (d) => !d && setEnableStream(false)
       );
-    } else if (state.mediaDiveces[deviceKey]?.[0]) {
-      setSelectedDeviceLabel(state.mediaDiveces[deviceKey][0].label);
+    } else if (mediaDiveces[deviceKey]?.[0]) {
+      setSelectedDeviceLabel(mediaDiveces[deviceKey][0].label);
     } else {
       stopStream(stream);
       setStream(null);
@@ -46,7 +46,7 @@ const useMediaStream = (
     return () => {
       stopStream(stream);
     };
-  }, [state.mediaDiveces[deviceKey], selectedDeviceLabel, enableStream]);
+  }, [mediaDiveces[deviceKey], selectedDeviceLabel, enableStream]);
 
   useEffect(() => {
     return () => {

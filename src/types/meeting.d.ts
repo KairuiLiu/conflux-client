@@ -9,6 +9,7 @@ interface MeetingState {
     name: string;
   };
   participants: Participant[];
+  passcode: string;
 }
 
 interface SetMeetingState {
@@ -17,6 +18,7 @@ interface SetMeetingState {
   setMeetingStartTime: (meetingStartTime: number) => void;
   setOrganizer: (organizer: { muid: string; name: string }) => void;
   setParticipants: (participants: UserInfo[]) => void;
+  setPasscode: (passcode: string) => void;
 }
 
 interface MeetingDeviceState {
@@ -97,11 +99,18 @@ type MeetingContextType = MeetingContextState &
   };
 
 type UserPanelConfig = {
-  user?: Pick<UserInfo, 'name' | 'avatar'>;
+  user?: Pick<UserInfo, 'name' | 'avatar', 'muid'>;
   camStream?: MediaStream | null;
   audioStream?: MediaStream | null;
   screenStream?: MediaStream | null;
   mirrroCamera?: boolean;
   expandCamera?: boolean;
   isScreenShareControlPanel?: boolean;
+  type?: 'CAMERA' | 'SCREEN' | 'CONTROL';
 };
+
+declare interface Chat {
+  muid: string;
+  message: string;
+  time: number;
+}

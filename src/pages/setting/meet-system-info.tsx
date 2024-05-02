@@ -10,11 +10,6 @@ export default function MeetSystemInfo() {
         {state.rtcStatus.map((data) => (
           <RTCPanel key={data.title} data={data} />
         ))}
-        <div className="flex h-full shrink items-end text-gray-400">
-          {`Ver: ${process.env.VERSION}${
-            process.env.MODE ? `-${process.env.MODE}` : ''
-          }-${process.env.BUILDTIME}`}
-        </div>
       </div>
     </>
   );

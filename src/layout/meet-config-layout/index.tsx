@@ -3,13 +3,13 @@ import { VideoPanel } from '@/components/video-panel';
 import useGlobalStore from '@/context/global-context';
 import SettingPanel from '@/pages/setting/setting-panel';
 import { MeetingContextType } from '@/types/meeting';
-import useMediaStream from '@/utils/use-media-stream';
+import useMediaStream from '@/hooks/use-media-stream';
 import { Dialog } from '@headlessui/react';
 import { Cog8ToothIcon } from '@heroicons/react/24/solid';
-import { ReactNode, useState } from 'react';
-
-// const maxHeight = 75;
-// const maxWidth = (maxHeight / 2) * aspRange[1];
+import { ReactNode, useMemo, useState } from 'react';
+import { getVideoBackgroundConfig } from '@/utils/video-background-image';
+import { BackgroundConfig } from '@/hooks/use-background-replace/helpers/backgroundHelper';
+import useBgReplace from '@/hooks/use-background-replace';
 
 const MeetConfigLayout = ({
   titleBar,
@@ -53,6 +53,16 @@ const MeetConfigLayout = ({
     'camera'
   );
 
+  const backgroundConfig = useMemo<BackgroundConfig>(
+    () => getVideoBackgroundConfig(state.user.videoBackground || 0),
+    [state.user.videoBackground]
+  );
+
+  const [canvasRef, backgroundImageRef, replacedStream] = useBgReplace(
+    backgroundConfig,
+    videoStream
+  );
+
   const user = {
     name: meetingContext.selfState.name,
     avatar: state.user.avatar,
@@ -74,12 +84,29 @@ const MeetConfigLayout = ({
             'overflow-visible rounded-none shadow-none transition-all lg:flex-grow-0 lg:overflow-hidden lg:rounded-lg lg:shadow-panel '
           }
         >
+          {backgroundConfig.type === 'image' && (
+            <img
+              ref={backgroundImageRef}
+              src={backgroundConfig.url}
+              alt=""
+              hidden={true}
+            />
+          )}
+          <canvas
+            key={'webgl2'}
+            ref={canvasRef}
+            width={videoStream?.getVideoTracks()[0].getSettings().width}
+            height={videoStream?.getVideoTracks()[0].getSettings().height}
+            className='canvas-gpu-enhance'
+          />
           <VideoPanel
             user={user}
             mirrroCamera={state.user.mirrorCamera}
             camStream={
-              meetingContext.meetingDeviceState.enableCamera
-                ? videoStream
+              meetingContext.meetingDeviceState.enableCamera && videoStream
+                ? state.user.videoBackground
+                  ? replacedStream
+                  : videoStream
                 : null
             }
             audioStream={null}
@@ -111,7 +138,7 @@ const MeetConfigLayout = ({
 
       <Dialog open={showSetting} onClose={() => setShowSetting(false)}>
         <Dialog.Panel>
-          <div className="fixed inset-0 flex w-screen items-center justify-center bg-gray-300 p-4">
+          <div className="fixed inset-0 z-10 flex h-screen w-screen items-stretch justify-center bg-gray-300 p-4 sm:h-auto sm:items-center">
             <SettingPanel
               handleClose={() => {
                 setShowSetting(false);

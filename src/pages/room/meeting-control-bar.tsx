@@ -5,19 +5,21 @@ import {
   WindowIcon,
   PhoneXMarkIcon,
   UsersIcon,
+  ChatBubbleLeftIcon,
 } from '@heroicons/react/24/solid';
 import React, { Fragment, useState } from 'react';
 import SettingPanel from '../setting/setting-panel';
 import { useNavigate } from 'react-router-dom';
 import useMeetingStore from '@/context/meeting-context';
-import { emitSocket } from '@/utils/use-socket';
+import { emitSocket } from '@/hooks/use-socket';
 import { toast } from 'react-toastify';
 import toastConfig from '@/utils/toast-config';
 
 const MeetingControlBar: React.FC<{
   setEnableScreenShareStream: (enableShare: boolean) => void;
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ setEnableScreenShareStream, setShowUserPanel }) => {
+  setShowChatPanel: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ setEnableScreenShareStream, setShowUserPanel, setShowChatPanel }) => {
   const [showSetting, setShowSetting] = useState(false);
   const navigate = useNavigate();
   const meetingContext = useMeetingStore((d) => d);
@@ -49,6 +51,7 @@ const MeetingControlBar: React.FC<{
                     !meetingContext.meetingDeviceState.enableShare
                   );
               }}
+              onMouseDown={(e) => e.preventDefault()}
             >
               <WindowIcon className="h-4 w-4 text-gray-600" />
             </button>
@@ -58,8 +61,18 @@ const MeetingControlBar: React.FC<{
             onClick={() => {
               setShowUserPanel((d) => !d);
             }}
+            onMouseDown={(e) => e.preventDefault()}
           >
             <UsersIcon className="h-4 w-4 text-gray-600" />
+          </button>
+          <button
+            className="btn btn-gray-glass flex-shrink-0"
+            onClick={() => {
+              setShowChatPanel((d) => !d);
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            <ChatBubbleLeftIcon className="h-4 w-4 text-gray-600" />
           </button>
 
           <Menu as="div" className="relative inline-block text-left">
@@ -126,6 +139,7 @@ const MeetingControlBar: React.FC<{
             onClick={() => {
               setShowSetting(true);
             }}
+            onMouseDown={(e) => e.preventDefault()}
           >
             <Cog8ToothIcon className="h-4 w-4 text-gray-600" />
           </button>
@@ -133,14 +147,12 @@ const MeetingControlBar: React.FC<{
       </section>
       <Dialog open={showSetting} onClose={() => setShowSetting(false)}>
         <Dialog.Panel>
-          <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-            <div className="h-min w-min rounded-lg bg-slate-200">
+          <div className="fixed inset-0 flex h-screen w-screen items-stretch justify-center bg-gray-300 p-4 sm:h-auto sm:items-center z-10">
               <SettingPanel
                 handleClose={() => {
                   setShowSetting(false);
                 }}
               />
-            </div>
           </div>
         </Dialog.Panel>
       </Dialog>

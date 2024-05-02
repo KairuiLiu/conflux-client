@@ -1,4 +1,4 @@
-import { aspRange } from '@/utils/use-panel-size';
+import { aspRange } from '@/hooks/use-panel-size';
 import { Switch } from '@headlessui/react';
 import { useEffect, useRef } from 'react';
 
@@ -49,7 +49,7 @@ export const ScreenShareControlPanel: React.FC<{
         ref={videoRef}
         muted={true}
       />
-      <div className="absolute flex h-full w-full flex-col  items-center justify-evenly overflow-hidden rounded-lg p-2 text-center backdrop-blur-md backdrop-brightness-90">
+      <div className="absolute flex h-full w-full flex-col  items-center justify-evenly overflow-hidden overflow-y-auto rounded-lg p-2 text-center backdrop-blur-md backdrop-brightness-90">
         <div className="flex flex-col gap-3">
           <p className="text-xl">You are Sharing the Screen</p>
           <div className="flex items-center justify-center gap-2">
@@ -73,6 +73,7 @@ export const ScreenShareControlPanel: React.FC<{
           <button
             className="btn btn-danger-secondary"
             onClick={handleStopSharing}
+            onMouseDown={(e) => e.preventDefault()}
           >
             Stop Sharing
           </button>

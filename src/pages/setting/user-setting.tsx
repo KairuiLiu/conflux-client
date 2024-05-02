@@ -1,6 +1,7 @@
 import Avatar from '@/components/avatar';
 import useGlobalStore from '@/context/global-context';
 import { useState } from 'react';
+import { compressAccurately } from 'image-conversion';
 
 export default function UserSetting() {
   const state = useGlobalStore((d) => d);
@@ -10,15 +11,36 @@ export default function UserSetting() {
   const [name, setName] = useState<string>(state.user.name);
   const user = { avatar, name };
 
-  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e?.target?.files?.[0]) return;
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      if (!e.target) return;
-      const base64 = e.target.result as string;
-      setAvatar(base64);
+
+    const file = e.target.files[0];
+
+    const options = {
+      size: 256,
+      width: 300,
+      height: 300,
     };
-    reader.readAsDataURL(e.target.files[0]);
+
+    compressAccurately(file, options)
+      .then((compressedBlob) => {
+        const formData = new FormData();
+        formData.append('image', compressedBlob, file.name);
+        return fetch('/api/avatar', {
+          method: 'POST',
+          body: formData,
+        });
+      })
+      .then((d) => d.json())
+      .then((d) => {
+        if (d.code) return Error(d.msg);
+        setAvatar(d.data);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+
+    e.target.value = '';
   }
 
   return (
@@ -26,7 +48,16 @@ export default function UserSetting() {
       <section className="flex flex-col">
         <div className="grid flex-grow grid-cols-[min-content_min-content] gap-8 p-5">
           <p className="self-center">Avatar</p>
-          <div className="relative h-[96px] w-[96px] cursor-pointer">
+          <div
+            className="relative h-[96px] w-[96px] cursor-pointer"
+            onClick={(e) => {
+              if (avatar) {
+                setAvatar(null);
+                e.preventDefault();
+                return false;
+              }
+            }}
+          >
             <Avatar user={user} size={96} />
             <input
               type="file"

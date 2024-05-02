@@ -26,9 +26,11 @@
 
 - Multi-person P2P video conferencing based on WebRTC
 - Local users, no registration required, no login required
+- Support for meeting scheduling and invitation code entry
+- Support for video background replacement
 - Supports screen sharing
+- Support for meeting chat
 - Supports audio and video device testing and switching
-- Supports meeting invitations
 - Supports meeting member permission management (setting co-hosts, muting, kicking out)
 - Real-time traffic monitoring
 
@@ -51,3 +53,6 @@
 > pnpm build
 ```
 
+### 🥰 Reference
+
+- The implementation of video background replacement is based on [Volcomix/virtual-background](https://github.com/Volcomix/virtual-background) and uses the [Meet Segmentation](https://drive.google.com/file/d/1lnP1bRi9CSqQQXUHa13159vLELYDgDu0/preview) model from [google/mediapipe](https://github.com/google/mediapipe).

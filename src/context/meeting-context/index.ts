@@ -15,6 +15,8 @@ const useMeetingStore = create<MeetingContextType>((set, get) => {
         set((state) => ({
           meetingState: { ...state.meetingState, meetingStartTime },
         })),
+      setPasscode: (passcode: string) =>
+        set((state) => ({ meetingState: { ...state.meetingState, passcode } })),
       setOrganizer: (organizer: { muid: string; name: string }) =>
         set((state) => ({
           meetingState: { ...state.meetingState, organizer },

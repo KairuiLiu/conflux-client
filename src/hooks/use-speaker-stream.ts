@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import testSound from '@/assets/Bluestone_Alley_clip.mp3';
 import testSoundFull from '@/assets/Bluestone_Alley.mp3';
 import { toast } from 'react-toastify';
-import toastConfig from './toast-config';
+import toastConfig from '../utils/toast-config';
 
 const useSpeakerStream = (
   speakerLabel: string,

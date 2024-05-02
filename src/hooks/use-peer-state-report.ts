@@ -1,21 +1,20 @@
 import Peer, { MediaConnection } from 'peerjs';
 import { connIdMap } from './use-peer';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   addReport,
   diffReport,
   getEmptyReport,
   getNetworkReportContext,
   genRtcStatus,
-} from './report';
+} from '../utils/report';
 import useGlobalStore from '@/context/global-context';
 import { getNewRtcStatus } from '@/context/global-context/init-state';
 
 export function usePeerStateReport(peer: Peer | null) {
-  const [reportContext, setReportContext] =
-    useState<ReportContext>(getEmptyReport());
+  const reportContext = useRef(getEmptyReport());
 
-  async function reportStatus(peer: Peer) {
+  const reportStatus = useCallback(async (peer: Peer) => {
     const connectionIds = [...connIdMap]
       .map(([muid, connIds]) => [
         { muid: muid, streamId: connIds?.mediaStream, type: 'media' },
@@ -30,7 +29,7 @@ export function usePeerStateReport(peer: Peer | null) {
           muid,
           streamId!
         ) as MediaConnection;
-        if (connection.peerConnection === null) return Promise.resolve(false);
+        if (!connection?.peerConnection) return Promise.resolve(false);
         const state = await connection.peerConnection?.getStats();
 
         const networkReportContext = getNetworkReportContext(
@@ -49,18 +48,24 @@ export function usePeerStateReport(peer: Peer | null) {
     ) as ReportContext[];
 
     const mediaReportLen = allReports.filter((r) => r.type === 'media').length;
-    const screenReportLen = allReports.filter((r) => r.type === 'screen').length;
+    const screenReportLen = allReports.filter(
+      (r) => r.type === 'screen'
+    ).length;
 
     const combinedReport = allReports.reduce(addReport, getEmptyReport());
-    const deltaReport = diffReport(combinedReport, reportContext);
-    setReportContext(combinedReport);
+    const deltaReport = diffReport(combinedReport, reportContext.current);
+    reportContext.current = combinedReport;
 
-    const rtcStatus = genRtcStatus(deltaReport, mediaReportLen, screenReportLen);
+    const rtcStatus = genRtcStatus(
+      deltaReport,
+      mediaReportLen,
+      screenReportLen
+    );
     useGlobalStore.setState((v) => ({
       ...v,
       rtcStatus,
     }));
-  }
+  }, []);
 
   useEffect(() => {
     if (!peer) return;
@@ -68,7 +73,7 @@ export function usePeerStateReport(peer: Peer | null) {
     return () => {
       clearInterval(timer);
     };
-  }, [peer, reportContext]);
+  }, [peer, reportStatus]);
 
   useEffect(() => {
     return () => {
