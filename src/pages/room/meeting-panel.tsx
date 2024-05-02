@@ -99,10 +99,9 @@ const MeetingPanel: React.FC<{
       meetingContext.selfState.muid,
       true
     );
-    console.log('getting layout config');
     const config = getUserPanelConfig(participant, meetingContext, user);
-    if (!isEqual(config, userPanelConfigArr)) setUserPanelConfigArr(config);
-    let userPinedConfig = null;
+    setUserPanelConfigArr((old) => (isEqual(old, config) ? old : config));
+    let userPinedConfig: UserPanelConfig | undefined = undefined;
     if (userPined) {
       const [userPinedMuid, userPinedType] = userPined.split('@');
       userPinedConfig = config.find(
@@ -112,7 +111,11 @@ const MeetingPanel: React.FC<{
             (d.type === 'CONTROL' || d.type === 'SCREEN')) ||
             (userPinedType === 'C' && d.type === 'CAMERA'))
       );
-      if (!isEqual(userPinedConfig, pined)) setPined(userPinedConfig);
+      setPined((old) =>
+        !userPinedConfig || isEqual(userPinedConfig, old)
+          ? old
+          : userPinedConfig
+      );
     }
     if (!userPinedConfig) {
       setUserPined(null);
