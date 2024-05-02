@@ -129,79 +129,119 @@ const MeetingPanel: React.FC<{
     else setUserPined(index);
   };
 
+  // const addMockUser = () => {
+  //   const muid = v4();
+  //   meetingContext.setMeetingState.setParticipants([
+  //     ...meetingContext.meetingState.participants,
+  //     {
+  //       muid: 'mock' + muid,
+  //       name: 'mock' + muid,
+  //       state: {
+  //         audio: false,
+  //         video: false,
+  //         screen: false,
+  //       },
+  //     },
+  //   ]);
+  // };
+  // window.addMockUser = addMockUser;
+
   return (
     <>
       <section
         ref={videoPanelRef}
         className={
-          'flex flex-grow gap-4 overflow-hidden rounded-lg ' +
+          'flex flex-grow rounded-lg ' +
           (layout === 'grid'
-            ? 'flex-col items-center justify-center'
-            : 'flex-col-reverse justify-between p-4 lg:flex-row')
+            ? 'flex-row overflow-x-auto'
+            : 'flex-col-reverse justify-between gap-4 overflow-hidden p-4 lg:flex-row ')
         }
       >
         {layout === 'grid' ? (
-          Array.from({ length: videoPanelGridSize.row }).map((_, rowIndex) => (
-            <div
-              key={rowIndex}
-              className="flex flex-nowrap content-center items-center justify-center gap-4 overflow-hidden rounded-lg"
-            >
-              {Array.from({ length: videoPanelGridSize.col }).map(
-                (_, colIndex) => {
-                  const panelIndex =
-                    rowIndex * videoPanelGridSize.col + colIndex;
-                  if (panelIndex >= userPanelConfigArr.length) return null;
-                  const panelConfig = userPanelConfigArr[panelIndex];
-
-                  return (
+          <>
+            {Array.from({
+              length: Math.ceil(
+                userPanelConfigArr.length /
+                  (videoPanelGridSize.col * videoPanelGridSize.row)
+              ),
+            }).map((_, pageIndex) => (
+              <div
+                key={pageIndex}
+                className="flex h-full w-full shrink-0 flex-grow flex-col items-center justify-center gap-4 overflow-hidden rounded-lg"
+              >
+                {Array.from({ length: videoPanelGridSize.row }).map(
+                  (_, rowIndex) => (
                     <div
-                      key={`${rowIndex} ${colIndex}`}
-                      style={{
-                        width:
-                          videoPanelGridSize.width -
-                          ((videoPanelGridSize.col + 1) * 16) /
-                            videoPanelGridSize.col,
-                        height:
-                          videoPanelGridSize.height -
-                          ((videoPanelGridSize.row + 1) * 16) /
-                            videoPanelGridSize.row,
-                      }}
-                      className="flex-shrink-0 overflow-hidden rounded-lg"
-                      onDoubleClick={() => handleDoubleClick(panelConfig)}
+                      key={rowIndex}
+                      className="flex flex-nowrap content-center items-center justify-center gap-4 overflow-hidden rounded-lg"
                     >
-                      {panelConfig.isScreenShareControlPanel ? (
-                        <ScreenShareControlPanel
-                          handleStopSharing={() =>
-                            meetingContext.setMeetingDeviceState.setEnableShare(
-                              false
-                            )
-                          }
-                          enableAudio={enableScreenShareAudio}
-                          setEnableAudio={setEnableScreenShareAudio}
-                          screenStream={panelConfig.screenStream!}
-                        />
-                      ) : (
-                        <VideoPanel
-                          user={panelConfig.user!}
-                          camStream={panelConfig.camStream!}
-                          screenStream={panelConfig.screenStream!}
-                          audioStream={panelConfig.audioStream!}
-                          fixAvatarSize={
-                            Math.min(
-                              videoPanelGridSize.width,
-                              videoPanelGridSize.height
-                            ) / 2 || 32
-                          }
-                          mirrroCamera={panelConfig.mirrroCamera!}
-                          expandCamera={panelConfig.expandCamera!}
-                        />
+                      {Array.from({ length: videoPanelGridSize.col }).map(
+                        (_, colIndex) => {
+                          const panelIndex =
+                            pageIndex *
+                              videoPanelGridSize.col *
+                              videoPanelGridSize.row +
+                            rowIndex * videoPanelGridSize.col +
+                            colIndex;
+                          if (panelIndex >= userPanelConfigArr.length)
+                            return null;
+                          const panelConfig = userPanelConfigArr[panelIndex];
+
+                          return (
+                            <div
+                              key={`${pageIndex} ${rowIndex} ${colIndex}`}
+                              style={{
+                                width:
+                                  videoPanelGridSize.width -
+                                  ((videoPanelGridSize.col + 1) * 16) /
+                                    videoPanelGridSize.col,
+                                height:
+                                  videoPanelGridSize.height -
+                                  ((videoPanelGridSize.row + 1) * 16) /
+                                    videoPanelGridSize.row,
+                              }}
+                              className="flex-shrink-0 overflow-hidden rounded-lg"
+                              onDoubleClick={() =>
+                                handleDoubleClick(panelConfig)
+                              }
+                            >
+                              {panelConfig.isScreenShareControlPanel ? (
+                                <ScreenShareControlPanel
+                                  handleStopSharing={() =>
+                                    meetingContext.setMeetingDeviceState.setEnableShare(
+                                      false
+                                    )
+                                  }
+                                  enableAudio={enableScreenShareAudio}
+                                  setEnableAudio={setEnableScreenShareAudio}
+                                  screenStream={panelConfig.screenStream!}
+                                />
+                              ) : (
+                                <VideoPanel
+                                  user={panelConfig.user!}
+                                  camStream={panelConfig.camStream!}
+                                  screenStream={panelConfig.screenStream!}
+                                  audioStream={panelConfig.audioStream!}
+                                  fixAvatarSize={
+                                    Math.min(
+                                      videoPanelGridSize.width,
+                                      videoPanelGridSize.height
+                                    ) / 2 || 32
+                                  }
+                                  mirrroCamera={panelConfig.mirrroCamera!}
+                                  expandCamera={panelConfig.expandCamera!}
+                                />
+                              )}
+                            </div>
+                          );
+                        }
                       )}
                     </div>
-                  );
-                }
-              )}
-            </div>
-          ))
+                  )
+                )}
+              </div>
+            ))}
+          </>
         ) : (
           <>
             <main className="flex flex-1 items-center justify-center align-middle">
