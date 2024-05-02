@@ -12,6 +12,7 @@ const ChatPanel: React.FC<{
   const [message, setMessage] = useState('');
   const meetingContext = useMeetingStore((d) => d);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  const [isComposing, setIsComposing] = useState(false);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -48,7 +49,9 @@ const ChatPanel: React.FC<{
           placeholder="Enter message"
           value={message}
           onChange={(d) => setMessage(d.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+          onKeyDown={(e) => e.key === 'Enter' && !isComposing && sendMessage()}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={() => setIsComposing(false)}
         />
         <button
           className="btn btn-primary shrink-0 px-3"
