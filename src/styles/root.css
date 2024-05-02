@@ -14,19 +14,34 @@ body,
 }
 
 @keyframes icon-animate {
-  0%,100% {
-      transform: scale(1)
+  0%,
+  100% {
+    transform: scale(1);
   }
 
-  10%,30% {
-      transform: scale(.9)
+  10%,
+  30% {
+    transform: scale(0.9);
   }
 
-  20%,40%,60%,80% {
-      transform: scale(1.1)
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: scale(1.1);
   }
 
-  50%,70% {
-      transform: scale(1.1)
+  50%,
+  70% {
+    transform: scale(1.1);
   }
+}
+
+/* wtf: hide canvas will decrease GPU rendering priority. only on chrome + macOS :( */
+.canvas-gpu-enhance {
+  position: fixed;
+  width: 1px;
+  transform: translateZ(0);
+  opacity: 0.00001;
+  z-index: 999999999;
 }

@@ -159,7 +159,7 @@ const MeetingPanel: React.FC<{
       >
         {layout === 'grid' ? (
           <>
-            {videoPanelGridSize.col * videoPanelGridSize.row &&
+            {videoPanelGridSize.col * videoPanelGridSize.row ? (
               Array.from({
                 length: Math.ceil(
                   userPanelConfigArr.length /
@@ -241,7 +241,10 @@ const MeetingPanel: React.FC<{
                     )
                   )}
                 </div>
-              ))}
+              ))
+            ) : (
+              <></>
+            )}
           </>
         ) : (
           <>
@@ -353,7 +356,7 @@ const MeetingPanel: React.FC<{
         ref={canvasRef}
         width={originVideoStream?.getVideoTracks()[0].getSettings().width}
         height={originVideoStream?.getVideoTracks()[0].getSettings().height}
-        hidden={true}
+        className='canvas-gpu-enhance'
       />
     </>
   );

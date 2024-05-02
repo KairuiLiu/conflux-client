@@ -141,7 +141,7 @@ function VideoBackgroundSetting() {
             ref={canvasRef}
             width={originVideoStream?.getVideoTracks()[0].getSettings().width}
             height={originVideoStream?.getVideoTracks()[0].getSettings().height}
-            hidden={true}
+            className="canvas-gpu-enhance"
           />
           <VideoPanel
             camStream={

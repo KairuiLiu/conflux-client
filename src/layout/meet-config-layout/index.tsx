@@ -97,7 +97,7 @@ const MeetConfigLayout = ({
             ref={canvasRef}
             width={videoStream?.getVideoTracks()[0].getSettings().width}
             height={videoStream?.getVideoTracks()[0].getSettings().height}
-            hidden={true}
+            className='canvas-gpu-enhance'
           />
           <VideoPanel
             user={user}
@@ -138,7 +138,7 @@ const MeetConfigLayout = ({
 
       <Dialog open={showSetting} onClose={() => setShowSetting(false)}>
         <Dialog.Panel>
-          <div className="fixed inset-0 flex h-screen w-screen items-stretch justify-center bg-gray-300 p-4 sm:h-auto sm:items-center z-10">
+          <div className="fixed inset-0 z-10 flex h-screen w-screen items-stretch justify-center bg-gray-300 p-4 sm:h-auto sm:items-center">
             <SettingPanel
               handleClose={() => {
                 setShowSetting(false);
