@@ -75,7 +75,6 @@ export function buildWebGL2Pipeline(
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-  // TODO Rename segmentation and person mask to be more specific
   const segmentationTexture = createTexture(
     gl,
     gl.RGBA8,
@@ -179,7 +178,6 @@ export function buildWebGL2Pipeline(
       const backgroundBlurStage = backgroundStage as BackgroundBlurStage
       backgroundBlurStage.updateCoverage(postProcessingConfig.coverage)
     } else {
-      // TODO Handle no background in a separate pipeline path
       const backgroundImageStage = backgroundStage as BackgroundImageStage
       backgroundImageStage.updateCoverage([0, 0.9999])
       backgroundImageStage.updateLightWrapping(0)

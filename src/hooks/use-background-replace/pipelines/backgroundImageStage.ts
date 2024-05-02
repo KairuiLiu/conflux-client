@@ -121,7 +121,6 @@ export function buildBackgroundImageStage(
   gl.uniform1f(blendModeLocation, 0);
 
   let backgroundTexture: WebGLTexture | null = null;
-  // TODO Find a better to handle background being loaded
   if (backgroundImage?.complete) {
     updateBackgroundImage(backgroundImage);
   } else if (backgroundImage) {
@@ -138,7 +137,6 @@ export function buildBackgroundImageStage(
     if (backgroundTexture !== null) {
       gl.activeTexture(gl.TEXTURE2);
       gl.bindTexture(gl.TEXTURE_2D, backgroundTexture);
-      // TODO Handle correctly the background not loaded yet
       gl.uniform1i(backgroundLocation, 2);
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);

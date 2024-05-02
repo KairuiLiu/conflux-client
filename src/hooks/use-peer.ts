@@ -9,6 +9,8 @@ import {
   createEmptyVideoTrack,
 } from '../utils/empty-stream';
 import { usePeerStateReport } from './use-peer-state-report';
+import { toast } from 'react-toastify';
+import toastConfig from '@/utils/toast-config';
 
 let fakeVidioTrack: MediaStreamTrack | null = null;
 let fakeAudioTrack: MediaStreamTrack | null = null;
@@ -221,7 +223,7 @@ const usePeer = () => {
     meetingState,
   } = useMeetingStore();
   const [peer, setPeer] = useState<Peer | null>(null);
-  const siteConfig = useGlobalStore(d=>d.siteConfig);
+  const siteConfig = useGlobalStore((d) => d.siteConfig);
   const [tryConnected, setTryConnected] = useState(false);
   usePeerStateReport(peer);
 
@@ -242,7 +244,7 @@ const usePeer = () => {
       call.answer(type === 'screenStream' ? screenStream! : mediaStream!);
       call.on('stream', (stream) => {
         console.log(
-          `[Peer] on receive ${type} stream from ${call.peer} to ${selfState.muid} @ ${call.connectionId}`
+          `[Peer] on receive ${type} stream from ${call.peer} to ${muid} @ ${call.connectionId}`
         );
         handleOnStream(call, stream, type);
       });
@@ -254,6 +256,13 @@ const usePeer = () => {
         ...connId,
         [type]: call.connectionId,
       });
+    });
+
+    newPeer.on('error', (e) => {
+      toast.error(
+        'Connection error, please refresh the page. ' + e.message,
+        toastConfig
+      );
     });
 
     return () => {
