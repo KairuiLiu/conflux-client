@@ -167,13 +167,13 @@ const MeetingPanel: React.FC<{
                 ),
               }).map((_, pageIndex) => (
                 <div
-                  key={pageIndex}
+                  key={`G ${pageIndex}`}
                   className="flex h-full w-full shrink-0 flex-grow flex-col items-center justify-center gap-4 overflow-hidden rounded-lg"
                 >
                   {Array.from({ length: videoPanelGridSize.row }).map(
                     (_, rowIndex) => (
                       <div
-                        key={rowIndex}
+                        key={`G ${pageIndex} ${rowIndex}`}
                         className="flex flex-nowrap content-center items-center justify-center gap-4 overflow-hidden rounded-lg"
                       >
                         {Array.from({ length: videoPanelGridSize.col }).map(
@@ -190,7 +190,7 @@ const MeetingPanel: React.FC<{
 
                             return (
                               <div
-                                key={`${pageIndex} ${rowIndex} ${colIndex}`}
+                                key={`G ${pageIndex} ${rowIndex} ${colIndex}`}
                                 style={{
                                   width:
                                     videoPanelGridSize.width -
@@ -251,7 +251,7 @@ const MeetingPanel: React.FC<{
             <main className="flex flex-1 items-center justify-center align-middle">
               {pined && (
                 <div
-                  key={pined.user?.muid}
+                  key={`LP ${pined.user?.muid}`}
                   className="overflow-hidden rounded-lg"
                   onDoubleClick={() => handleDoubleClick(pined)}
                   style={{
@@ -290,10 +290,10 @@ const MeetingPanel: React.FC<{
               )}
             </main>
             <aside className="flex h-1/6 w-full items-center justify-start gap-2 overflow-auto lg:h-full lg:w-1/6 lg:flex-col">
-              {userPanelConfigArr.map((config, index) => {
+              {userPanelConfigArr.map((config) => {
                 return (
                   <div
-                    key={config.user?.muid + index}
+                    key={`LA ${config.user?.muid}`}
                     onDoubleClick={() => handleDoubleClick(config)}
                     className="flex-shrink-0 overflow-hidden rounded-lg"
                     style={{
@@ -356,7 +356,7 @@ const MeetingPanel: React.FC<{
         ref={canvasRef}
         width={originVideoStream?.getVideoTracks()[0].getSettings().width}
         height={originVideoStream?.getVideoTracks()[0].getSettings().height}
-        className='canvas-gpu-enhance'
+        className="canvas-gpu-enhance"
       />
     </>
   );

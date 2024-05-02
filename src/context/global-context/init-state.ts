@@ -41,6 +41,7 @@ export function initState(
     },
   } as StateType;
   fetchConfig(res.user.uuid, setState);
+  setState(() => res);
   return res;
 }
 
