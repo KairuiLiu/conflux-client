@@ -12,6 +12,7 @@ import sortParticipants from '@/utils/sort-participants';
 import getUserPanelConfig from '@/utils/get-user-panel-config';
 import useBgReplace from '@/hooks/use-background-replace';
 import { getVideoBackgroundConfig } from '@/utils/video-background-image';
+import { isEqual } from 'lodash-es';
 
 const MeetingPanel: React.FC<{
   setShowUserPanel: React.Dispatch<React.SetStateAction<boolean>>;
@@ -71,12 +72,7 @@ const MeetingPanel: React.FC<{
     if (!originVideoStream || !user.videoBackground)
       meetingContext.setSelfState.setCamStream(originVideoStream);
     else meetingContext.setSelfState.setCamStream(replacedStream);
-  }, [
-    replacedStream,
-    meetingContext.setSelfState,
-    originVideoStream,
-    user,
-  ]);
+  }, [replacedStream, meetingContext.setSelfState, originVideoStream, user]);
 
   // layout
 
@@ -91,7 +87,7 @@ const MeetingPanel: React.FC<{
 
   const [videoPanelRef, videoPanelGridSize, videoPanelMainSize] =
     useVideoPanelSize(itemCount);
-  const [userPanelConfigArr, setUsePanelConfigArr] = useState<
+  const [userPanelConfigArr, setUserPanelConfigArr] = useState<
     UserPanelConfig[]
   >([]);
   const [pined, setPined] = useState<UserPanelConfig>();
@@ -103,10 +99,9 @@ const MeetingPanel: React.FC<{
       meetingContext.selfState.muid,
       true
     );
-
+    console.log('getting layout config');
     const config = getUserPanelConfig(participant, meetingContext, user);
-
-    setUsePanelConfigArr(config);
+    if (!isEqual(config, userPanelConfigArr)) setUserPanelConfigArr(config);
     let userPinedConfig = null;
     if (userPined) {
       const [userPinedMuid, userPinedType] = userPined.split('@');
@@ -117,7 +112,7 @@ const MeetingPanel: React.FC<{
             (d.type === 'CONTROL' || d.type === 'SCREEN')) ||
             (userPinedType === 'C' && d.type === 'CAMERA'))
       );
-      if (userPinedConfig) setPined(userPinedConfig);
+      if (!isEqual(userPinedConfig, pined)) setPined(userPinedConfig);
     }
     if (!userPinedConfig) {
       setUserPined(null);
@@ -247,13 +242,13 @@ const MeetingPanel: React.FC<{
                 </div>
               )}
             </main>
-            <aside className="flex h-1/6 w-full items-center justify-start gap-2 lg:h-full lg:w-1/6 lg:flex-col overflow-auto">
+            <aside className="flex h-1/6 w-full items-center justify-start gap-2 overflow-auto lg:h-full lg:w-1/6 lg:flex-col">
               {userPanelConfigArr.map((config, index) => {
                 return (
                   <div
                     key={config.user?.muid + index}
                     onDoubleClick={() => handleDoubleClick(config)}
-                    className="overflow-hidden rounded-lg flex-shrink-0"
+                    className="flex-shrink-0 overflow-hidden rounded-lg"
                     style={{
                       width: videoPanelMainSize.width / 6,
                       height: videoPanelMainSize.height / 6,
